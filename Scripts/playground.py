@@ -9,48 +9,6 @@ from scipy.interpolate import interp1d
 
 data = pd.read_csv('/Users/josepharehart/PycharmProjects/Bldg_Stock/InputData/dummy_data.csv')
 
-# Implement a stock-driven model
-Years = data.Year
-TotalBldgStock = data.Floor_Area
-BldgLife_mean = data.AverageLifetime_yrs
-
-# Build the DSM data class
-US_Bldg_DSM = DynamicStockModel(t = Years,
-                                s = TotalBldgStock,
-                                lt={'Type': 'Normal', 'Mean': np.array(BldgLife_mean),
-                                    'StdDev': 0.3 * np.array(BldgLife_mean)})
-CheckStr, ExitFlag = US_Bldg_DSM.dimension_check()
-print(CheckStr)
-
-
-S_C, O_C, I, ExitFlag = US_Bldg_DSM.compute_stock_driven_model()
-# S_C: Stock by cohort
-# O_C: Outflow by cohort
-# I: inflow (construction of buildings)
-
-O, ExitFlag   = US_Bldg_DSM.compute_outflow_total() # Total outflow
-DS, ExitFlag  = US_Bldg_DSM.compute_stock_change()  # Stock change
-Bal, ExitFlag = US_Bldg_DSM.check_stock_balance()   # Vehicle balance
-
-print(np.abs(Bal).sum()) # show sum absolute of all mass balance mismatches.
-
-plt2, = plt.plot(US_Bldg_DSM.t, US_Bldg_DSM.s)
-plt4, = plt.plot([2020,2020],[0,8e4], color = 'k', LineStyle = '--')
-plt.legend([plt2], ['Stock'], loc = 2)
-plt.xlabel('Year')
-plt.ylabel('Floor Area')
-plt.title('Floor Area Stock')
-plt.show();
-
-plt1, = plt.plot(US_Bldg_DSM.t, US_Bldg_DSM.i)
-plt3, = plt.plot(US_Bldg_DSM.t, US_Bldg_DSM.o)
-plt4, = plt.plot([2020,2020],[0,1e4], color = 'k', LineStyle = '--')
-plt.xlabel('Year')
-plt.ylabel('Floor Area per year')
-plt.title('Floor Area flows')
-plt.legend([plt1,plt3], ['Inflow','Outflow'], loc = 2)
-plt.show();
-
 data_pop = pd.read_csv('/Users/josepharehart/PycharmProjects/Bldg_Stock/InputData/USA_pop_forecast.csv')
 
 # Create interpolation
@@ -78,6 +36,59 @@ plt.xlabel('Year')
 plt.ylabel('US Population')
 plt.title('Historical and Forecast of Population in the US')
 plt.show();
+
+# Floor Area elasticity
+FA_elasticity = 340
+
+# Population forecast
+FA_stock = np.multiply(US_pop, FA_elasticity)
+
+# Building lifespan
+BldgLife_mean = 60     # years
+BldgLife_mean_vec = [BldgLife_mean] * len(years)     # years
+
+
+# Implement a stock-driven model
+
+# Build the DSM data class
+US_Bldg_DSM = DynamicStockModel(t=years,
+                                s=FA_stock,
+                                lt = {'Type': 'Normal', 'Mean': np.array(BldgLife_mean_vec),
+                                     'StdDev': 0.3*np.array(BldgLife_mean_vec)})
+CheckStr, ExitFlag = US_Bldg_DSM.dimension_check()
+print(CheckStr)
+
+
+S_C, O_C, I, ExitFlag = US_Bldg_DSM.compute_stock_driven_model()
+# S_C: Stock by cohort
+# O_C: Outflow by cohort
+# I: inflow (construction of buildings)
+
+O, ExitFlag   = US_Bldg_DSM.compute_outflow_total() # Total outflow
+DS, ExitFlag  = US_Bldg_DSM.compute_stock_change()  # Stock change
+Bal, ExitFlag = US_Bldg_DSM.check_stock_balance()   # Vehicle balance
+
+print(np.abs(Bal).sum()) # show sum absolute of all mass balance mismatches.
+
+plt2, = plt.plot(US_Bldg_DSM.t, US_Bldg_DSM.s)
+plt4, = plt.plot([2020,2020],[0,1.4e11], color = 'k', LineStyle = '--')
+plt.legend([plt2], ['Stock'], loc = 2)
+plt.xlabel('Year')
+plt.ylabel('Floor Area')
+plt.title('Floor Area Stock')
+plt.show();
+
+plt1, = plt.plot(US_Bldg_DSM.t, US_Bldg_DSM.i)
+plt3, = plt.plot(US_Bldg_DSM.t, US_Bldg_DSM.o)
+plt4, = plt.plot([2020,2020],[0,1e4], color = 'k', LineStyle = '--')
+plt.xlim(left=1995)
+plt.ylim(bottom=0, top=4.5e9)
+plt.xlabel('Year')
+plt.ylabel('Floor Area per year')
+plt.title('Floor Area flows')
+plt.legend([plt1,plt3], ['Inflow','Outflow'], loc = 2)
+plt.show();
+
 
 
 

@@ -7,20 +7,25 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.interpolate import interp1d
 
-data = pd.read_csv('/Users/josepharehart/PycharmProjects/Bldg_Stock/InputData/dummy_data.csv')
+# Load in datasets
+RECS_Area = pd.read_csv('/Users/josepharehart/PycharmProjects/Bldg_Stock/InputData/RECS_Area.csv')
+RECS_Weights = pd.read_csv('/Users/josepharehart/PycharmProjects/Bldg_Stock/InputData/RECS_Area_weights.csv')
+CBECS_Area = pd.read_csv('/Users/josepharehart/PycharmProjects/Bldg_Stock/InputData/CBECS_Area.csv')
+CBECS_Weights = pd.read_csv('/Users/josepharehart/PycharmProjects/Bldg_Stock/InputData/RECS_Area_weights.csv')
 
 data_pop = pd.read_csv('/Users/josepharehart/PycharmProjects/Bldg_Stock/InputData/USA_pop_forecast.csv')
 
 # Create interpolation
-f_median = interp1d(data_pop.Year, data_pop.Median)
-f_upper_95 = interp1d(data_pop.Year, data_pop.Upper_95)
-f_lower_95 = interp1d(data_pop.Year, data_pop.Lower_95)
-f_upper_80 = interp1d(data_pop.Year, data_pop.Upper_80)
-f_lower_80 = interp1d(data_pop.Year, data_pop.Lower_80)
+f_median = interp1d(data_pop.Year, data_pop.Median,     kind='cubic')
+f_upper_95 = interp1d(data_pop.Year, data_pop.Upper_95, kind='cubic')
+f_lower_95 = interp1d(data_pop.Year, data_pop.Lower_95, kind='cubic')
+f_upper_80 = interp1d(data_pop.Year, data_pop.Upper_80, kind='cubic')
+f_lower_80 = interp1d(data_pop.Year, data_pop.Lower_80, kind='cubic')
 
-# List of years
-years = np.linspace(1990, 2100, num=111, endpoint=True)
-US_pop = f_median(years)
+# Study Period
+year1 = 1990
+year2 = 2100
+years = np.linspace(year1, year2, num=(year2-year1+1), endpoint=True)
 
 # Plot of population forecasts
 plt1, = plt.plot(years, f_upper_95(years))
@@ -37,14 +42,34 @@ plt.ylabel('US Population')
 plt.title('Historical and Forecast of Population in the US')
 plt.show();
 
-# Floor Area elasticity
-FA_elasticity = 340
+# Floor Area elasticity (residential and commercial)
+FA_elasticity_res = 200
+FA_elasticity_res_vec = np.array([FA_elasticity_res] * len(years))
+FA_elasticity_com = 140
+FA_elasticity_com_vec = np.array([FA_elasticity_com] * len(years))
 
 # Population forecast
-FA_stock = np.multiply(US_pop, FA_elasticity)
+US_pop = f_median(years)
+FA_stock = np.multiply(US_pop, FA_elasticity_res)
+
+# Residential input data
+res_input_data = pd.DataFrame({'Year':years,
+                               'US_pop':US_pop,
+                               'FA_elasticity':FA_elasticity_res_vec})
+
+# Residential floor area  age-cohort in base year: 2015
+S_0_res = RECS_Weights.Res_Weight * US_pop[25]*FA_elasticity_res
+
+
+
+
+
+
+
+
 
 # Building lifespan
-BldgLife_mean = 60     # years
+BldgLife_mean = 40     # years
 BldgLife_mean_vec = [BldgLife_mean] * len(years)     # years
 
 
@@ -55,11 +80,14 @@ US_Bldg_DSM = DynamicStockModel(t=years,
                                 s=FA_stock,
                                 lt = {'Type': 'Normal', 'Mean': np.array(BldgLife_mean_vec),
                                      'StdDev': 0.3*np.array(BldgLife_mean_vec)})
+                                # lt={'Type': 'Weibull', 'Scale': [np.float(85.8)],'Shape': [np.float(5.5)]})
 CheckStr, ExitFlag = US_Bldg_DSM.dimension_check()
 print(CheckStr)
 
+# S_C = US_Bldg_DSM.compute_evolution_initialstock(InitialStock=S_0_res,SwitchTime=2015)
 
 S_C, O_C, I, ExitFlag = US_Bldg_DSM.compute_stock_driven_model()
+
 # S_C: Stock by cohort
 # O_C: Outflow by cohort
 # I: inflow (construction of buildings)
@@ -89,6 +117,12 @@ plt.title('Floor Area flows')
 plt.legend([plt1,plt3], ['Inflow','Outflow'], loc = 2)
 plt.show();
 
+# Stock by age-cohort
+plt.imshow(US_Bldg_DSM.s_c[:,1:],interpolation='nearest')   # exclude the first column to have the color scale work.
+plt.xlabel('age-cohort')
+plt.ylabel('year')
+plt.title('Stock by age-cohort')
+plt.show();
 
 
 

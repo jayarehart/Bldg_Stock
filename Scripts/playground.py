@@ -64,43 +64,53 @@ res_input_data = pd.DataFrame({'Year':years,
                                'US_pop':US_pop,
                                'FA_elasticity':FA_elasticity_res_vec,
                                'FA_stock':FA_stock},)
-plt1, = plt.plot(years, FA_stock)
-plt.show();
 
-
-# Building lifespan
+# Building lifespan distributions
+# Normal
 BldgLife_mean = 80     # years
 BldgLife_mean_vec = [BldgLife_mean] * len(years)     # years
-# lifetime_WeibullLT = {'Type': 'Weibull', 'Shape': np.array([5.5]), 'Scale': np.array([85.5])}
-lifetime_GammaLT = {'Type': 'Gamma', 'Shape': np.array([2.7]), 'Scale': np.array([32.9])}
+lifetime_NormalLT = {'Type': 'Normal', 'Mean': np.array(BldgLife_mean_vec), 'StdDev': 0.3*np.array(BldgLife_mean_vec)}
+
+# Weibull
+lifetime_WeibullLT = {'Type': 'Weibull', 'Shape': np.array([5.5]), 'Scale': np.array([85.5])}
 # lifetime_WeibullLT = {'Type': 'Weibull', 'Shape': np.array([1.47]), 'Scale': np.array([37.64])}
-# lifetime_WeibullLT = {'Type': 'Weibull', 'Shape': np.array([1.2]), 'Scale': np.array([1])}
+
+# Gamma (currently not working)
+# lifetime_GammaLT = {'Type': 'Gamma', 'Scale': np.array([2.7]), 'Shape': np.array([32.9])}
+
+# Lognormal (currently not working)
+# lifetime_LogNormalLT = {'Type': 'LogNormal', 'Mean': np.array([4]), 'StdDev': np.array([80])}
+
+myLT = lifetime_WeibullLT
 
 # Residential floor area  age-cohort in base year: 2015
 # S_0_res_2015 = [100] * len(years)
-S_0_res_2015 = list(reversed(RECS_Weights.Res_Weight * US_pop[115]*FA_elasticity_res))        # square meters of res by age in 2015
-list(reversed(S_0_res_2015))
-# S_0_res_2015.sum()
+S_0_res_2015 = np.flipud(RECS_Weights.Res_Weight * US_pop[115]*FA_elasticity_res)      # square meters of res by age in 2015
+
 # Implement a stock-driven model
-# Build the DSM data class
-# US_Bldg_DSM = dsm.DynamicStockModel(t=years,
-#                                 s=FA_stock,
-#                                 lt = {'Type': 'Normal',
-#                                       'Mean': np.array(BldgLife_mean_vec),
-#                                      'StdDev': 0.6*np.array(BldgLife_mean_vec)})
-US_Bldg_DSM = dsm.DynamicStockModel(t=years, s=FA_stock, lt=lifetime_GammaLT)
+US_Bldg_DSM = dsm.DynamicStockModel(t=years, s=FA_stock, lt=myLT)
 
 CheckStr = US_Bldg_DSM.dimension_check()
-US_Bldg_DSM.compute_stock_total()
 print(CheckStr)
 
-S_C, O_C, I = US_Bldg_DSM.compute_stock_driven_model_initialstock(InitialStock=S_0_res_2015,
-                                                    SwitchTime=117,
-                                                    NegativeInflowCorrect=False)
+S_C = US_Bldg_DSM.compute_evolution_initialstock(InitialStock=S_0_res_2015, SwitchTime=116)
+S_C, O_C, I = US_Bldg_DSM.compute_stock_driven_model()
 O   = US_Bldg_DSM.compute_outflow_total() # Total outflow
 DS  = US_Bldg_DSM.compute_stock_change()  # Stock change
 Bal = US_Bldg_DSM.check_stock_balance()   # Vehicle balance
 print(np.abs(Bal).sum()) # show sum absolute of all mass balance mismatches.
+
+
+
+
+
+# S_C, O_C, I = US_Bldg_DSM.compute_stock_driven_model_initialstock(InitialStock=S_0_res_2015[0:115],
+#                                                     SwitchTime=116,
+#                                                     NegativeInflowCorrect=True)
+# O   = US_Bldg_DSM.compute_outflow_total() # Total outflow
+# DS  = US_Bldg_DSM.compute_stock_change()  # Stock change
+# Bal = US_Bldg_DSM.check_stock_balance()   # Vehicle balance
+# print(np.abs(Bal).sum()) # show sum absolute of all mass balance mismatches.
 
 ## Old code
 # S_C = US_Bldg_DSM.compute_evolution_initialstock(InitialStock=S_0_res,SwitchTime=2015)
@@ -125,8 +135,8 @@ plt.show();
 plt1, = plt.plot(US_Bldg_DSM.t, US_Bldg_DSM.i)
 plt3, = plt.plot(US_Bldg_DSM.t, US_Bldg_DSM.o)
 plt4, = plt.plot([2020,2020],[0,1e4], color = 'k', LineStyle = '--')
-# plt.xlim(left=1995)
-# plt.ylim(bottom=0, top=4.5e9)
+plt.xlim(left=1905)
+# plt.ylim(bottom=0, top=2.5e9)
 plt.xlabel('Year')
 plt.ylabel('Floor Area per year')
 plt.title('Floor Area flows')
@@ -140,7 +150,40 @@ plt.ylabel('year')
 plt.title('Stock by age-cohort')
 plt.show();
 
+# -------- OLD CODE --------
+# -----
+# Implement a stock-driven model with evolution of initial stock
+# US_Bldg_DSM = dsm.DynamicStockModel(t=years, s=FA_stock_res, lt=myLT)
+# CheckStr = US_Bldg_DSM.dimension_check()
+# print(CheckStr)
+# S_C = US_Bldg_DSM.compute_stock_driven_model_initialstock(InitialStock=S_0_res_2015[0:115], SwitchTime=116)
+# O = US_Bldg_DSM.compute_outflow_total()  # Total outflow
+# DS = US_Bldg_DSM.compute_stock_change()  # Stock change
+# Bal = US_Bldg_DSM.check_stock_balance()  # Vehicle balance
+# print(np.abs(Bal).sum())  # show sum absolute of all mass balance mismatches.
 
+
+
+# S_C, O_C, I = US_Bldg_DSM.compute_stock_driven_model()
+# S_C, O_C, I = US_Bldg_DSM.compute_stock_driven_model_initialstock(InitialStock=S_0_res_2015[0:115],
+#                                                     SwitchTime=116,
+#                                                     NegativeInflowCorrect=True)
+# O   = US_Bldg_DSM.compute_outflow_total() # Total outflow
+# DS  = US_Bldg_DSM.compute_stock_change()  # Stock change
+# Bal = US_Bldg_DSM.check_stock_balance()   # Vehicle balance
+# print(np.abs(Bal).sum()) # show sum absolute of all mass balance mismatches.
+
+## Old code
+# S_C = US_Bldg_DSM.compute_evolution_initialstock(InitialStock=S_0_res,SwitchTime=2015)
+# S_C, O_C, I, ExitFlag = US_Bldg_DSM.compute_stock_driven_model()
+# S_C: Stock by cohort
+# O_C: Outflow by cohort
+# I: inflow (construction of buildings)
+
+# O   = US_Bldg_DSM.compute_outflow_total() # Total outflow
+# DS  = US_Bldg_DSM.compute_stock_change()  # Stock change
+# Bal = US_Bldg_DSM.check_stock_balance()   # Vehicle balance
+# print(np.abs(Bal).sum()) # show sum absolute of all mass balance mismatches.
 
 
 

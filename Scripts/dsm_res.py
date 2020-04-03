@@ -89,6 +89,9 @@ def FA_elasticity_linear(year1=1900, year2=2100, base_year=2016,
         plt.show();
     return FA_elas
 
+# def FA_elasticity_interp(year1=1900, year2=2100, x_years, y_FA_elas):
+#     x_years =
+#
 
 # Time period input variables
 year1 = 1900
@@ -99,9 +102,9 @@ base_year = 2015
 years, US_pop = interpolate_population(data_pop, year1=year1, year2=year2, proj='median', plot=False)
 
 # interpolate floor area elasticity for each year
-FA_elas_res = FA_elasticity_linear(year1=year1, year2=year2, base_year=2016,
+FA_elas_res = FA_elasticity_linear(year1=year1, year2=year2, base_year=base_year,
                                    FA_elas_year1=100, FA_elas_base_year=100, FA_elas_year2=100,
-                                   plot=True, plot_name='Residential')
+                                   plot=False, plot_name='Residential')
 
 # calculate demanded floor area stock
 FA_stock_res = np.multiply(US_pop.US_pop, FA_elas_res.FA_elas) / 1000000
@@ -134,54 +137,67 @@ lifetime_FixedLT = {'Type': 'Fixed', 'Mean': np.array([BldgLife_mean] * len(year
 
 
 # Residential floor area  age-cohort in base year: 2015
-# my_index = FA_elas_res.FA_elas[list(years).index(base_year)]
 S_0_res_2015 = np.flipud(RECS_Weights.Res_Weight * FA_stock_res[list(years).index(base_year)])
-# S_0_res_2015 = (RECS_Weights.Res_Weight * FA_stock_res[list(years).index(base_year-1)])
 
-def plot_dsm(dsm):
-    plt2, = plt.plot(dsm.t, dsm.s)
-    plt4, = plt.plot([base_year, base_year], [0, 1.0e5], color='k', LineStyle='--')
-    plt.legend([plt2], ['Stock'], loc=2)
-    plt.xlabel('Year')
-    plt.ylabel('Floor Area')
-    plt.title('Floor Area Stock')
-    plt.show();
+def do_stock_driven_model(t, s, lt, InitialStock, SwitchTime, plot=True):
+    """ Compute a stock driven model from an initial stock.
+        Returns an object with class dynamic_stock_model with age-cohort matrix
+        with inputs, outputs, and stocks computed"""
+    def plot_dsm(dsm):
+        plt2, = plt.plot(dsm.t, dsm.s)
+        plt4, = plt.plot([base_year, base_year], [0, 1.0e5], color='k', LineStyle='--')
+        plt.legend([plt2], ['Stock'], loc=2)
+        plt.xlabel('Year')
+        plt.ylabel('Floor Area')
+        plt.title('Floor Area Stock')
+        plt.show();
 
-    plt1, = plt.plot(dsm.t, dsm.i)
-    plt3, = plt.plot(dsm.t, dsm.o)
-    plt4, = plt.plot([base_year, base_year], [0, 1e4], color='k', LineStyle='--')
-    plt.xlim(left=1905)
-    plt.ylim(bottom=0, top=2.5e3)
-    plt.xlabel('Year')
-    plt.ylabel('Floor Area per year')
-    plt.title('Floor Area flows')
-    plt.legend([plt1, plt3], ['Inflow', 'Outflow'], loc=2)
-    plt.show();
+        plt1, = plt.plot(dsm.t, dsm.i)
+        plt3, = plt.plot(dsm.t, dsm.o)
+        plt4, = plt.plot([base_year, base_year], [0, 1e4], color='k', LineStyle='--')
+        plt.xlim(left=t[0]+5)
+        plt.ylim(bottom=0, top=2.5e3)
+        plt.xlabel('Year')
+        plt.ylabel('Floor Area per year')
+        plt.title('Floor Area flows')
+        plt.legend([plt1, plt3], ['Inflow', 'Outflow'], loc=2)
+        plt.show();
 
-    # Stock by age-cohort
-    plt.imshow(dsm.s_c[:, 1:], interpolation='nearest')  # exclude the first column to have the color scale work.
-    plt.xlabel('age-cohort')
-    plt.ylabel('year')
-    plt.title('Stock by age-cohort')
-    plt.show();
+        # Stock by age-cohort
+        plt.imshow(dsm.s_c[:, 1:], interpolation='nearest')  # exclude the first column to have the color scale work.
+        plt.xlabel('age-cohort')
+        plt.ylabel('year')
+        plt.title('Stock by age-cohort')
+        plt.show();
 
+    my_dsm = dsm.DynamicStockModel(t=t, s=s, lt=lt)
+    CheckStr = my_dsm.dimension_check()
+    print(CheckStr)
 
+    S_C = my_dsm.compute_evolution_initialstock(InitialStock=InitialStock, SwitchTime=SwitchTime)
+    S_C, O_C, I = my_dsm.compute_stock_driven_model()
+
+    O = my_dsm.compute_outflow_total()  # Total outflow
+    DS = my_dsm.compute_stock_change()  # Stock change
+    Bal = my_dsm.check_stock_balance()  # Stock balance
+    print('The mass balance between inflows and outflows is:   ')
+    print(np.abs(Bal).sum())  # show sum absolute of all mass balance mismatches.
+    if plot==True: plot_dsm(my_dsm)
+    print('Difference in stock in base year is: ')
+    # print(sum(S_C[list(t).index(base_year)]) - sum(InitialStock))
+    print(sum(S_C[SwitchTime-1]) - sum(InitialStock))
+
+    return my_dsm
+
+t = years
+s = FA_stock_res
+lt = lifetime_NormalLT
+InitialStock=S_0_res_2015
+SwitchTime=116
+US_stock_res = do_stock_driven_model(t, s, lt, InitialStock, SwitchTime, plot=False)
 
 # 'compute_evolution_initialstock':
-US_Bldg_DSM_2 = dsm.DynamicStockModel(t=years, s=FA_stock_res, lt=lifetime_WeibullLT)
-CheckStr = US_Bldg_DSM_2.dimension_check()
-print(CheckStr)
 
-S_C = US_Bldg_DSM_2.compute_evolution_initialstock(InitialStock=S_0_res_2015,SwitchTime=116)
-S_C, O_C, I = US_Bldg_DSM_2.compute_stock_driven_model()
-
-O = US_Bldg_DSM_2.compute_outflow_total()  # Total outflow
-DS = US_Bldg_DSM_2.compute_stock_change()  # Stock change
-Bal = US_Bldg_DSM_2.check_stock_balance()  # Vehicle balance
-print(np.abs(Bal).sum())  # show sum absolute of all mass balance mismatches.
-plot_dsm(US_Bldg_DSM_2)
-
-print(sum(S_C[115,]) - sum(S_0_res_2015))
 # ----------------------------------------------------------------------------------------------------------------------
 # 'compute_stock_driven_model_initialstock
 # BldgLife_mean = 120  # years

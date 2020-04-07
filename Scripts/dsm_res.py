@@ -8,60 +8,122 @@ from scipy.interpolate import interp1d
 from odym import dynamic_stock_model as dsm
 
 # Load in datasets
-data_pop = pd.read_excel('./InputData/Pop_Data.xlsx', sheet_name='USA_pop_forecast')
+data_pop_WiC = pd.read_excel('./InputData/Pop_Data.xlsx', sheet_name='US_pop_WiC')
+data_pop_UN = pd.read_excel('./InputData/Pop_Data.xlsx', sheet_name='US_pop_UN')
 data_gdp = pd.read_excel('./InputData/Pop_Data.xlsx', sheet_name='GDP_pc')
 RECS_Weights = pd.read_excel('./InputData/Pop_Data.xlsx', sheet_name='res_weight')
 FA_elas_res = pd.read_excel('./InputData/Pop_Data.xlsx', sheet_name='FA_elas_res')  # dummy data for now
 
 
 # function to interpolate the population data
-def interpolate_population(data_pop, year1=1900, year2=2100, proj='median', kind='cubic', plot=True):
+def interpolate_population(data_pop=data_pop_UN, data_source='UN', year1=1900, year2=2100, proj='median', kind='cubic', plot=True):
     """ Interpolate the population data between the specified years for the US.
-        Choose a UN projection for future population data (median, upper_95, lower_95, upper_80, or lower_80).
+        Choose a data source (UN, or WiC)
+        Choose a scenario for future population data (median, upper_95, lower_95, upper_80, or lower_80).
         Options for 'kind' are [linear, cubic, nearest, previous, and next] """
+    if data_source=='UN':
+        # Create interpolations for population
+        f_median = interp1d(data_pop.Year, data_pop.Median, kind=kind)
+        f_upper_95 = interp1d(data_pop.Year, data_pop.Upper_95, kind=kind)
+        f_lower_95 = interp1d(data_pop.Year, data_pop.Lower_95, kind=kind)
+        f_upper_80 = interp1d(data_pop.Year, data_pop.Upper_80, kind=kind)
+        f_lower_80 = interp1d(data_pop.Year, data_pop.Lower_80, kind=kind)
 
-    # Create interpolations for population
-    f_median = interp1d(data_pop.Year, data_pop.Median, kind=kind)
-    f_upper_95 = interp1d(data_pop.Year, data_pop.Upper_95, kind=kind)
-    f_lower_95 = interp1d(data_pop.Year, data_pop.Lower_95, kind=kind)
-    f_upper_80 = interp1d(data_pop.Year, data_pop.Upper_80, kind=kind)
-    f_lower_80 = interp1d(data_pop.Year, data_pop.Lower_80, kind=kind)
+        # Study Period
+        # year1 = 1900
+        # year2 = 2100
+        years = np.linspace(year1, year2, num=(year2 - year1 + 1), endpoint=True)
 
-    # Study Period
-    # year1 = 1900
-    # year2 = 2100
-    years = np.linspace(year1, year2, num=(year2 - year1 + 1), endpoint=True)
+        if proj == 'median':
+            US_pop = f_median(years)
+        elif proj == 'upper_95':
+            US_pop = f_upper_95(years)
+        elif proj == 'upper_80':
+            US_pop = f_upper_80(years)
+        elif proj == 'lower_95':
+            US_pop = f_lower_95(years)
+        elif proj == 'lower_80':
+            US_pop = f_lower_80(years)
+        else:
+            US_pop = None
+        US_pop_years = pd.DataFrame({'Year': years,
+                                     'US_pop': US_pop})
 
-    if proj == 'median':
-        US_pop = f_median(years)
-    elif proj == 'upper_95':
-        US_pop = f_upper_95(years)
-    elif proj == 'upper_80':
-        US_pop = f_upper_80(years)
-    elif proj == 'lower_95':
-        US_pop = f_lower_95(years)
-    elif proj == 'lower_80':
-        US_pop = f_lower_80(years)
-    else:
-        US_pop = None
-    US_pop_years = pd.DataFrame({'Year': years,
-                                 'US_pop': US_pop})
+        if plot == True:
+            # Plot of population forecasts
+            plt1, = plt.plot(years, f_upper_95(years))
+            plt2, = plt.plot(years, f_upper_80(years))
+            plt3, = plt.plot(years, f_median(years))
+            plt4, = plt.plot(years, f_lower_80(years))
+            plt5, = plt.plot(years, f_lower_95(years))
+            plt6, = plt.plot([base_year, base_year], [2.4e8, 4.5e8], color='k', LineStyle='--')
+            plt.legend([plt1, plt2, plt3, plt4, plt5],
+                       ['Upper 95th', 'Upper 80th', 'Median', 'Lower 80th', 'Lower 95th'],
+                       loc=2)
+            plt.xlabel('Year')
+            plt.ylabel('US Population')
+            plt.title('Historical and Forecast of Population in the US (US Census and UN)')
+            plt.show();
+    elif data_source=='WiC':
+        # Create interpolations for population
+        f_SSP1 = interp1d(data_pop.Year, data_pop.SSP1, kind=kind)
+        f_SSP2 = interp1d(data_pop.Year, data_pop.SSP2, kind=kind)
+        f_SSP3 = interp1d(data_pop.Year, data_pop.SSP3, kind=kind)
+        f_SSP4 = interp1d(data_pop.Year, data_pop.SSP4, kind=kind)
+        f_SSP5 = interp1d(data_pop.Year, data_pop.SSP5, kind=kind)
 
-    if plot == True:
-        # Plot of population forecasts
-        plt1, = plt.plot(years, f_upper_95(years))
-        plt2, = plt.plot(years, f_upper_80(years))
-        plt3, = plt.plot(years, f_median(years))
-        plt4, = plt.plot(years, f_lower_80(years))
-        plt5, = plt.plot(years, f_lower_95(years))
-        plt6, = plt.plot([base_year, base_year], [2.4e8, 4.5e8], color='k', LineStyle='--')
-        plt.legend([plt1, plt2, plt3, plt4, plt5],
-                   ['Upper 95th', 'Upper 80th', 'Median', 'Lower 80th', 'Lower 95th'],
-                   loc=2)
-        plt.xlabel('Year')
-        plt.ylabel('US Population')
-        plt.title('Historical and Forecast of Population in the US')
-        plt.show();
+        # Study Period
+        # year1 = 1900
+        # year2 = 2100
+        years = np.linspace(year1, year2, num=(year2 - year1 + 1), endpoint=True)
+
+        if proj == 'SSP1':
+            US_pop = f_SSP1(years)
+            US_pop_years = pd.DataFrame({'Year': years,
+                                         'US_pop_' + str(proj): US_pop})
+        elif proj == 'SSP2':
+            US_pop = f_SSP2(years)
+            US_pop_years = pd.DataFrame({'Year': years,
+                                         'US_pop_' + str(proj): US_pop})
+        elif proj == 'SSP3':
+            US_pop = f_SSP3(years)
+            US_pop_years = pd.DataFrame({'Year': years,
+                                         'US_pop_' + str(proj): US_pop})
+        elif proj == 'SSP4':
+            US_pop = f_SSP4(years)
+            US_pop_years = pd.DataFrame({'Year': years,
+                                         'US_pop_' + str(proj): US_pop})
+        elif proj == 'SSP5':
+            US_pop = f_SSP5(years)
+            US_pop_years = pd.DataFrame({'Year': years,
+                                         'US_pop_' + str(proj): US_pop})
+        elif proj == 'All':
+            US_pop_years = pd.DataFrame({'Year': years,
+                                   'US_pop_SSP1': f_SSP1(years),
+                                   'US_pop_SSP2': f_SSP2(years),
+                                   'US_pop_SSP3': f_SSP3(years),
+                                   'US_pop_SSP4': f_SSP4(years),
+                                   'US_pop_SSP5': f_SSP5(years),
+                                   })
+        else:
+            US_pop_years = None
+
+
+        if plot == True:
+            # Plot of population forecasts
+            plt1, = plt.plot(years, f_SSP1(years))
+            plt2, = plt.plot(years, f_SSP2(years))
+            plt3, = plt.plot(years, f_SSP3(years))
+            plt4, = plt.plot(years, f_SSP4(years))
+            plt5, = plt.plot(years, f_SSP5(years))
+            plt6, = plt.plot([base_year, base_year], [2.4e8, 4.5e8], color='k', LineStyle='--')
+            plt.legend([plt1, plt2, plt3, plt4, plt5],
+                       ['SSP1', 'SSP2', 'SSP3', 'SSP4', 'SSP5'],
+                       loc=2)
+            plt.xlabel('Year')
+            plt.ylabel('US Population')
+            plt.title(r'Historical and Forecast of Population in the US' + '\n' + '(Census and WiC)')
+            plt.show();
 
     return years, US_pop_years
 
@@ -146,7 +208,7 @@ def FA_elasticity_linear(year1=1900, year2=2100, base_year=2016,
         plt.show();
     return FA_elas
 
-def FA_elasticity_EDGE(US_gdp, US_pop, SSP='SSP1',
+def FA_elasticity_EDGE(US_gdp, US_pop, SSP='All',
                        base_year=2016,FA_base_year=347, Area_country=9.14759e6, gamma=-0.03,
                        plot=True):
     """ Area of the USA is 9.834 million km².
@@ -166,28 +228,26 @@ def FA_elasticity_EDGE(US_gdp, US_pop, SSP='SSP1',
         FA_df = FA_df.set_index('Year', drop=False)
 
         # calculate historical FA
-        FA_df['Pop_Dens'] = FA_df['US_pop'] / Area_country
-        base_year_0_df = FA_df.loc[[SSP_split_year]]
-        alpha  = FA_base_year / (base_year_0_df['gdp_'+SSP] ** Beta * base_year_0_df['Pop_Dens'] ** gamma)
+        FA_df['Pop_Dens_'+SSP] = FA_df['US_pop_'+SSP] / Area_country
+        base_year_0_df = FA_df.loc[[base_year]]
+        alpha  = FA_base_year / (base_year_0_df['gdp_'+SSP] ** Beta * base_year_0_df['Pop_Dens_'+SSP] ** gamma)
         # alpha reported by EDGE model is 0.61.
         # alpha from Arehart et al. 2020 high   = 5.002223
         #                                median = 4.350305
         #                                low    = 3.635701
+        # print('Alpha is = ' + str(alpha))
 
-
-
-
-        FA_df.loc[FA_df['Year'] <= SSP_split_year, 'FA_elas_'+SSP] = alpha[SSP_split_year] * (FA_df['gdp_'+SSP] ** Beta) * FA_df['Pop_Dens'] ** gamma
+        FA_df.loc[FA_df['Year'] <= base_year, 'FA_elas_'+SSP] = alpha[base_year] * (FA_df['gdp_'+SSP] ** Beta) * FA_df['Pop_Dens_'+SSP] ** gamma
         for i in range(1,len(FA_df)):
             year_i = FA_df.index[i]
-            if year_i > SSP_split_year:
+            if year_i > base_year:
                 row_t_1 = FA_df.loc[year_i-1]
                 FA_t_1 = row_t_1['FA_elas_'+SSP]
                 I_t_1 = row_t_1['gdp_'+SSP]
-                D_t_1 = row_t_1['Pop_Dens']
+                D_t_1 = row_t_1['Pop_Dens_'+SSP]
                 row_t = FA_df.loc[year_i]
                 I_t = row_t['gdp_'+SSP]
-                D_t = row_t['Pop_Dens']
+                D_t = row_t['Pop_Dens_'+SSP]
                 FA_df.loc[int(year_i),'FA_elas_'+SSP] = FA_t_1 * (I_t/I_t_1) ** Beta_SSP[SSP] * (D_t/D_t_1) ** gamma
         return FA_df
 
@@ -208,22 +268,47 @@ def FA_elasticity_EDGE(US_gdp, US_pop, SSP='SSP1',
     elif SSP=='SSP5':
         df_return = FA_SSP5
     elif SSP=='All':
-        df_return = pd.DataFrame({'FA_SSP1': FA_SSP1['FA_elas_SSP1'],
+        df_return = pd.DataFrame({'Year': FA_SSP1['Year'],
+                                  'US_pop_SSP1': FA_SSP1['US_pop_SSP1'],
+                                  'US_pop_SSP2': FA_SSP1['US_pop_SSP2'],
+                                  'US_pop_SSP3': FA_SSP1['US_pop_SSP3'],
+                                  'US_pop_SSP4': FA_SSP1['US_pop_SSP4'],
+                                  'US_pop_SSP5': FA_SSP1['US_pop_SSP5'],
+                                  'US_gdp_SSP1': FA_SSP1['gdp_SSP1'],
+                                  'US_gdp_SSP2': FA_SSP1['gdp_SSP2'],
+                                  'US_gdp_SSP3': FA_SSP1['gdp_SSP3'],
+                                  'US_gdp_SSP4': FA_SSP1['gdp_SSP4'],
+                                  'US_gdp_SSP5': FA_SSP1['gdp_SSP5'],
+                                  'FA_SSP1': FA_SSP1['FA_elas_SSP1'],
                                   'FA_SSP2': FA_SSP2['FA_elas_SSP2'],
                                   'FA_SSP3': FA_SSP3['FA_elas_SSP3'],
                                   'FA_SSP4': FA_SSP4['FA_elas_SSP4'],
                                   'FA_SSP5': FA_SSP5['FA_elas_SSP5'], })
 
         if plot == True:
+            # Plot GFA vs time.
+            max_GFA = max(FA_SSP1.FA_elas_SSP1.max(), FA_SSP2.FA_elas_SSP2.max(), FA_SSP3.FA_elas_SSP3.max(), FA_SSP4.FA_elas_SSP4.max(), FA_SSP5.FA_elas_SSP5.max())
             plt1, = plt.plot(df_return.index, df_return.FA_SSP1)
             plt2, = plt.plot(df_return.index, df_return.FA_SSP2)
             plt3, = plt.plot(df_return.index, df_return.FA_SSP3)
             plt4, = plt.plot(df_return.index, df_return.FA_SSP4)
             plt5, = plt.plot(df_return.index, df_return.FA_SSP5)
-            plt6, = plt.plot([base_year, base_year], [0, 800], color='k', LineStyle='--')
+            plt6, = plt.plot([base_year, base_year], [0, max_GFA], color='k', LineStyle='--')
             plt.legend([plt1, plt2, plt3, plt4, plt5],
                        ['SSP1', 'SSP2', 'SSP3', 'SSP4', 'SSP5'], loc=2)
             plt.xlabel('Year')
+            plt.ylabel('Floor Area Elasticity')
+            plt.title('Floor Area Elasticity for various SSPs')
+            plt.show();
+            # Plot GFA vs GDP.
+            plt1, = plt.plot(df_return.US_gdp_SSP1, df_return.FA_SSP1)
+            plt2, = plt.plot(df_return.US_gdp_SSP2, df_return.FA_SSP2)
+            plt3, = plt.plot(df_return.US_gdp_SSP3, df_return.FA_SSP3)
+            plt4, = plt.plot(df_return.US_gdp_SSP4, df_return.FA_SSP4)
+            plt5, = plt.plot(df_return.US_gdp_SSP5, df_return.FA_SSP5)
+            plt.legend([plt1, plt2, plt3, plt4, plt5],
+                       ['SSP1', 'SSP2', 'SSP3', 'SSP4', 'SSP5'], loc=2)
+            plt.xlabel('GDP')
             plt.ylabel('Floor Area Elasticity')
             plt.title('Floor Area Elasticity for various SSPs')
             plt.show();
@@ -239,27 +324,27 @@ def FA_elasticity_EDGE(US_gdp, US_pop, SSP='SSP1',
     #                         'FA_elas': np.concatenate((FA_historic, FA_future), axis=0)
     #                         }, )
 
-
-# def FA_elasticity_interp(year1=1900, year2=2100, x_years, y_FA_elas):
-#     x_years =
-#
-
 # Time period input variables
 year1 = 1900
 year2 = 2100
 base_year = 2016
 
 # interpolate population data for the US.
-years, US_pop = interpolate_population(data_pop, year1=year1, year2=year2, proj='median', plot=False)
+years, US_pop = interpolate_population(data_pop=data_pop_WiC, data_source='WiC', year1=year1, year2=year2, proj='All', plot=True)
 
 # interpolate gdp data for the US.
 US_gdp = interpolate_gdp(data_gdp, year1=1900, year2=2100, SSP='All', kind='cubic', plot=True)
-# US_gdp_all =
 
 # calculate total floor area elasticity
 FA_all = FA_elasticity_EDGE(US_gdp, US_pop, SSP='All',
-                       base_year=2016,FA_base_year=347, Area_country=9.14759e6, gamma=-0.03,
+                       base_year=2016,FA_base_year=70, Area_country=9.14759e6, gamma=-0.03,
                        plot=True)
+
+# ratio of residential floor area to total floor area:
+ratio_res = 0.7
+ratio_non_res = 0.3
+
+# FA_all.to_csv('./InputData/Verify_me.csv')
 
 
 

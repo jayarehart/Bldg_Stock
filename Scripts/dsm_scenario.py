@@ -273,15 +273,15 @@ def FA_elasticity_EDGE(US_gdp, US_pop, SSP='All',
     elif SSP=='All':
         df_return = pd.DataFrame({'Year': FA_SSP1['Year'],
                                   'US_pop_SSP1': FA_SSP1['US_pop_SSP1'],
-                                  'US_pop_SSP2': FA_SSP1['US_pop_SSP2'],
-                                  'US_pop_SSP3': FA_SSP1['US_pop_SSP3'],
-                                  'US_pop_SSP4': FA_SSP1['US_pop_SSP4'],
-                                  'US_pop_SSP5': FA_SSP1['US_pop_SSP5'],
+                                  'US_pop_SSP2': FA_SSP2['US_pop_SSP2'],
+                                  'US_pop_SSP3': FA_SSP3['US_pop_SSP3'],
+                                  'US_pop_SSP4': FA_SSP4['US_pop_SSP4'],
+                                  'US_pop_SSP5': FA_SSP5['US_pop_SSP5'],
                                   'US_gdp_SSP1': FA_SSP1['gdp_SSP1'],
-                                  'US_gdp_SSP2': FA_SSP1['gdp_SSP2'],
-                                  'US_gdp_SSP3': FA_SSP1['gdp_SSP3'],
-                                  'US_gdp_SSP4': FA_SSP1['gdp_SSP4'],
-                                  'US_gdp_SSP5': FA_SSP1['gdp_SSP5'],
+                                  'US_gdp_SSP2': FA_SSP2['gdp_SSP2'],
+                                  'US_gdp_SSP3': FA_SSP3['gdp_SSP3'],
+                                  'US_gdp_SSP4': FA_SSP4['gdp_SSP4'],
+                                  'US_gdp_SSP5': FA_SSP5['gdp_SSP5'],
                                   'FA_SSP1': FA_SSP1['FA_elas_SSP1'],
                                   'FA_SSP2': FA_SSP2['FA_elas_SSP2'],
                                   'FA_SSP3': FA_SSP3['FA_elas_SSP3'],
@@ -393,7 +393,7 @@ def do_stock_driven_model(t, s, lt, InitialStock, SwitchTime, plot=True, plot_na
     CheckStr = my_dsm.dimension_check()
     print(CheckStr)
 
-    S_C = my_dsm.compute_evolution_initialstock(InitialStock=InitialStock, SwitchTime=SwitchTime)
+    # S_C = my_dsm.compute_evolution_initialstock(InitialStock=InitialStock, SwitchTime=SwitchTime)
     S_C, O_C, I = my_dsm.compute_stock_driven_model(NegativeInflowCorrect=True)
 
     O = my_dsm.compute_outflow_total()  # Total outflow

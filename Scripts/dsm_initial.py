@@ -5,7 +5,6 @@ import pandas as pd
 import numpy as np
 import xlsxwriter
 import matplotlib.pyplot as plt
-import seaborn as sns
 from scipy.interpolate import interp1d
 from odym import dynamic_stock_model as dsm
 
@@ -13,7 +12,8 @@ from odym import dynamic_stock_model as dsm
 data_pop_WiC = pd.read_excel('./InputData/Pop_Data.xlsx', sheet_name='US_pop_WiC')
 data_pop_UN = pd.read_excel('./InputData/Pop_Data.xlsx', sheet_name='US_pop_UN')
 data_gdp = pd.read_excel('./InputData/Pop_Data.xlsx', sheet_name='GDP_pc')
-RECS_Weights = pd.read_excel('./InputData/Pop_Data.xlsx', sheet_name='res_weight')
+# RECS_Weights = pd.read_excel('./InputData/Pop_Data.xlsx', sheet_name='res_weight')
+RECS_Weights = pd.read_excel('./InputData/Pop_Data.xlsx', sheet_name='res_weight_1850')
 CBECS_Weights = pd.read_excel('./InputData/Pop_Data.xlsx', sheet_name='com_weight')
 
 
@@ -329,19 +329,19 @@ def FA_elasticity_EDGE(US_gdp, US_pop, SSP='All',
     #                         }, )
 
 # Time period input variables
-year1 = 1820
+year1 = 1900
 year2 = 2100
 base_year = 2016
 
 # interpolate population data for the US.
-years, US_pop = interpolate_population(data_pop=data_pop_WiC, data_source='WiC', year1=year1, year2=year2, proj='All', plot=True)
+years, US_pop = interpolate_population(data_pop=data_pop_WiC, data_source='WiC', year1=year1, year2=year2, proj='All', plot=False)
 
 # interpolate gdp data for the US.
-US_gdp = interpolate_gdp(data_gdp, year1=year1, year2=year2, SSP='All', kind='cubic', plot=True)
+US_gdp = interpolate_gdp(data_gdp, year1=1900, year2=2100, SSP='All', kind='cubic', plot=False)
 # calculate total floor area elasticity
 FA_all = FA_elasticity_EDGE(US_gdp, US_pop, SSP='All',
                        base_year=2016,FA_base_year=347, Area_country=9.14759e6, gamma=-0.03,
-                       plot=True)
+                       plot=False)
 
 
 US_pop = US_pop.set_index('Year', drop=False)
@@ -370,7 +370,7 @@ def plot_dsm(dsm, plot_name):
     plt1, = plt.plot(dsm.t, dsm.i)
     plt3, = plt.plot(dsm.t, dsm.o)
     plt4, = plt.plot([base_year, base_year], [0, 1.15 * max_val], color='k', LineStyle='--')
-    plt.xlim(left=dsm.t[0] + 5)
+    # plt.xlim(left=dsm.t[0] + 5)
     plt.ylim(top=1.2 * max_val)
     plt.xlabel('Year')
     plt.ylabel('Floor Area per year')
@@ -385,10 +385,16 @@ def plot_dsm(dsm, plot_name):
     plt.title(plot_name + ' Stock by age-cohort')
     plt.show();
 
-def do_stock_driven_model(t, s, lt, plot=True, plot_name='Residential'):
+def do_stock_driven_model(t, s, lt, InitialStock, SwitchTime, plot=True, plot_name='Residential'):
     """ Compute a stock driven model from an initial stock.
         Returns an object with class dynamic_stock_model with age-cohort matrix
         with inputs, outputs, and stocks computed"""
+
+    # debuggg
+    t_19thc = np.linspace(1850, 1900, num=(1900 - 1850), endpoint=False)
+    s_19thc = np.repeat(stock_res[1900], len(t_19thc))
+    t = np.append(t_19thc, years)
+    s = np.append(s_19thc, np.array(stock_res))
 
     my_dsm = dsm.DynamicStockModel(t=t, s=s, lt=lt)
     CheckStr = my_dsm.dimension_check()
@@ -403,11 +409,15 @@ def do_stock_driven_model(t, s, lt, plot=True, plot_name='Residential'):
     print('The mass balance between inflows and outflows is:   ')
     print(np.abs(Bal).sum())  # show sum absolute of all mass balance mismatches.
     if plot==True: plot_dsm(my_dsm, plot_name=plot_name)
+    print('Difference in stock in base year is: ')
+    # print(sum(S_C[list(t).index(base_year)]) - sum(InitialStock))
+    print(sum(S_C[SwitchTime-1]) - sum(InitialStock))
+
     return my_dsm
 
 def calc_MFA(scenario, lifetime):
-    # select a scenario to consider during debugging
-    # scenario = 'SSP1'
+    # select a scenario to consider
+    # scenario = 'SSP2'
     # lifetime = 'Weibull'
     scenario_pop = US_pop['US_pop_'+scenario]
     scenario_gdp = US_gdp['gdp_'+scenario]
@@ -445,10 +455,8 @@ def calc_MFA(scenario, lifetime):
         lt_pub = {'Type': 'Normal', 'Mean': np.array([BldgLife_mean_pub] * len(years)), 'StdDev': BldgLife_StdDev_pub}
     elif lifetime=='Weibull':
         # Weibull
-        # lt_res = {'Type': 'Weibull', 'Shape': np.array([5.5]), 'Scale': np.array([85.8])}
-        lt_res = {'Type': 'Weibull', 'Shape': np.array([3]), 'Scale': np.array([140])}
-        lt_com = {'Type': 'Weibull', 'Shape': np.array([3]), 'Scale': np.array([100])}
-        # lt_com = {'Type': 'Weibull', 'Shape': np.array([4.8]), 'Scale': np.array([75.1])}
+        lt_res = {'Type': 'Weibull', 'Shape': np.array([5.5]), 'Scale': np.array([85.8])}
+        lt_com = {'Type': 'Weibull', 'Shape': np.array([4.8]), 'Scale': np.array([75.1])}
         lt_pub = {'Type': 'Weibull', 'Shape': np.array([6.1]), 'Scale': np.array([95.6])}
     elif lifetime=='Gamma':
         # Gamma (currently not working)
@@ -470,250 +478,50 @@ def calc_MFA(scenario, lifetime):
 
     # ---- Initial Conditions ----
     # Residential floor area  age-cohort in base year: 2015
-    # S_0_res_2015 = np.flipud(RECS_Weights.Res_Weight) * stock_res[2015]
+    S_0_res_2015 = np.flipud(RECS_Weights.Res_Weight) * stock_res[2015]
 
     # Commercial floor area  age-cohort in base year: 2012
-    # S_0_com_2012 = np.flipud(CBECS_Weights.Com_Weight) * stock_com[2012]
+    S_0_com_2012 = np.flipud(CBECS_Weights.Com_Weight) * stock_com[2012]
 
     # Public floor area  age-cohort in base year: 2012
-    # S_0_pub_2012 = np.flipud(CBECS_Weights.Com_Weight) * stock_pub[2012]
+    S_0_pub_2012 = np.flipud(CBECS_Weights.Com_Weight) * stock_pub[2012]
 
     # Residential
     t = years
     s = np.array(stock_res)
-    # InitialStock_res = S_0_res_2015
-    SwitchTime = 196
-    US_stock_res = do_stock_driven_model(t, s, lt_res, plot=False, plot_name='Residential')
+    InitialStock_res = S_0_res_2015
+    SwitchTime = 116
+    US_stock_res = do_stock_driven_model(t, s, lt_res, InitialStock_res, SwitchTime, plot=False, plot_name='Residential')
 
     # Commercial
     t = years
     s = np.array(stock_com)
     lt = lt_com
-    # InitialStock_com = S_0_com_2012
-    SwitchTime = 193
-    US_stock_com = do_stock_driven_model(t, s, lt_com, plot=False, plot_name='Commercial')
+    InitialStock_com = S_0_com_2012
+    SwitchTime = 113
+    US_stock_com = do_stock_driven_model(t, s, lt_com, InitialStock_com, SwitchTime, plot=False,
+                                             plot_name='Commercial')
 
     # Public
     t = years
     s = np.array(stock_pub)
     lt = lt_pub
-    # InitialStock_pub = S_0_pub_2012
-    SwitchTime = 193
-    US_stock_pub = do_stock_driven_model(t, s, lt_pub, plot=False, plot_name='Public')
+    InitialStock_pub = S_0_pub_2012
+    SwitchTime = 113
+    US_stock_pub = do_stock_driven_model(t, s, lt_pub, InitialStock_pub, SwitchTime, plot=True,
+                                             plot_name='Public')
 
-    return US_stock_res, US_stock_com, US_stock_pub, MFA_input_data
+    return US_stock_res, US_stock_com, US_stock_pub
 
 # Calculate MFA for individual scenarios
-SSP1_dsm_res, SSP1_dsm_com, SSP1_dsm_pub, SSP1_MFA_input = calc_MFA('SSP1', 'Weibull')
-SSP2_dsm_res, SSP2_dsm_com, SSP2_dsm_pub, SSP2_MFA_input = calc_MFA('SSP2', 'Weibull')
-SSP3_dsm_res, SSP3_dsm_com, SSP3_dsm_pub, SSP3_MFA_input = calc_MFA('SSP3', 'Weibull')
-SSP4_dsm_res, SSP4_dsm_com, SSP4_dsm_pub, SSP4_MFA_input = calc_MFA('SSP4', 'Weibull')
-SSP5_dsm_res, SSP5_dsm_com, SSP5_dsm_pub, SSP5_MFA_input = calc_MFA('SSP5', 'Weibull')
-
-# Checking historical data against CBECS and RECS lifespan distributions
-# S_0_com_2012 = np.flipud(CBECS_Weights.Com_Weight) * SSP1_dsm_com.s_c[193][0:193]
-# S_0_pub_2012 = np.flipud(CBECS_Weights.Com_Weight) * SSP1_dsm_pub.s_c[193][0:193]
-
-# Plot all RECS data against the DSM simulation distribution
-n_bins = 20
-kde_flag = False
-rug_flag = False
-RECS_comparison = False
-if RECS_comparison==True:
-    # number of bins for histogram comparisons
-    # n_bins = 10
-    # function to comput the desnity function of simualtion and RECS data
-    def compare_RECS(year=2015, index=196, RECS_series=RECS_Weights.Res_Weight_2015, plot=True, n_bins=10):
-        age_in_year = np.full(index, year) - SSP1_dsm_res.t[0:index]
-        computed_distr_year = SSP1_dsm_res.s_c[index][0:index] / SSP1_dsm_res.s_c[index][0:index].sum()
-        calc_age_weighted_year = age_in_year * computed_distr_year * (index - 1)
-        S_0_res_year = age_in_year * (RECS_series[0:index]) * (index - 1)
-
-        # if plot==True:
-        #     sns.distplot(calc_age_weighted_year, color="r", bins=n_bins, label='DSM Simulation')
-        #     sns.distplot(S_0_res_year, color="black", bins=n_bins, label=str(year)+' RECS')
-        #     plt.legend();
-        #     plt.title('Residential Floor Area Age Distribution in ' + str(year))
-        #     plt.xlabel('Age')
-        #     plt.show();
-        return calc_age_weighted_year, S_0_res_year
-
-    # Compute the density functions for each
-    DSM_age_2015, RECS_age_2015 = compare_RECS(year=2015, index=196, RECS_series=RECS_Weights.Res_Weight_2015)
-    DSM_age_2009, RECS_age_2009 = compare_RECS(year=2009, index=190, RECS_series=RECS_Weights.Res_Weight_2009)
-    DSM_age_2005, RECS_age_2005 = compare_RECS(year=2005, index=186, RECS_series=RECS_Weights.Res_Weight_2005)
-    DSM_age_2001, RECS_age_2001 = compare_RECS(year=2001, index=182, RECS_series=RECS_Weights.Res_Weight_2001)
-    DSM_age_1997, RECS_age_1997 = compare_RECS(year=1997, index=178, RECS_series=RECS_Weights.Res_Weight_1997)
-    DSM_age_1993, RECS_age_1993 = compare_RECS(year=1993, index=174, RECS_series=RECS_Weights.Res_Weight_1993)
-    DSM_age_1987, RECS_age_1987 = compare_RECS(year=1987, index=168, RECS_series=RECS_Weights.Res_Weight_1987)
-    DSM_age_1980, RECS_age_1980 = compare_RECS(year=1980, index=161, RECS_series=RECS_Weights.Res_Weight_1980)
-
-    # multiplot of each RECS year data against the data for that year in the DSM simulation
-    plt.subplot(421)
-    plt1 = sns.distplot(DSM_age_2015, kde=kde_flag, color="r", bins=10, label='DSM Simulation'),
-    plt2 = sns.distplot(RECS_age_2015, kde=kde_flag, color="black", bins=10, label='2015 RECS'),
-    # plt1 = plt.hist(DSM_age_2015, alpha=0.5, color="r", bins=n_bins, label='DSM Simulation')
-    # plt2 = plt.hist(RECS_age_2015, alpha=0.5, color="black", bins=n_bins, label='2015 RECS')
-    plt.legend(fontsize='x-small');
-    plt.xlabel(None)
-
-    plt.subplot(422)
-    plt1 = sns.distplot(DSM_age_2009, rug=rug_flag, kde=kde_flag, color="r", bins=n_bins, label='DSM Simulation')
-    plt2 = sns.distplot(RECS_age_2009, rug=rug_flag, kde=kde_flag, color="black", bins=n_bins, label='2009 RECS')
-    # plt1 = plt.hist(DSM_age_2009, alpha=0.5, color="r", bins=n_bins, label='DSM Simulation')
-    # plt2 = plt.hist(RECS_age_2009, alpha=0.5, color="black", bins=n_bins, label='2009 RECS')
-    plt.legend(fontsize='x-small');
-    plt.xlabel(None)
-
-    plt.subplot(423)
-    plt1 = sns.distplot(DSM_age_2005, rug=rug_flag, kde=kde_flag, color="r", bins=n_bins, label='DSM Simulation')
-    plt2 = sns.distplot(RECS_age_2005, rug=rug_flag, kde=kde_flag, color="black", bins=n_bins, label='2005 RECS')
-    # plt1 = plt.hist(DSM_age_2005, alpha=0.5, color="r", bins=n_bins, label='DSM Simulation')
-    # plt2 = plt.hist(RECS_age_2005, alpha=0.5, color="black", bins=n_bins, label='2005 RECS')
-    plt.legend(fontsize='x-small');
-    plt.xlabel(None)
-
-    plt.subplot(424)
-    plt1 = sns.distplot(DSM_age_2001, rug=rug_flag, kde=kde_flag, color="r", bins=n_bins, label='DSM Simulation')
-    plt2 = sns.distplot(RECS_age_2001, rug=rug_flag, kde=kde_flag, color="black", bins=n_bins, label='2001 RECS')
-    # plt1 = plt.hist(DSM_age_2001, alpha=0.5, color="r", bins=n_bins, label='DSM Simulation')
-    # plt2 = plt.hist(RECS_age_2001, alpha=0.5, color="black", bins=n_bins, label='2001 RECS')
-    plt.legend(fontsize='x-small');
-    plt.xlabel(None)
-
-    plt.subplot(425)
-    plt1 = sns.distplot(DSM_age_1997, rug=rug_flag, kde=kde_flag, color="r", bins=n_bins, label='DSM Simulation')
-    plt2 = sns.distplot(RECS_age_1997, rug=rug_flag, kde=kde_flag, color="black", bins=n_bins, label='1997 RECS')
-    # plt1 = plt.hist(DSM_age_1997, alpha=0.5, color="r", bins=n_bins, label='DSM Simulation')
-    # plt2 = plt.hist(RECS_age_1997, alpha=0.5, color="black", bins=n_bins, label='1997 RECS')
-    plt.legend(fontsize='x-small');
-    plt.xlabel(None)
-
-    plt.subplot(426)
-    plt1 = sns.distplot(DSM_age_1993, rug=rug_flag, kde=kde_flag, color="r", bins=n_bins, label='DSM Simulation')
-    plt2 = sns.distplot(RECS_age_1993, rug=rug_flag, kde=kde_flag, color="black", bins=n_bins, label='1993 RECS')
-    # plt1 = plt.hist(DSM_age_1993, alpha=0.5, color="r", bins=n_bins, label='DSM Simulation')
-    # plt2 = plt.hist(RECS_age_1993, alpha=0.5, color="black", bins=n_bins, label='1993 RECS')
-    plt.legend(fontsize='x-small');
-    plt.xlabel(None)
-
-    plt.subplot(427)
-    plt1 = sns.distplot(DSM_age_1987, rug=rug_flag, kde=kde_flag, color="r", bins=n_bins, label='DSM Simulation')
-    plt2 = sns.distplot(RECS_age_1987, rug=rug_flag, kde=kde_flag, color="black", bins=n_bins, label='1987 RECS')
-    # plt1 = plt.hist(DSM_age_1987, alpha=0.5, color="r", bins=n_bins, label='DSM Simulation')
-    # plt2 = plt.hist(RECS_age_1987, alpha=0.5, color="black", bins=n_bins, label='1987 RECS')
-    plt.legend(fontsize='x-small');
-    plt.xlabel('Age')
-
-    plt.subplot(428)
-    plt1 = sns.distplot(DSM_age_1980, rug=rug_flag, kde=kde_flag, color="r", bins=n_bins, label='DSM Simulation')
-    plt2 = sns.distplot(RECS_age_1980, rug=rug_flag, kde=kde_flag, color="black", bins=n_bins, label='1980 RECS')
-    # plt1 = plt.hist(DSM_age_1980, alpha=0.5, color="r", bins=n_bins, label='DSM Simulation')
-    # plt2 = plt.hist(RECS_age_1980, alpha=0.5, color="black", bins=n_bins, label='1980 RECS')
-    plt.legend(fontsize='x-small');
-    plt.xlabel('Age')
-    plt.show();
-
-def compare_RECS_and_plot(year=2015, index=196, RECS_series=RECS_Weights.Res_Weight_2015, plot=True, n_bins=20):
-    age_in_year = np.full(index, year) - SSP1_dsm_res.t[0:index]
-    computed_distr_year = SSP1_dsm_res.s_c[index][0:index] / SSP1_dsm_res.s_c[index][0:index].sum()
-    calc_age_weighted_year = age_in_year * computed_distr_year # * (index - 1)
-    S_0_res_year = np.multiply(age_in_year, (RECS_series[0:index]) ) #* (index - 1)
-
-    if plot==True:
-        sns.distplot(calc_age_weighted_year, kde=kde_flag, rug=rug_flag, color="r", bins=n_bins, label='DSM Simulation')
-        sns.distplot(S_0_res_year, kde=kde_flag, rug=rug_flag, color="black", bins=n_bins, label=str(year)+' RECS')
-        plt.legend();
-        plt.title('Residential Floor Age Structure ' + str(year))
-        plt.xlabel('Age')
-        plt.show();
-    return S_0_res_year
-
-x = compare_RECS_and_plot(year=2015, index=196, RECS_series=RECS_Weights.Res_Weight_2015, plot=True, n_bins=50)
-
-
-# Plot all CBECS data against the DSM simulation distribution
-CBECS_comparison = False
-if CBECS_comparison == True:
-    # number of bins for histogram comparisons
-    # n_bins = 10
-    # function to comput the desnity function of simualtion and CBECS data
-    def compare_CBECS(year=2012, index=193, CBECS_series=CBECS_Weights.Com_Weight_2012, plot=True, n_bins=10):
-        age_in_year = np.full(index, year) - SSP1_dsm_res.t[0:index]
-        computed_distr_year = SSP1_dsm_com.s_c[index][0:index] / SSP1_dsm_com.s_c[index][0:index].sum()
-        calc_age_weighted_year = age_in_year * computed_distr_year * (index - 1)
-        S_0_com_year = age_in_year * (CBECS_series[0:index]) * (index - 1)
-        # sns.distplot(calc_age_weighted_year, color="r", bins=n_bins, label='DSM Simulation')
-        # sns.distplot(S_0_com_year, color="black", bins=n_bins, label=str(year)+' CBECS')
-        # plt.legend();
-        # plt.title('Residential Floor Area Age Distribution in ' + str(year))
-        # plt.xlabel('Age')
-        # plt.show();
-
-        return calc_age_weighted_year, S_0_com_year
-
-    # Compute the density functions for each
-    DSM_age_2012, CBECS_age_2012 = compare_CBECS(year=2012, index=193, CBECS_series=CBECS_Weights.Com_Weight_2012)
-    DSM_age_2003, CBECS_age_2003 = compare_CBECS(year=2003, index=184, CBECS_series=CBECS_Weights.Com_Weight_2003)
-    DSM_age_1999, CBECS_age_1999 = compare_CBECS(year=1999, index=180, CBECS_series=CBECS_Weights.Com_Weight_1999)
-    DSM_age_1995, CBECS_age_1995 = compare_CBECS(year=1995, index=176, CBECS_series=CBECS_Weights.Com_Weight_1995)
-    DSM_age_1992, CBECS_age_1992 = compare_CBECS(year=1992, index=173, CBECS_series=CBECS_Weights.Com_Weight_1992)
-    DSM_age_1986, CBECS_age_1986 = compare_CBECS(year=1986, index=167, CBECS_series=CBECS_Weights.Com_Weight_1986)
-    DSM_age_1983, CBECS_age_1983 = compare_CBECS(year=1983, index=164, CBECS_series=CBECS_Weights.Com_Weight_1983)
-    DSM_age_1979, CBECS_age_1979 = compare_CBECS(year=1979, index=160, CBECS_series=CBECS_Weights.Com_Weight_1979)
-
-    # multiplot of each RECS year data against the data for that year in the DSM simulation
-    plt.subplot(421)
-    plt1 = sns.distplot(DSM_age_2012, rug=rug_flag, kde=kde_flag, color="blue", bins=10, label='DSM Simulation'),
-    plt2 = sns.distplot(CBECS_age_2012, rug=rug_flag, kde=kde_flag, color="black", bins=10, label='2012 CBECS'),
-    plt.legend(fontsize='x-small');
-    plt.xlabel(None)
-
-    plt.subplot(422)
-    plt1 = sns.distplot(DSM_age_2003, rug=rug_flag, kde=kde_flag, color="blue", bins=n_bins, label='DSM Simulation')
-    plt2 = sns.distplot(CBECS_age_2003, rug=rug_flag, kde=kde_flag, color="black", bins=n_bins, label='2003 CBECS')
-    plt.legend(fontsize='x-small');
-    plt.xlabel(None)
-
-    plt.subplot(423)
-    plt1 = sns.distplot(DSM_age_1999, rug=rug_flag, kde=kde_flag, color="blue", bins=n_bins, label='DSM Simulation')
-    plt2 = sns.distplot(CBECS_age_1999, rug=rug_flag, kde=kde_flag, color="black", bins=n_bins, label='1999 CBECS')
-    plt.legend(fontsize='x-small');
-    plt.xlabel(None)
-
-    plt.subplot(424)
-    plt1 = sns.distplot(DSM_age_1995, rug=rug_flag, kde=kde_flag, color="blue", bins=n_bins, label='DSM Simulation')
-    plt2 = sns.distplot(CBECS_age_1995, rug=rug_flag, kde=kde_flag, color="black", bins=n_bins, label='1995 CBECS')
-    plt.legend(fontsize='x-small');
-    plt.xlabel(None)
-
-    plt.subplot(425)
-    plt1 = sns.distplot(DSM_age_1992, rug=rug_flag, kde=kde_flag, color="blue", bins=n_bins, label='DSM Simulation')
-    plt2 = sns.distplot(CBECS_age_1992, rug=rug_flag, kde=kde_flag, color="black", bins=n_bins, label='1992 CBECS')
-    plt.legend(fontsize='x-small');
-    plt.xlabel(None)
-
-    plt.subplot(426)
-    plt1 = sns.distplot(DSM_age_1986, rug=rug_flag, kde=kde_flag, color="blue", bins=n_bins, label='DSM Simulation')
-    plt2 = sns.distplot(CBECS_age_1986, rug=rug_flag, kde=kde_flag, color="black", bins=n_bins, label='1986 CBECS')
-    plt.legend(fontsize='x-small');
-    plt.xlabel(None)
-
-    plt.subplot(427)
-    plt1 = sns.distplot(DSM_age_1983, kde=kde_flag, color="blue", bins=n_bins, label='DSM Simulation')
-    plt2 = sns.distplot(CBECS_age_1983, kde=kde_flag, color="black", bins=n_bins, label='1983 CBECS')
-    plt.legend(fontsize='x-small');
-    plt.xlabel('Age')
-
-    plt.subplot(428)
-    plt1 = sns.distplot(DSM_age_1979, rug=rug_flag, kde=kde_flag, color="blue", bins=n_bins, label='DSM Simulation')
-    plt2 = sns.distplot(CBECS_age_1979, rug=rug_flag, kde=kde_flag, color="black", bins=n_bins, label='1979 CBECS')
-    plt.legend(fontsize='x-small');
-    plt.xlabel('Age')
-    plt.show();
-
+SSP1_dsm_res, SSP1_dsm_com, SSP1_dsm_pub = calc_MFA('SSP1', 'Weibull')
+# SSP2_dsm_res, SSP2_dsm_com, SSP2_dsm_pub = calc_MFA('SSP2', 'Weibull')
+# SSP3_dsm_res, SSP3_dsm_com, SSP3_dsm_pub = calc_MFA('SSP3', 'Weibull')
+# SSP4_dsm_res, SSP4_dsm_com, SSP4_dsm_pub = calc_MFA('SSP4', 'Weibull')
+# SSP5_dsm_res, SSP5_dsm_com, SSP5_dsm_pub = calc_MFA('SSP5', 'Weibull')
 
 # Save the floor area models as .csv files.
+
 SSP1_dsm_df = pd.DataFrame({'time': SSP1_dsm_res.t,
                             'stock_res': SSP1_dsm_res.s,
                             'inflow_res': SSP1_dsm_res.i,
@@ -728,90 +536,90 @@ SSP1_dsm_df = pd.DataFrame({'time': SSP1_dsm_res.t,
                             'inflow_total': SSP1_dsm_res.i + SSP1_dsm_com.i + SSP1_dsm_pub.i,
                             'outflow_total': SSP1_dsm_res.o + SSP1_dsm_com.o + SSP1_dsm_pub.o
                             })
-SSP2_dsm_df = pd.DataFrame({'time': SSP2_dsm_res.t,
-                            'stock_res': SSP2_dsm_res.s,
-                            'inflow_res': SSP2_dsm_res.i,
-                            'outflow_res': SSP2_dsm_res.o,
-                            'stock_com': SSP2_dsm_com.s,
-                            'inflow_com': SSP2_dsm_com.i,
-                            'outflow_com': SSP2_dsm_com.o,
-                            'stock_pub': SSP2_dsm_pub.s,
-                            'inflow_pub': SSP2_dsm_pub.i,
-                            'outflow_pub': SSP2_dsm_pub.o,
-                            'stock_total': SSP2_dsm_res.s + SSP2_dsm_com.s + SSP2_dsm_pub.s,
-                            'inflow_total': SSP2_dsm_res.i + SSP2_dsm_com.i + SSP2_dsm_pub.i,
-                            'outflow_total': SSP2_dsm_res.o + SSP2_dsm_com.o + SSP2_dsm_pub.o
-                            })
-SSP3_dsm_df = pd.DataFrame({'time': SSP3_dsm_res.t,
-                            'stock_res': SSP3_dsm_res.s,
-                            'inflow_res': SSP3_dsm_res.i,
-                            'outflow_res': SSP3_dsm_res.o,
-                            'stock_com': SSP3_dsm_com.s,
-                            'inflow_com': SSP3_dsm_com.i,
-                            'outflow_com': SSP3_dsm_com.o,
-                            'stock_pub': SSP3_dsm_pub.s,
-                            'inflow_pub': SSP3_dsm_pub.i,
-                            'outflow_pub': SSP3_dsm_pub.o,
-                            'stock_total': SSP3_dsm_res.s + SSP3_dsm_com.s + SSP3_dsm_pub.s,
-                            'inflow_total': SSP3_dsm_res.i + SSP3_dsm_com.i + SSP3_dsm_pub.i,
-                            'outflow_total': SSP3_dsm_res.o + SSP3_dsm_com.o + SSP3_dsm_pub.o
-                            })
-SSP4_dsm_df = pd.DataFrame({'time': SSP4_dsm_res.t,
-                            'stock_res': SSP4_dsm_res.s,
-                            'inflow_res': SSP4_dsm_res.i,
-                            'outflow_res': SSP4_dsm_res.o,
-                            'stock_com': SSP4_dsm_com.s,
-                            'inflow_com': SSP4_dsm_com.i,
-                            'outflow_com': SSP4_dsm_com.o,
-                            'stock_pub': SSP4_dsm_pub.s,
-                            'inflow_pub': SSP4_dsm_pub.i,
-                            'outflow_pub': SSP4_dsm_pub.o,
-                            'stock_total': SSP4_dsm_res.s + SSP4_dsm_com.s + SSP4_dsm_pub.s,
-                            'inflow_total': SSP4_dsm_res.i + SSP4_dsm_com.i + SSP4_dsm_pub.i,
-                            'outflow_total': SSP4_dsm_res.o + SSP4_dsm_com.o + SSP4_dsm_pub.o
-                            })
-SSP5_dsm_df = pd.DataFrame({'time': SSP5_dsm_res.t,
-                            'stock_res': SSP5_dsm_res.s,
-                            'inflow_res': SSP5_dsm_res.i,
-                            'outflow_res': SSP5_dsm_res.o,
-                            'stock_com': SSP5_dsm_com.s,
-                            'inflow_com': SSP5_dsm_com.i,
-                            'outflow_com': SSP5_dsm_com.o,
-                            'stock_pub': SSP5_dsm_pub.s,
-                            'inflow_pub': SSP5_dsm_pub.i,
-                            'outflow_pub': SSP5_dsm_pub.o,
-                            'stock_total': SSP5_dsm_res.s + SSP5_dsm_com.s + SSP5_dsm_pub.s,
-                            'inflow_total': SSP5_dsm_res.i + SSP5_dsm_com.i + SSP5_dsm_pub.i,
-                            'outflow_total': SSP5_dsm_res.o + SSP5_dsm_com.o + SSP5_dsm_pub.o
-                            })
-
-# write to excel
-writer = pd.ExcelWriter('./Results/SSP_dsm.xlsx', engine='xlsxwriter')
-SSP1_dsm_df.to_excel(writer, sheet_name='SSP1')
-SSP2_dsm_df.to_excel(writer, sheet_name='SSP2')
-SSP3_dsm_df.to_excel(writer, sheet_name='SSP3')
-SSP4_dsm_df.to_excel(writer, sheet_name='SSP4')
-SSP5_dsm_df.to_excel(writer, sheet_name='SSP5')
-writer.save()
-
-
-# Plot the material flow analyses
-plot_dsm(SSP1_dsm_res, 'SSP1 Residential')
+# SSP2_dsm_df = pd.DataFrame({'time': SSP2_dsm_res.t,
+#                             'stock_res': SSP2_dsm_res.s,
+#                             'inflow_res': SSP2_dsm_res.i,
+#                             'outflow_res': SSP2_dsm_res.o,
+#                             'stock_com': SSP2_dsm_com.s,
+#                             'inflow_com': SSP2_dsm_com.i,
+#                             'outflow_com': SSP2_dsm_com.o,
+#                             'stock_pub': SSP2_dsm_pub.s,
+#                             'inflow_pub': SSP2_dsm_pub.i,
+#                             'outflow_pub': SSP2_dsm_pub.o,
+#                             'stock_total': SSP2_dsm_res.s + SSP2_dsm_com.s + SSP2_dsm_pub.s,
+#                             'inflow_total': SSP2_dsm_res.i + SSP2_dsm_com.i + SSP2_dsm_pub.i,
+#                             'outflow_total': SSP2_dsm_res.o + SSP2_dsm_com.o + SSP2_dsm_pub.o
+#                             })
+# SSP3_dsm_df = pd.DataFrame({'time': SSP3_dsm_res.t,
+#                             'stock_res': SSP3_dsm_res.s,
+#                             'inflow_res': SSP3_dsm_res.i,
+#                             'outflow_res': SSP3_dsm_res.o,
+#                             'stock_com': SSP3_dsm_com.s,
+#                             'inflow_com': SSP3_dsm_com.i,
+#                             'outflow_com': SSP3_dsm_com.o,
+#                             'stock_pub': SSP3_dsm_pub.s,
+#                             'inflow_pub': SSP3_dsm_pub.i,
+#                             'outflow_pub': SSP3_dsm_pub.o,
+#                             'stock_total': SSP3_dsm_res.s + SSP3_dsm_com.s + SSP3_dsm_pub.s,
+#                             'inflow_total': SSP3_dsm_res.i + SSP3_dsm_com.i + SSP3_dsm_pub.i,
+#                             'outflow_total': SSP3_dsm_res.o + SSP3_dsm_com.o + SSP3_dsm_pub.o
+#                             })
+# SSP4_dsm_df = pd.DataFrame({'time': SSP4_dsm_res.t,
+#                             'stock_res': SSP4_dsm_res.s,
+#                             'inflow_res': SSP4_dsm_res.i,
+#                             'outflow_res': SSP4_dsm_res.o,
+#                             'stock_com': SSP4_dsm_com.s,
+#                             'inflow_com': SSP4_dsm_com.i,
+#                             'outflow_com': SSP4_dsm_com.o,
+#                             'stock_pub': SSP4_dsm_pub.s,
+#                             'inflow_pub': SSP4_dsm_pub.i,
+#                             'outflow_pub': SSP4_dsm_pub.o,
+#                             'stock_total': SSP4_dsm_res.s + SSP4_dsm_com.s + SSP4_dsm_pub.s,
+#                             'inflow_total': SSP4_dsm_res.i + SSP4_dsm_com.i + SSP4_dsm_pub.i,
+#                             'outflow_total': SSP4_dsm_res.o + SSP4_dsm_com.o + SSP4_dsm_pub.o
+#                             })
+# SSP5_dsm_df = pd.DataFrame({'time': SSP5_dsm_res.t,
+#                             'stock_res': SSP5_dsm_res.s,
+#                             'inflow_res': SSP5_dsm_res.i,
+#                             'outflow_res': SSP5_dsm_res.o,
+#                             'stock_com': SSP5_dsm_com.s,
+#                             'inflow_com': SSP5_dsm_com.i,
+#                             'outflow_com': SSP5_dsm_com.o,
+#                             'stock_pub': SSP5_dsm_pub.s,
+#                             'inflow_pub': SSP5_dsm_pub.i,
+#                             'outflow_pub': SSP5_dsm_pub.o,
+#                             'stock_total': SSP5_dsm_res.s + SSP5_dsm_com.s + SSP5_dsm_pub.s,
+#                             'inflow_total': SSP5_dsm_res.i + SSP5_dsm_com.i + SSP5_dsm_pub.i,
+#                             'outflow_total': SSP5_dsm_res.o + SSP5_dsm_com.o + SSP5_dsm_pub.o
+#                             })
+#
+# # write to excel
+# writer = pd.ExcelWriter('./Results/SSP_dsm.xlsx', engine='xlsxwriter')
+# SSP1_dsm_df.to_excel(writer, sheet_name='SSP1')
+# SSP2_dsm_df.to_excel(writer, sheet_name='SSP2')
+# SSP3_dsm_df.to_excel(writer, sheet_name='SSP3')
+# SSP4_dsm_df.to_excel(writer, sheet_name='SSP4')
+# SSP5_dsm_df.to_excel(writer, sheet_name='SSP5')
+# writer.save()
+#
+#
+# # Plot the material flow analyses
+# plot_dsm(SSP1_dsm_res, 'SSP1 Residential')
 # plot_dsm(SSP1_dsm_com, 'SSP1 Commercial')
 # plot_dsm(SSP1_dsm_pub, 'SSP1 Public')
-# plot_dsm(SSP2_dsm_res, 'SSP2 Residential')
-# plot_dsm(SSP2_dsm_com, 'SSP2 Commercial')
-# plot_dsm(SSP2_dsm_pub, 'SSP2 Public')
-# plot_dsm(SSP3_dsm_res, 'SSP3 Residential')
-# plot_dsm(SSP3_dsm_com, 'SSP3 Commercial')
-# plot_dsm(SSP3_dsm_pub, 'SSP3 Public')
-# plot_dsm(SSP4_dsm_res, 'SSP4 Residential')
-# plot_dsm(SSP4_dsm_com, 'SSP4 Commercial')
-# plot_dsm(SSP4_dsm_pub, 'SSP4 Public')
-# plot_dsm(SSP5_dsm_res, 'SSP5 Residential')
-# plot_dsm(SSP5_dsm_com, 'SSP5 Commercial')
-# plot_dsm(SSP5_dsm_pub, 'SSP5 Public')
-
+# # plot_dsm(SSP2_dsm_res, 'SSP2 Residential')
+# # plot_dsm(SSP2_dsm_com, 'SSP2 Commercial')
+# # plot_dsm(SSP2_dsm_pub, 'SSP2 Public')
+# # plot_dsm(SSP3_dsm_res, 'SSP3 Residential')
+# # plot_dsm(SSP3_dsm_com, 'SSP3 Commercial')
+# # plot_dsm(SSP3_dsm_pub, 'SSP3 Public')
+# # plot_dsm(SSP4_dsm_res, 'SSP4 Residential')
+# # plot_dsm(SSP4_dsm_com, 'SSP4 Commercial')
+# # plot_dsm(SSP4_dsm_pub, 'SSP4 Public')
+# # plot_dsm(SSP5_dsm_res, 'SSP5 Residential')
+# # plot_dsm(SSP5_dsm_com, 'SSP5 Commercial')
+# # plot_dsm(SSP5_dsm_pub, 'SSP5 Public')
+#
 # # ----------------------------------------------------------------------------------------------------------------------
 # # Plot all scenarios together for residential buildings
 # plt.subplot(211)
@@ -865,30 +673,30 @@ plot_dsm(SSP1_dsm_res, 'SSP1 Residential')
 #
 #
 # # ----------------------------------------------------------------------------------------------------------------------
-# Plot weibull lifetime distributions:
-x = np.arange(1,150)
-def weib(x,n,a):
-    return (a / n) * (x / n)**(a - 1) * np.exp(-(x / n)**a)
-
-# count, bins, ignored = plt.hist(np.random.weibull(5.5,1000))
-# scale = count.max()/weib(x, 85.8, 5.5).max()
-plt1, = plt.plot(x, weib(x, 85.5, 5.5)*85.5)
-plt2, = plt.plot(x, weib(x, 75.1, 4.8)*75.1)
-plt3, = plt.plot(x, weib(x, 95.6, 6.1)*95.6)
-plt.legend([plt1, plt2, plt3],
-           ['Weibull - Residential', 'Weibull - Commercial', 'Weibull - Public'], loc=2)
-plt.title('Weibull distributions from Bureau of Ecomonic Analysis 2003')
-plt.xlabel('Building lifespan')
-plt.show()
-
-
-
-
-
-
-
-
-
+# # Plot weibull lifetime distributions:
+# x = np.arange(1,150)
+# def weib(x,n,a):
+#     return (a / n) * (x / n)**(a - 1) * np.exp(-(x / n)**a)
+#
+# # count, bins, ignored = plt.hist(np.random.weibull(5.5,1000))
+# # scale = count.max()/weib(x, 85.8, 5.5).max()
+# plt1, = plt.plot(x, weib(x, 85.5, 5.5)*85.5)
+# plt2, = plt.plot(x, weib(x, 75.1, 4.8)*75.1)
+# plt3, = plt.plot(x, weib(x, 95.6, 6.1)*95.6)
+# plt.legend([plt1, plt2, plt3],
+#            ['Weibull - Residential', 'Weibull - Commercial', 'Weibull - Public'], loc=2)
+# plt.title('Weibull distributions from Bureau of Ecomonic Analysis 2003')
+# plt.xlabel('Building lifespan')
+# plt.show()
+#
+#
+#
+#
+#
+#
+#
+#
+#
 
 # ----------------------------------------------------------------------------------------------------------------------
 # OLD CODE

@@ -9,6 +9,10 @@ import seaborn as sns
 from scipy.interpolate import interp1d
 from odym import dynamic_stock_model as dsm
 from scipy import stats
+import scipy
+from sklearn.preprocessing import StandardScaler
+import scipy.stats
+import statsmodels.distributions
 
 # Load in datasets
 data_pop_WiC = pd.read_excel('./InputData/Pop_Data.xlsx', sheet_name='US_pop_WiC')
@@ -406,7 +410,54 @@ def do_stock_driven_model(t, s, lt, plot=True, plot_name='Residential'):
     if plot==True: plot_dsm(my_dsm, plot_name=plot_name)
     return my_dsm
 
-def calc_MFA(scenario, lifetime):
+def generate_lt(type, par1, par2):
+    ''' Normal: par1  = mean, par2 = std. dev
+        Weibull: par1 = shape, par2 = scale'''
+
+    # ---- Building lifespan distributions ----
+    # BldgLife_mean_res = 80  # years
+    # BldgLife_StdDev_res = 0.2 *  np.array([BldgLife_mean_res] * len(years))
+    # BldgLife_mean_com = 70  # years
+    # BldgLife_StdDev_com = 0.2 *  np.array([BldgLife_mean_com] * len(years))
+    # BldgLife_mean_pub = 90  # years
+    # BldgLife_StdDev_pub = 0.2 * np.array([BldgLife_mean_com] * len(years))
+    if type=='Normal':
+        # Normal
+        lt = {'Type': type, 'Mean': np.array([par1] * len(years)), 'StdDev': par2}
+    elif type=='Weibull':
+        # Weibull
+        # lt_res = {'Type': 'Weibull', 'Shape': np.array([4.16343417]), 'Scale': np.array([85.18683893])}     # deetman_2018_res_distr_weibull
+        # lt_res = {'Type': 'Weibull', 'Shape': np.array([5.5]), 'Scale': np.array([85.8])}
+        # lt_com = {'Type': 'Weibull', 'Shape': np.array([4.8]), 'Scale': np.array([75.1])}
+        # lt_res = {'Type': type, 'Shape': np.array([5]), 'Scale': np.array([130])}
+        # lt_com = {'Type': type, 'Shape': np.array([3]), 'Scale': np.array([100])}
+        # lt_pub = {'Type': type, 'Shape': np.array([6.1]), 'Scale': np.array([95.6])}
+        lt = {'Type': type, 'Shape': np.array([par1]), 'Scale': np.array([par2])}
+    return lt
+
+lt_res = generate_lt('Weibull',par1=130, par2=3)
+lt_com = generate_lt('Weibull',par1=100, par2=5)
+lt_pub = generate_lt('Weibull',par1=150, par2=5)
+
+# Plot lifetime distributions:
+plot_lifetime_distr=True
+if plot_lifetime_distr==True:
+    x = np.arange(1,200)
+    def weib(x,n,a):
+        return (a / n) * (x / n)**(a - 1) * np.exp(-(x / n)**a)
+
+    # count, bins, ignored = plt.hist(np.random.weibull(5.5,1000))
+    # scale = count.max()/weib(x, 85.8, 5.5).max()
+    plt1, = plt.plot(x, weib(x, lt_res['Shape'][0], lt_res['Scale'][0])*lt_res['Shape'][0], label='Weibull Residential')
+    plt2, = plt.plot(x, weib(x, lt_com['Shape'][0], lt_com['Scale'][0])*lt_com['Shape'][0], label='Weibull Commercial')
+    plt3, = plt.plot(x, weib(x, lt_pub['Shape'][0], lt_pub['Scale'][0])*lt_pub['Shape'][0], label='Weibull Public')
+    plt.legend(loc=2)
+    plt.title('Input Weibull Distributions')
+    plt.xlabel('Building lifespan')
+    plt.show()
+
+
+def calc_MFA(scenario, lt_res, lt_com, lt_pub):
     # select a scenario to consider during debugging
     # scenario = 'SSP1'
     # lifetime = 'Weibull'
@@ -432,42 +483,7 @@ def calc_MFA(scenario, lifetime):
                                    'stock_com_'+scenario: stock_com,
                                    'stock_pub_'+scenario: stock_pub})
 
-    # ---- Building lifespan distributions ----
-    BldgLife_mean_res = 80  # years
-    BldgLife_StdDev_res = 0.2 *  np.array([BldgLife_mean_res] * len(years))
-    BldgLife_mean_com = 70  # years
-    BldgLife_StdDev_com = 0.2 *  np.array([BldgLife_mean_com] * len(years))
-    BldgLife_mean_pub = 90  # years
-    BldgLife_StdDev_pub = 0.2 * np.array([BldgLife_mean_com] * len(years))
-    if lifetime=='Normal':
-        # Normal
-        lt_res = {'Type': 'Normal', 'Mean': np.array([BldgLife_mean_res] * len(years)), 'StdDev': BldgLife_StdDev_res}
-        lt_com = {'Type': 'Normal', 'Mean': np.array([BldgLife_mean_com] * len(years)), 'StdDev': BldgLife_StdDev_com}
-        lt_pub = {'Type': 'Normal', 'Mean': np.array([BldgLife_mean_pub] * len(years)), 'StdDev': BldgLife_StdDev_pub}
-    elif lifetime=='Weibull':
-        # Weibull
-        # lt_res = {'Type': 'Weibull', 'Shape': np.array([5.5]), 'Scale': np.array([85.8])}
-        lt_res = {'Type': 'Weibull', 'Shape': np.array([3]), 'Scale': np.array([140])}
-        lt_com = {'Type': 'Weibull', 'Shape': np.array([3]), 'Scale': np.array([100])}
-        # lt_com = {'Type': 'Weibull', 'Shape': np.array([4.8]), 'Scale': np.array([75.1])}
-        lt_pub = {'Type': 'Weibull', 'Shape': np.array([6.1]), 'Scale': np.array([95.6])}
-    elif lifetime=='Gamma':
-        # Gamma (currently not working)
-        lt_res = {'Type': 'Gamma', 'Scale': np.array([2.7]), 'Shape': np.array([32.9])}
-        lt_com = {'Type': 'Gamma', 'Scale': np.array([2.7]), 'Shape': np.array([32.9])}
-        print('Gamma distribution for lifetime not working...')
-    elif lifetime=='Lognormal':
-        # Lognormal (currently not working)
-        lt_res = {'Type': 'LogNormal', 'Mean': np.array([50]), 'StdDev': np.array([10])}
-        lt_com = {'Type': 'LogNormal', 'Mean': np.array([50]), 'StdDev': np.array([10])}
-        print('Lognormal distribution for lifetime not working...')
-    elif lifetime=='Fixed':
-        # Fixed lifetime
-        lt_res = {'Type': 'Fixed', 'Mean': np.array([BldgLife_mean_res] * len(years))}
-        lt_com = {'Type': 'Fixed', 'Mean': np.array([BldgLife_mean_com] * len(years))}
-        lt_pub = {'Type': 'Fixed', 'Mean': np.array([BldgLife_mean_pub] * len(years))}
-    else:
-        print('Lifetime is not supported. Please choose another one...')
+
 
     # ---- Initial Conditions ----
     # Residential floor area  age-cohort in base year: 2015
@@ -505,22 +521,24 @@ def calc_MFA(scenario, lifetime):
     return US_stock_res, US_stock_com, US_stock_pub, MFA_input_data
 
 # Calculate MFA for individual scenarios
-SSP1_dsm_res, SSP1_dsm_com, SSP1_dsm_pub, SSP1_MFA_input = calc_MFA('SSP1', 'Weibull')
-SSP2_dsm_res, SSP2_dsm_com, SSP2_dsm_pub, SSP2_MFA_input = calc_MFA('SSP2', 'Weibull')
-SSP3_dsm_res, SSP3_dsm_com, SSP3_dsm_pub, SSP3_MFA_input = calc_MFA('SSP3', 'Weibull')
-SSP4_dsm_res, SSP4_dsm_com, SSP4_dsm_pub, SSP4_MFA_input = calc_MFA('SSP4', 'Weibull')
-SSP5_dsm_res, SSP5_dsm_com, SSP5_dsm_pub, SSP5_MFA_input = calc_MFA('SSP5', 'Weibull')
+SSP1_dsm_res, SSP1_dsm_com, SSP1_dsm_pub, SSP1_MFA_input = calc_MFA('SSP1', lt_res, lt_com, lt_pub)
+SSP2_dsm_res, SSP2_dsm_com, SSP2_dsm_pub, SSP2_MFA_input = calc_MFA('SSP2', lt_res, lt_com, lt_pub)
+SSP3_dsm_res, SSP3_dsm_com, SSP3_dsm_pub, SSP3_MFA_input = calc_MFA('SSP3', lt_res, lt_com, lt_pub)
+SSP4_dsm_res, SSP4_dsm_com, SSP4_dsm_pub, SSP4_MFA_input = calc_MFA('SSP4', lt_res, lt_com, lt_pub)
+SSP5_dsm_res, SSP5_dsm_com, SSP5_dsm_pub, SSP5_MFA_input = calc_MFA('SSP5', lt_res, lt_com, lt_pub)
 
-# Checking historical data against CBECS and RECS lifespan distributions
-# S_0_com_2012 = np.flipud(CBECS_Weights.Com_Weight) * SSP1_dsm_com.s_c[193][0:193]
-# S_0_pub_2012 = np.flipud(CBECS_Weights.Com_Weight) * SSP1_dsm_pub.s_c[193][0:193]
 
-# Plot all RECS data against the DSM simulation distribution
+#
+# # ----------------------------------------------------------------------------------------------------------------------
+
 n_bins = 20
 kde_flag = True
 rug_flag = False
 RECS_comparison = True
-plot_all = True
+CBECS_comparison = False
+plot_all = False
+
+# Plot all RECS data against the DSM simulation distribution
 if RECS_comparison==True:
     # number of bins for histogram comparisons
     # function to comput the desnity function of simualtion and RECS data
@@ -535,7 +553,6 @@ if RECS_comparison==True:
         dsm_summary_df['year'] = dsm_summary_df['year'].astype(int)
         dsm_summary_df['area'] = dsm_summary_df['area'].astype(int)
         dsm_summary_df['age'] = dsm_summary_df['age'].astype(int)
-
         dsm_for_histogram = []
         for index, row in dsm_summary_df.iterrows():
             age_reps = list(np.full(row['area'], row['age']))
@@ -543,19 +560,20 @@ if RECS_comparison==True:
 
         # Create desnity for RECS valeus in 2015
         RECS_summary_df = pd.DataFrame({'year': SSP1_dsm_res.t[0:index],
-                                        'area': RECS_series[0:index] * SSP1_dsm_res.s_c[index][0:index].sum(),
+                                        'area': RECS_series[0:index] * SSP1_dsm_res.s_c[index][0:index].astype(int).sum(),
                                         'age': age_in_year[0:index]})
         RECS_summary_df['year'] = RECS_summary_df['year'].astype(int)
         RECS_summary_df['area'] = RECS_summary_df['area'].astype(int)
         RECS_summary_df['age'] = RECS_summary_df['age'].astype(int)
-
         RECS_for_histogram = []
         for index, row in RECS_summary_df.iterrows():
             age_reps = list(np.full(row['area'], row['age']))
             RECS_for_histogram.extend(age_reps)
 
-        stats.describe(dsm_for_histogram)
-        stats.describe(RECS_for_histogram)
+        dsm_for_histogram = np.array(dsm_for_histogram)
+        RECS_for_histogram = np.array(RECS_for_histogram)
+        print(stats.describe(dsm_for_histogram))
+        print(stats.describe(RECS_for_histogram))
 
         if plot == True:
             sns.distplot(dsm_for_histogram, kde=kde_flag, rug=rug_flag, color="r", bins=n_bins, label='DSM Simulation')
@@ -565,6 +583,42 @@ if RECS_comparison==True:
             # plt.title('Residential Floor Age Structure ' + str(year))
             # plt.xlabel('Age')
             plt.show();
+
+            # qq plot
+            # Calculate quantiles
+            dsm_for_histogram.sort()
+            quantile_levels1 = np.arange(len(dsm_for_histogram), dtype=float) / len(dsm_for_histogram)
+
+            RECS_for_histogram.sort()
+            quantile_levels2 = np.arange(len(RECS_for_histogram), dtype=float) / len(RECS_for_histogram)
+            # Use the smaller set of quantile levels to create the plot
+            quantile_levels = quantile_levels2
+            # We already have the set of quantiles for the smaller data set
+            quantiles2 = RECS_for_histogram
+            # We find the set of quantiles for the larger data set using linear interpolation
+            quantiles1 = np.interp(quantile_levels, quantile_levels1, dsm_for_histogram)
+            # Plot the quantiles to create the qq plot
+            plt.plot(quantiles1, quantiles2)
+            # Add a reference line
+            maxval = max(dsm_for_histogram[-1], RECS_for_histogram[-1])
+            minval = min(dsm_for_histogram[0], RECS_for_histogram[0])
+            plt.plot([minval, maxval], [minval, maxval], 'k-')
+            plt.xlabel('Simulation Quantiles')
+            plt.ylabel('RECS Quantiles')
+            plt.show();
+
+            # plot cdfs next to one another
+            plt.hist(quantiles1, bins=100, cumulative=True, alpha=0.8, histtype='step', label='Simulation', color='black')
+            plt.hist(quantiles2, bins=100, cumulative=True, alpha=0.8, histtype='step', label=str(year) + ' RECS', color='red')
+            plt.legend(loc=2);
+            plt.show();
+            # ks test
+            print(stats.ks_2samp(dsm_for_histogram, RECS_for_histogram))
+
+
+
+
+
         return dsm_for_histogram, RECS_for_histogram
 
     if plot_all==True:
@@ -584,7 +638,6 @@ if RECS_comparison==True:
         plt2 = sns.distplot(RECS_age_2015, kde=kde_flag, color="black", bins=10, label='2015 RECS'),
         # plt1 = plt.hist(DSM_age_2015, alpha=0.5, color="r", bins=n_bins, label='DSM Simulation')
         # plt2 = plt.hist(RECS_age_2015, alpha=0.5, color="black", bins=n_bins, label='2015 RECS')
-        plt.ylim(0,0.02)
         plt.legend(fontsize='x-small');
         plt.xlabel(None)
 
@@ -645,11 +698,9 @@ if RECS_comparison==True:
         plt.xlabel('Age')
         plt.show();
     else:
-        compare_RECS_and_plot(year=2015, index=196, RECS_series=RECS_Weights.Res_Weight_2015, plot=True, n_bins=n_bins)
-
+        dsm_for_histogram, RECS_for_histogram = compare_RECS_and_plot(year=2015, index=196, RECS_series=RECS_Weights.Res_Weight_2015, plot=True, n_bins=n_bins)
 
 # Plot all CBECS data against the DSM simulation distribution
-CBECS_comparison = True
 if CBECS_comparison == True:
 
     # function to comput the desnity function of simualtion and CBECS data
@@ -693,6 +744,39 @@ if CBECS_comparison == True:
             # plt.title('Residential Floor Age Structure ' + str(year))
             # plt.xlabel('Age')
             plt.show();
+
+            # qq plot
+            # Calculate quantiles
+            dsm_for_histogram.sort()
+            quantile_levels1 = np.arange(len(dsm_for_histogram), dtype=float) / len(dsm_for_histogram)
+
+            CBECS_for_histogram.sort()
+            quantile_levels2 = np.arange(len(CBECS_for_histogram), dtype=float) / len(CBECS_for_histogram)
+            # Use the smaller set of quantile levels to create the plot
+            quantile_levels = quantile_levels2
+            # We already have the set of quantiles for the smaller data set
+            quantiles2 = CBECS_for_histogram
+            # We find the set of quantiles for the larger data set using linear interpolation
+            quantiles1 = np.interp(quantile_levels, quantile_levels1, dsm_for_histogram)
+            # Plot the quantiles to create the qq plot
+            plt.plot(quantiles1, quantiles2)
+            # Add a reference line
+            maxval = max(dsm_for_histogram[-1], CBECS_for_histogram[-1])
+            minval = min(dsm_for_histogram[0], CBECS_for_histogram[0])
+            plt.plot([minval, maxval], [minval, maxval], 'k-')
+            plt.xlabel('Simulation Quantiles')
+            plt.ylabel('CBECS Quantiles')
+            plt.show();
+
+            # plot cdfs next to one another
+            plt.hist(quantiles1, bins=100, cumulative=True, alpha=0.8, histtype='step', label='Simulation', color='black')
+            plt.hist(quantiles2, bins=100, cumulative=True, alpha=0.8, histtype='step', label=str(year) + ' CBECS', color='blue')
+            plt.legend(loc=2);
+            plt.show();
+            # ks test
+            print(stats.ks_2samp(dsm_for_histogram, CBECS_for_histogram))
+
+
         return dsm_for_histogram, CBECS_for_histogram
 
     # def compare_CBECS(year=2012, index=193, CBECS_series=CBECS_Weights.Com_Weight_2012, plot=True, n_bins=10):
@@ -771,7 +855,6 @@ if CBECS_comparison == True:
         plt.show();
     else:
         compare_CBECS_and_plot(year=2012, index=193, CBECS_series=CBECS_Weights.Com_Weight_2012, plot=True, n_bins=n_bins)
-
 
 # Save the floor area models as .csv files.
 SSP1_dsm_df = pd.DataFrame({'time': SSP1_dsm_res.t,
@@ -854,140 +937,334 @@ SSP4_dsm_df.to_excel(writer, sheet_name='SSP4')
 SSP5_dsm_df.to_excel(writer, sheet_name='SSP5')
 writer.save()
 
-
 # Plot the material flow analyses
-plot_dsm(SSP1_dsm_res, 'SSP1 Residential')
-# plot_dsm(SSP1_dsm_com, 'SSP1 Commercial')
-# plot_dsm(SSP1_dsm_pub, 'SSP1 Public')
-# plot_dsm(SSP2_dsm_res, 'SSP2 Residential')
-# plot_dsm(SSP2_dsm_com, 'SSP2 Commercial')
-# plot_dsm(SSP2_dsm_pub, 'SSP2 Public')
-# plot_dsm(SSP3_dsm_res, 'SSP3 Residential')
-# plot_dsm(SSP3_dsm_com, 'SSP3 Commercial')
-# plot_dsm(SSP3_dsm_pub, 'SSP3 Public')
-# plot_dsm(SSP4_dsm_res, 'SSP4 Residential')
-# plot_dsm(SSP4_dsm_com, 'SSP4 Commercial')
-# plot_dsm(SSP4_dsm_pub, 'SSP4 Public')
-# plot_dsm(SSP5_dsm_res, 'SSP5 Residential')
-# plot_dsm(SSP5_dsm_com, 'SSP5 Commercial')
-# plot_dsm(SSP5_dsm_pub, 'SSP5 Public')
+plot_MFA_all_scenarios = False
+if plot_MFA_all_scenarios==True:
+    plot_dsm(SSP1_dsm_res, 'SSP1 Residential')
+    plot_dsm(SSP1_dsm_com, 'SSP1 Commercial')
+    plot_dsm(SSP1_dsm_pub, 'SSP1 Public')
+    plot_dsm(SSP2_dsm_res, 'SSP2 Residential')
+    plot_dsm(SSP2_dsm_com, 'SSP2 Commercial')
+    plot_dsm(SSP2_dsm_pub, 'SSP2 Public')
+    plot_dsm(SSP3_dsm_res, 'SSP3 Residential')
+    plot_dsm(SSP3_dsm_com, 'SSP3 Commercial')
+    plot_dsm(SSP3_dsm_pub, 'SSP3 Public')
+    plot_dsm(SSP4_dsm_res, 'SSP4 Residential')
+    plot_dsm(SSP4_dsm_com, 'SSP4 Commercial')
+    plot_dsm(SSP4_dsm_pub, 'SSP4 Public')
+    plot_dsm(SSP5_dsm_res, 'SSP5 Residential')
+    plot_dsm(SSP5_dsm_com, 'SSP5 Commercial')
+    plot_dsm(SSP5_dsm_pub, 'SSP5 Public')
+else:
+    plot_dsm(SSP1_dsm_res, 'SSP1 Residential')
 
 # # ----------------------------------------------------------------------------------------------------------------------
 # # Plot all scenarios together for residential buildings
-# plt.subplot(211)
-# plt1, = plt.plot(SSP1_dsm_res.t, SSP1_dsm_res.s)
-# plt2, = plt.plot(SSP2_dsm_res.t, SSP2_dsm_res.s)
-# plt3, = plt.plot(SSP3_dsm_res.t, SSP3_dsm_res.s)
-# plt4, = plt.plot(SSP4_dsm_res.t, SSP4_dsm_res.s)
-# plt5, = plt.plot(SSP5_dsm_res.t, SSP5_dsm_res.s)
-# plt16, = plt.plot([base_year, base_year], [0, 100000], color='k', LineStyle='--')
-# plt.legend([plt1, plt2, plt3, plt4, plt5], ['SSP1', 'SSP2', 'SSP3', 'SSP4', 'SSP5'], loc=(1.05, 0.5))
-# # plt.legend(loc=(1.05, 0.5))
-# plt.tight_layout()
-# plt.xlabel('Year')
-# plt.ylabel('Floor Area')
-# plt.title('Residential Floor Space - Stock')
-# # plt.show();
-#
-# plt.subplot(212)
-# plt1, = plt.plot(SSP1_dsm_res.t, SSP1_dsm_res.i, LineStyle='dashed')
-# plt2, = plt.plot(SSP1_dsm_res.t, SSP1_dsm_res.o)
-# plt3, = plt.plot(SSP2_dsm_res.t, SSP2_dsm_res.i, LineStyle='dashed')
-# plt4, = plt.plot(SSP2_dsm_res.t, SSP2_dsm_res.o)
-# plt5, = plt.plot(SSP3_dsm_res.t, SSP3_dsm_res.i, LineStyle='dashed')
-# plt6, = plt.plot(SSP3_dsm_res.t, SSP3_dsm_res.o)
-# plt7, = plt.plot(SSP4_dsm_res.t, SSP4_dsm_res.i, LineStyle='dashed')
-# plt8, = plt.plot(SSP4_dsm_res.t, SSP4_dsm_res.o)
-# plt9, = plt.plot(SSP5_dsm_res.t, SSP5_dsm_res.i, LineStyle='dashed')
-# plt0, = plt.plot(SSP5_dsm_res.t, SSP5_dsm_res.o)
-#
-# plt11, = plt.plot([base_year, base_year], [0, 4000], color='k', LineStyle='--')
-# plt.legend([plt1, plt2, plt3, plt4, plt5, plt6, plt7, plt8, plt9, plt0],
-#            ['Inflow SSP1', 'Outflow SSP1',
-#             'Inflow SSP2', 'Outflow SSP2',
-#             'Inflow SSP3', 'Outflow SSP3',
-#             'Inflow SSP4', 'Outflow SSP4',
-#             'Inflow SSP5', 'Outflow SSP5'], loc='center left', bbox_to_anchor=(1, 0.5))
-# # plt.legend([plt1, plt2, plt3, plt4, plt5, plt6, plt7, plt8],
-# #            ['Inflow SSP1', 'Outflow SSP1',
-# #             'Inflow SSP2', 'Outflow SSP2',
-# #             'Inflow SSP3', 'Outflow SSP3',
-# #             'Inflow SSP4', 'Outflow SSP4'], loc='center left', bbox_to_anchor=(1, 0.5))
-# # plt.ylim(top=5000)
-# plt.xlim(left=SSP1_dsm_res.t[0] + 5)
-# plt.xlabel('Year')
-# plt.ylabel('Floor Area per year')
-# plt.title('Residential Floor Area flows')
-# plt.show();
-#
-#
-#
-#
-#
-# # ----------------------------------------------------------------------------------------------------------------------
-# Plot weibull lifetime distributions:
-x = np.arange(1,150)
-def weib(x,n,a):
-    return (a / n) * (x / n)**(a - 1) * np.exp(-(x / n)**a)
+plot_MFA_all_same_graph = False
+no_SSP5 = True      # True for ignoring SSP5, False for including SSP5
+if plot_MFA_all_same_graph == True:
+    plt.subplot(211)
+    plt1, = plt.plot(SSP1_dsm_res.t, SSP1_dsm_res.s)
+    plt2, = plt.plot(SSP2_dsm_res.t, SSP2_dsm_res.s)
+    plt3, = plt.plot(SSP3_dsm_res.t, SSP3_dsm_res.s)
+    plt4, = plt.plot(SSP4_dsm_res.t, SSP4_dsm_res.s)
+    plt16, = plt.plot([base_year, base_year], [0, 100000], color='k', LineStyle='--')
+    if no_SSP5 == True:
+        temp = 'bleh'
+    else:
+        plt5, = plt.plot(SSP5_dsm_res.t, SSP5_dsm_res.s)
+    if no_SSP5 == True:
+        plt.legend([plt1, plt2, plt3, plt4], ['SSP1', 'SSP2', 'SSP3', 'SSP4'], loc=(1.05, 0.5))
+    else:
+        plt.legend([plt1, plt2, plt3, plt4, plt5], ['SSP1', 'SSP2', 'SSP3', 'SSP4', 'SSP5'], loc=(1.05, 0.5))
+    # plt.legend([plt1, plt2, plt3, plt4, plt5], ['SSP1', 'SSP2', 'SSP3', 'SSP4', 'SSP5'], loc=(1.05, 0.5))
+    # plt.legend(loc=(1.05, 0.5))
+    plt.tight_layout()
+    plt.xlabel('Year')
+    plt.ylabel('Floor Area')
+    plt.title('Residential Floor Space - Stock')
+    # plt.show();
 
-# count, bins, ignored = plt.hist(np.random.weibull(5.5,1000))
-# scale = count.max()/weib(x, 85.8, 5.5).max()
-plt1, = plt.plot(x, weib(x, 85.5, 5.5)*85.5)
-plt2, = plt.plot(x, weib(x, 75.1, 4.8)*75.1)
-plt3, = plt.plot(x, weib(x, 95.6, 6.1)*95.6)
-plt.legend([plt1, plt2, plt3],
-           ['Weibull - Residential', 'Weibull - Commercial', 'Weibull - Public'], loc=2)
-plt.title('Weibull distributions from Bureau of Ecomonic Analysis 2003')
-plt.xlabel('Building lifespan')
-plt.show()
+    plt.subplot(212)
+    plt1, = plt.plot(SSP1_dsm_res.t, SSP1_dsm_res.i, LineStyle='dashed')
+    plt2, = plt.plot(SSP1_dsm_res.t, SSP1_dsm_res.o)
+    plt3, = plt.plot(SSP2_dsm_res.t, SSP2_dsm_res.i, LineStyle='dashed')
+    plt4, = plt.plot(SSP2_dsm_res.t, SSP2_dsm_res.o)
+    plt5, = plt.plot(SSP3_dsm_res.t, SSP3_dsm_res.i, LineStyle='dashed')
+    plt6, = plt.plot(SSP3_dsm_res.t, SSP3_dsm_res.o)
+    plt7, = plt.plot(SSP4_dsm_res.t, SSP4_dsm_res.i, LineStyle='dashed')
+    plt8, = plt.plot(SSP4_dsm_res.t, SSP4_dsm_res.o)
+    if no_SSP5 == True:
+        temp = 'bleh'
+    else:
+        plt9, = plt.plot(SSP5_dsm_res.t, SSP5_dsm_res.i, LineStyle='dashed')
+        plt0, = plt.plot(SSP5_dsm_res.t, SSP5_dsm_res.o)
 
+    plt11, = plt.plot([base_year, base_year], [0, 4000], color='k', LineStyle='--')
 
-
-
-
-
-
-
+    if no_SSP5 == True:
+        plt.legend([plt1, plt2, plt3, plt4, plt5, plt6, plt7, plt8],
+                   ['Inflow SSP1', 'Outflow SSP1',
+                    'Inflow SSP2', 'Outflow SSP2',
+                    'Inflow SSP3', 'Outflow SSP3',
+                    'Inflow SSP4', 'Outflow SSP4'], loc='center left', bbox_to_anchor=(1, 0.5))
+    else:
+        plt.legend([plt1, plt2, plt3, plt4, plt5, plt6, plt7, plt8, plt9, plt0],
+                   ['Inflow SSP1', 'Outflow SSP1',
+                    'Inflow SSP2', 'Outflow SSP2',
+                    'Inflow SSP3', 'Outflow SSP3',
+                    'Inflow SSP4', 'Outflow SSP4',
+                    'Inflow SSP5', 'Outflow SSP5'], loc='center left', bbox_to_anchor=(1, 0.5))
+    # plt.ylim(top=5000)
+    plt.xlim(left=SSP1_dsm_res.t[0] + 5)
+    plt.xlabel('Year')
+    plt.ylabel('Floor Area per year')
+    plt.title('Residential Floor Area flows')
+    plt.show();
 
 
 # ----------------------------------------------------------------------------------------------------------------------
-# OLD CODE
-#
-# 'compute_stock_driven_model_initialstock
-# BldgLife_mean = 120  # years
-# Normal_StdDev = 0.6 *  np.array([BldgLife_mean] * len(years))
-# lifetime_NormalLT = {'Type': 'Normal', 'Mean': np.array([BldgLife_mean] * len(years)), 'StdDev': Normal_StdDev}
-#
-# US_Bldg_DSM_3 = dsm.DynamicStockModel(t=years, s=FA_stock_res, lt=lifetime_NormalLT)
-# CheckStr = US_Bldg_DSM_3.dimension_check()
-# print(CheckStr)
-#
-# Initial_Stock = np.flipud(S_0_res_2015)
-#
-# S_C, O_C, I = US_Bldg_DSM_3.compute_stock_driven_model_initialstock(InitialStock=Initial_Stock,
-#                                                                   SwitchTime=list(years).index(base_year + 2),
-#                                                                   NegativeInflowCorrect=False)
-# O = US_Bldg_DSM_3.compute_outflow_total()  # Total outflow
-# DS = US_Bldg_DSM_3.compute_stock_change()  # Stock change
-# Bal = US_Bldg_DSM_3.check_stock_balance()  # Vehicle balance
-# print(np.abs(Bal).sum())  # show sum absolute of all mass balance mismatches.
-# plot_dsm(US_Bldg_DSM_3)
-# ----------------------------------------------------------------------------------------------------------------------
+# Derive distributions from CBECS and RECS data (compare against other studies distributions)
+# THIS CODE DOESN"T TELL US ANYTHING USEFUL!
+fit_distribution_to_age_structure = False
+if plot_all==True:
+    if fit_distribution_to_age_structure==True:
+        # Residential
+        # function to estimate the parameters for different lifetime distributions
+        def determine_lt_params_chi2(y=RECS_age_2015, n_bins=100, p_q_plots=True):
+            # plot initial histogram:
+            plt.hist(y, bins=n_bins)
+            plt.show();
 
-# ----------------------------------------------------------------------------------------------------------------------
-# 'compute_stock_driven_model':
-# US_Bldg_DSM_1 = dsm.DynamicStockModel(t=years, s=FA_stock_res, lt=lifetime_NormalLT)
-# CheckStr = US_Bldg_DSM_1.dimension_check()
-# print(CheckStr)
-# S_C, O_C, I = US_Bldg_DSM_1.compute_stock_driven_model()
-# O = US_Bldg_DSM_1.compute_outflow_total()  # Total outflow
-# DS = US_Bldg_DSM_1.compute_stock_change()  # Stock change
-# Bal = US_Bldg_DSM_1.check_stock_balance()  # Vehicle balance
-# print(np.abs(Bal).sum())  # show sum absolute of all mass balance mismatches.
-# plot_dsm(US_Bldg_DSM_1)
+            x = np.arange(len(y))
+            size = len(y)
+            # center the data
+            y = np.array(y)
+            sc = StandardScaler()
+            yy = y.reshape(-1, 1)
+            sc.fit(yy)
+            y_std = sc.transform(yy)
+            y_std = y_std.flatten()
+            y_std
+            del yy
+
+            dist_names = ['weibull_min']
+            # dist_names = ['expon','gamma','lognorm','norm','weibull_max', 'exponweib']
+            # dist_names = [x for x in dist_names_all if x not in distributions_excluded]
+
+            # Set up empty lists to store results
+            chi_square = []
+            p_values = []
+
+            # Set up 50 bins for chi-square test
+            # Observed data will be approximately evenly distrubuted aross all bins
+            percentile_bins = np.linspace(0, 100, 51)
+            percentile_cutoffs = np.percentile(y_std, percentile_bins)
+            observed_frequency, bins = (np.histogram(y_std, bins=percentile_cutoffs))
+            cum_observed_frequency = np.cumsum(observed_frequency)
+
+            # Loop through candidate distributions
+            for distribution in dist_names:
+                # Set up distribution and get fitted distribution parameters
+                dist = getattr(stats, distribution)
+                param = dist.fit(y_std)
+
+                # Obtain the KS test P statistic, round it to 5 decimal places
+                p = stats.kstest(y_std, distribution, args=param)[1]
+                # p = np.around(p, 5)
+                p_values.append(p)
+
+                # Get expected counts in percentile bins
+                # This is based on a 'cumulative distrubution function' (cdf)
+                cdf_fitted = dist.cdf(percentile_cutoffs, *param[:-2], loc=param[-2],
+                                      scale=param[-1])
+                expected_frequency = []
+                for bin in range(len(percentile_bins) - 1):
+                    expected_cdf_area = cdf_fitted[bin + 1] - cdf_fitted[bin]
+                    expected_frequency.append(expected_cdf_area)
+
+                # calculate chi-squared
+                expected_frequency = np.array(expected_frequency) * (size)
+                cum_expected_frequency = np.cumsum(expected_frequency)
+                ss = sum(((cum_expected_frequency - cum_observed_frequency) ** 2) / cum_observed_frequency)
+                chi_square.append(ss)
+
+            # Collate results and sort by goodness of fit (best at top)
+            results = pd.DataFrame()
+            results['Distribution'] = dist_names
+            results['chi_square'] = chi_square
+            results['p_value'] = p_values
+            results.sort_values(['chi_square'], inplace=True)
+
+            # Report results
+            print('\nDistributions sorted by goodness of fit:')
+            print('----------------------------------------')
+            print(results)
+
+            # Divide the observed data into 100 bins for plotting (this can be changed)
+            number_of_bins = n_bins
+            # bin_cutoffs = np.linspace(np.percentile(y, 0), np.percentile(y, 99), number_of_bins)
+
+            # Create the plot
+            h = plt.hist(y, bins=n_bins, color='0.75')
+
+            # Get the top three distributions from the previous phase
+            number_distributions_to_plot = 5
+            dist_names = results['Distribution'].iloc[0:number_distributions_to_plot]
+
+            # Create an empty list to stroe fitted distribution parameters
+            parameters = []
+
+            # Loop through the distributions ot get line fit and paraemters
+            for dist_name in dist_names:
+                # Set up distribution and store distribution paraemters
+                dist = getattr(stats, dist_name)
+                param = dist.fit(y)
+                parameters.append(param)
+
+                # Get line for each distribution (and scale to match observed data)
+                pdf_fitted = dist.pdf(x, *param[:-2], loc=param[-2], scale=param[-1])
+                scale_pdf = np.trapz(h[0], h[1][:-1]) / np.trapz(pdf_fitted, x)
+                pdf_fitted *= scale_pdf
+
+                # Add the line to the plot
+                plt.plot(pdf_fitted, label=dist_name)
+
+                # Set the plot x axis to contain 99% of the data
+                # This can be removed, but sometimes outlier data makes the plot less clear
+                plt.xlim(0, np.percentile(y, 99))
+
+            # Add legend and display plot
+
+            plt.legend()
+            plt.show()
+
+            # Store distribution paraemters in a dataframe (this could also be saved)
+            dist_parameters = pd.DataFrame()
+            dist_parameters['Distribution'] = (
+                results['Distribution'].iloc[0:number_distributions_to_plot])
+            dist_parameters['Distribution parameters'] = parameters
+
+            # Print parameter results
+            print('\nDistribution parameters:')
+            print('------------------------')
+
+            for index, row in dist_parameters.iterrows():
+                print('\nDistribution:', row[0])
+                print('Parameters:', row[1])
+            if p_q_plots==True:
+                ## qq and pp plots
+                data = y_std.copy()
+                data.sort()
+                # Loop through selected distributions (as previously selected)
+                for distribution in dist_names:
+                    # Set up distribution
+                    dist = getattr(stats, distribution)
+                    param = dist.fit(y_std)
+
+                    # Get random numbers from distribution
+                    norm = dist.rvs(*param[0:-2], loc=param[-2], scale=param[-1], size=size)
+                    norm.sort()
+
+                    # Create figure
+                    fig = plt.figure(figsize=(8, 5))
+
+                    # qq plot
+                    ax1 = fig.add_subplot(121)  # Grid of 2x2, this is suplot 1
+                    ax1.plot(norm, data, "o")
+                    min_value = np.floor(min(min(norm), min(data)))
+                    max_value = np.ceil(max(max(norm), max(data)))
+                    ax1.plot([min_value, max_value], [min_value, max_value], 'r--')
+                    ax1.set_xlim(min_value, max_value)
+                    ax1.set_xlabel('Theoretical quantiles')
+                    ax1.set_ylabel('Observed quantiles')
+                    title = 'qq plot for ' + distribution + ' distribution'
+                    ax1.set_title(title)
+
+                    # pp plot
+                    ax2 = fig.add_subplot(122)
+
+                    # Calculate cumulative distributions
+                    bins = np.percentile(norm, range(0, 101))
+                    data_counts, bins = np.histogram(data, bins)
+                    norm_counts, bins = np.histogram(norm, bins)
+                    cum_data = np.cumsum(data_counts)
+                    cum_norm = np.cumsum(norm_counts)
+                    cum_data = cum_data / max(cum_data)
+                    cum_norm = cum_norm / max(cum_norm)
+
+                    # plot
+                    ax2.plot(cum_norm, cum_data, "o")
+                    min_value = np.floor(min(min(cum_norm), min(cum_data)))
+                    max_value = np.ceil(max(max(cum_norm), max(cum_data)))
+                    ax2.plot([min_value, max_value], [min_value, max_value], 'r--')
+                    ax2.set_xlim(min_value, max_value)
+                    ax2.set_xlabel('Theoretical cumulative distribution')
+                    ax2.set_ylabel('Observed cumulative distribution')
+                    title = 'pp plot for ' + distribution + ' distribution'
+                    ax2.set_title(title)
+
+                    # Display plot
+                    plt.tight_layout(pad=4)
+                    plt.show()
+
+        determine_lt_params_chi2(y=RECS_age_2015, n_bins=100, p_q_plots=False)
+
+        def determine_age_distribution(data=RECS_age_2015, plot=True, name='RECS 2015', return_normal=True):
+            data = np.array(data)
+            plt.hist(data, bins=50, density=True, alpha=0.5)
+            shape, loc, scale = stats.weibull_min.fit(data, floc=0)
+            mean, stddev = stats.norm.fit(data)
+
+            if plot==True:
+                plt.plot(x, stats.weibull_min(shape, loc, scale).pdf(x), label='Weibull_min '+ name)
+                plt.plot(x, stats.norm(mean, stddev).pdf(x), label='Normal ' + name)
+                plt.legend();
+                plt.xlabel("Age")
+                plt.show();
+                print('Weibull lifetime parameters are: ')
+                print('shape = ', shape, 'loc = ', loc, 'scale = ', scale)
+                print('Normal lifetime parameters are: ')
+                print('mean = ', mean, 'std dev = ', stddev)
+
+                # Plot the CDF
+                ecdf = statsmodels.distributions.ECDF(data)
+                plt.plot(x, ecdf(x), label='Empirical CDF')
+                plt.plot(x, stats.weibull_min(shape, loc, scale).cdf(x), label='Weibull_min ' + name)
+                plt.plot(x, stats.norm(mean, stddev).cdf(x), label='Normal ' + name)
+                plt.xlabel('Age')
+                plt.title('CDF comparison')
+                plt.legend()
+                plt.show();
+
+                plt.subplot(211)
+                stats.probplot(data, dist=stats.weibull_min(shape, loc, scale), plot=plt)
+                plt.title('Weibull QQ-plot')
+                plt.xlim(right=100)
+                # plt.show();
+                plt.subplot(212)
+                stats.probplot(data, dist=stats.norm(mean, stddev), plot=plt)
+                plt.title('Normal QQ-plot')
+                plt.xlim(right=100, left=0)
+                plt.show();
+            if return_normal==True:
+                return shape, loc, scale, mean, stddev
+            else:
+                return shape, scale
 
 
+        determine_age_distribution(data=RECS_age_2015, plot=True, return_normal=True)
 
+        shape_r2015, scale_r2015 = determine_age_distribution(data=RECS_age_2015, plot=False, return_normal=False)
+        shape_r2009, scale_r2009 = determine_age_distribution(data=RECS_age_2009, plot=False, return_normal=False)
+        shape_r2005, scale_r2005 = determine_age_distribution(data=RECS_age_2005, plot=False, return_normal=False)
+        shape_r2001, scale_r2001 = determine_age_distribution(data=RECS_age_2001, plot=False, return_normal=False)
+        shape_r1997, scale_r1997 = determine_age_distribution(data=RECS_age_1997, plot=False, return_normal=False)
+        shape_r1993, scale_r1993 = determine_age_distribution(data=RECS_age_1993, plot=False, return_normal=False)
+        shape_r1987, scale_r1987 = determine_age_distribution(data=RECS_age_1987, plot=False, return_normal=False)
+        shape_r1980, scale_r1980 = determine_age_distribution(data=RECS_age_1980, plot=False, return_normal=False)
 
-
-
+        np.mean([shape_r2015, shape_r2009, shape_r2005, shape_r2001, shape_r1997, shape_r1993, shape_r1987, shape_r1980])
+        np.std([shape_r2015, shape_r2009, shape_r2005, shape_r2001, shape_r1997, shape_r1993, shape_r1987, shape_r1980])
+        np.mean([scale_r2015, scale_r2009, scale_r2005, scale_r2001, scale_r1997, scale_r1993, scale_r1987, scale_r1980])
+        np.std([scale_r2015, scale_r2009, scale_r2005, scale_r2001, scale_r1997, scale_r1993, scale_r1987, scale_r1980])

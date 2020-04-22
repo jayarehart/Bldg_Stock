@@ -339,14 +339,14 @@ year2 = 2100
 base_year = 2016
 
 # interpolate population data for the US.
-years, US_pop = interpolate_population(data_pop=data_pop_WiC, data_source='WiC', year1=year1, year2=year2, proj='All', plot=True)
+years, US_pop = interpolate_population(data_pop=data_pop_WiC, data_source='WiC', year1=year1, year2=year2, proj='All', plot=False)
 
 # interpolate gdp data for the US.
-US_gdp = interpolate_gdp(data_gdp, year1=year1, year2=year2, SSP='All', kind='cubic', plot=True)
+US_gdp = interpolate_gdp(data_gdp, year1=year1, year2=year2, SSP='All', kind='cubic', plot=False)
 # calculate total floor area elasticity
 FA_all = FA_elasticity_EDGE(US_gdp, US_pop, SSP='All',
                        base_year=2016,FA_base_year=347, Area_country=9.14759e6, gamma=-0.03,
-                       plot=True)
+                       plot=False)
 
 
 US_pop = US_pop.set_index('Year', drop=False)
@@ -436,8 +436,8 @@ def generate_lt(type, par1, par2):
     return lt
 
 lt_res = generate_lt('Weibull',par1=6, par2=100)
-lt_com = generate_lt('Weibull',par1=5, par2=100)
-lt_pub = generate_lt('Weibull',par1=5, par2=100)
+lt_com = generate_lt('Weibull',par1=4, par2=70)
+lt_pub = generate_lt('Weibull',par1=4, par2=80)
 
 # Plot lifetime distributions:
 plot_lifetime_distr=False
@@ -557,8 +557,8 @@ n_bins = 20
 kde_flag = True
 rug_flag = False
 RECS_comparison = True
-CBECS_comparison = False
-plot_all = True
+CBECS_comparison = True
+plot_all = False
 
 # Plot all RECS data against the DSM simulation distribution
 if RECS_comparison==True:
@@ -768,19 +768,20 @@ if RECS_comparison==True:
         plt.show();
 
     else:
-        dsm_for_histogram, RECS_for_histogram = compare_RECS_and_plot(year=2015, index_end=196, RECS_series=RECS_Weights.Res_Weight_2015, plot=True, n_bins=n_bins)
+        compare_RECS_and_plot(year=2015, index_end=196, RECS_series=RECS_Weights.Res_Weight_2015, plot=True, n_bins=n_bins)
 
 # Plot all CBECS data against the DSM simulation distribution
 if CBECS_comparison == True:
 
     # function to comput the desnity function of simualtion and CBECS data
-    def compare_CBECS_and_plot(year=2012, index=193, CBECS_series=CBECS_Weights.Com_Weight_2012, plot=False, n_bins=20):
-        age_in_year = np.full(index, year) - SSP1_dsm_com.t[0:index]
+    def compare_CBECS_and_plot(year=2012, index_end=193, CBECS_series=CBECS_Weights.Com_Weight_2012, plot=False, n_bins=20):
+        index_start = 100    # year to start comparison of histograms
+        age_in_year = np.full(index_end-index_start, year) - SSP1_dsm_com.t[index_start:index_end]
 
         # Create density for dsm values in 2015 (dsm_for_histogram)
-        dsm_summary_df = pd.DataFrame({'year': SSP1_dsm_com.t[0:index],
-                                       'area': SSP1_dsm_com.s_c[index][0:index].astype(int),
-                                       'age': age_in_year[0:index]})
+        dsm_summary_df = pd.DataFrame({'year': SSP1_dsm_com.t[index_start:index_end],
+                                       'area': SSP1_dsm_com.s_c[index_end][index_start:index_end].astype(int),
+                                       'age': age_in_year})
         dsm_summary_df['year'] = dsm_summary_df['year'].astype(int)
         dsm_summary_df['area'] = dsm_summary_df['area'].astype(int)
         dsm_summary_df['age'] = dsm_summary_df['age'].astype(int)
@@ -791,20 +792,39 @@ if CBECS_comparison == True:
             dsm_for_histogram.extend(age_reps)
 
         # Create desnity for CBECS valeus in 2015
-        CBECS_summary_df = pd.DataFrame({'year': SSP1_dsm_com.t[0:index],
-                                        'area': CBECS_series[0:index] * SSP1_dsm_com.s_c[index][0:index].sum(),
-                                        'age': age_in_year[0:index]})
+        CBECS_summary_df = pd.DataFrame({'year': SSP1_dsm_com.t[index_start:index_end],
+                                        'area': CBECS_series[index_start:index_end] * SSP1_dsm_com.s_c[index_end][index_start:index_end].sum(),
+                                        'age': age_in_year})
         CBECS_summary_df['year'] = CBECS_summary_df['year'].astype(int)
         CBECS_summary_df['area'] = CBECS_summary_df['area'].astype(int)
         CBECS_summary_df['age'] = CBECS_summary_df['age'].astype(int)
-
         CBECS_for_histogram = []
         for index, row in CBECS_summary_df.iterrows():
             age_reps = list(np.full(row['area'], row['age']))
             CBECS_for_histogram.extend(age_reps)
 
-        stats.describe(dsm_for_histogram)
-        stats.describe(CBECS_for_histogram)
+        dsm_for_histogram = np.array(dsm_for_histogram)
+        CBECS_for_histogram = np.array(CBECS_for_histogram)
+        print(stats.describe(dsm_for_histogram))
+        print(stats.describe(CBECS_for_histogram))
+
+        # ks test
+        ks = (stats.ks_2samp(dsm_for_histogram, CBECS_for_histogram))
+        print(ks)
+
+        # qq plot
+        # Calculate quantiles
+        dsm_for_histogram.sort()
+        quantile_levels1 = np.arange(len(dsm_for_histogram), dtype=float) / len(dsm_for_histogram)
+
+        CBECS_for_histogram.sort()
+        quantile_levels2 = np.arange(len(CBECS_for_histogram), dtype=float) / len(CBECS_for_histogram)
+        # Use the smaller set of quantile levels to create the plot
+        quantile_levels = quantile_levels2
+        # We already have the set of quantiles for the smaller data set
+        quantiles2 = CBECS_for_histogram
+        # We find the set of quantiles for the larger data set using linear interpolation
+        quantiles1 = np.interp(quantile_levels, quantile_levels1, dsm_for_histogram)
 
         if plot == True:
             sns.distplot(dsm_for_histogram, kde=kde_flag, rug=rug_flag, color="blue", bins=n_bins, label='DSM Simulation')
@@ -815,19 +835,6 @@ if CBECS_comparison == True:
             # plt.xlabel('Age')
             plt.show();
 
-            # qq plot
-            # Calculate quantiles
-            dsm_for_histogram.sort()
-            quantile_levels1 = np.arange(len(dsm_for_histogram), dtype=float) / len(dsm_for_histogram)
-
-            CBECS_for_histogram.sort()
-            quantile_levels2 = np.arange(len(CBECS_for_histogram), dtype=float) / len(CBECS_for_histogram)
-            # Use the smaller set of quantile levels to create the plot
-            quantile_levels = quantile_levels2
-            # We already have the set of quantiles for the smaller data set
-            quantiles2 = CBECS_for_histogram
-            # We find the set of quantiles for the larger data set using linear interpolation
-            quantiles1 = np.interp(quantile_levels, quantile_levels1, dsm_for_histogram)
             # Plot the quantiles to create the qq plot
             plt.plot(quantiles1, quantiles2)
             # Add a reference line
@@ -843,74 +850,157 @@ if CBECS_comparison == True:
             plt.hist(quantiles2, bins=100, cumulative=True, alpha=0.8, histtype='step', label=str(year) + ' CBECS', color='blue')
             plt.legend(loc=2);
             plt.show();
-            # ks test
-            print(stats.ks_2samp(dsm_for_histogram, CBECS_for_histogram))
 
-
-        return dsm_for_histogram, CBECS_for_histogram
+        return dsm_for_histogram, CBECS_for_histogram, quantiles1, quantiles2, ks
 
     if plot_all==True:
         # Compute the density functions for each
-        DSM_age_2012, CBECS_age_2012 = compare_CBECS_and_plot(year=2012, index=193, CBECS_series=CBECS_Weights.Com_Weight_2012)
-        DSM_age_2003, CBECS_age_2003 = compare_CBECS_and_plot(year=2003, index=184, CBECS_series=CBECS_Weights.Com_Weight_2003)
-        DSM_age_1999, CBECS_age_1999 = compare_CBECS_and_plot(year=1999, index=180, CBECS_series=CBECS_Weights.Com_Weight_1999)
-        DSM_age_1995, CBECS_age_1995 = compare_CBECS_and_plot(year=1995, index=176, CBECS_series=CBECS_Weights.Com_Weight_1995)
-        DSM_age_1992, CBECS_age_1992 = compare_CBECS_and_plot(year=1992, index=173, CBECS_series=CBECS_Weights.Com_Weight_1992)
-        DSM_age_1986, CBECS_age_1986 = compare_CBECS_and_plot(year=1986, index=167, CBECS_series=CBECS_Weights.Com_Weight_1986)
-        DSM_age_1983, CBECS_age_1983 = compare_CBECS_and_plot(year=1983, index=164, CBECS_series=CBECS_Weights.Com_Weight_1983)
-        DSM_age_1979, CBECS_age_1979 = compare_CBECS_and_plot(year=1979, index=160, CBECS_series=CBECS_Weights.Com_Weight_1979)
+        DSM_age_2012, CBECS_age_2012, q1_2012, q2_2012, ks_2012 = compare_CBECS_and_plot(year=2012, index_end=193, CBECS_series=CBECS_Weights.Com_Weight_2012)
+        DSM_age_2003, CBECS_age_2003, q1_2003, q2_2003, ks_2003 = compare_CBECS_and_plot(year=2003, index_end=184, CBECS_series=CBECS_Weights.Com_Weight_2003)
+        DSM_age_1999, CBECS_age_1999, q1_1999, q2_1999, ks_1999 = compare_CBECS_and_plot(year=1999, index_end=180, CBECS_series=CBECS_Weights.Com_Weight_1999)
+        DSM_age_1995, CBECS_age_1995, q1_1995, q2_1995, ks_1995 = compare_CBECS_and_plot(year=1995, index_end=176, CBECS_series=CBECS_Weights.Com_Weight_1995)
+        DSM_age_1992, CBECS_age_1992, q1_1992, q2_1992, ks_1992 = compare_CBECS_and_plot(year=1992, index_end=173, CBECS_series=CBECS_Weights.Com_Weight_1992)
+        DSM_age_1986, CBECS_age_1986, q1_1986, q2_1986, ks_1986 = compare_CBECS_and_plot(year=1986, index_end=167, CBECS_series=CBECS_Weights.Com_Weight_1986)
+        DSM_age_1983, CBECS_age_1983, q1_1983, q2_1983, ks_1983 = compare_CBECS_and_plot(year=1983, index_end=164, CBECS_series=CBECS_Weights.Com_Weight_1983)
+        DSM_age_1979, CBECS_age_1979, q1_1979, q2_1979, ks_1979 = compare_CBECS_and_plot(year=1979, index_end=160, CBECS_series=CBECS_Weights.Com_Weight_1979)
 
         # multiplot of each RECS year data against the data for that year in the DSM simulation
-        plt.subplot(421)
-        plt1 = sns.distplot(DSM_age_2012, rug=rug_flag, kde=kde_flag, color="blue", bins=10, label='DSM Simulation'),
-        plt2 = sns.distplot(CBECS_age_2012, rug=rug_flag, kde=kde_flag, color="black", bins=10, label='2012 CBECS'),
-        plt.legend(fontsize='x-small');
-        plt.xlabel(None)
+        print('mean ks values for each is = ',
+              str(np.round(np.mean([ks_2012[0], ks_2003[0], ks_1999[0], ks_1995[0], ks_1992[0], ks_1986[0], ks_1983[0], ks_1979[0]]), 5)))
 
-        plt.subplot(422)
-        plt1 = sns.distplot(DSM_age_2003, rug=rug_flag, kde=kde_flag, color="blue", bins=n_bins, label='DSM Simulation')
-        plt2 = sns.distplot(CBECS_age_2003, rug=rug_flag, kde=kde_flag, color="black", bins=n_bins, label='2003 CBECS')
-        plt.legend(fontsize='x-small');
+        # multiplot of each RECS year data against the data for that year in the DSM simulation
+        fig = plt.figure(figsize=(16, 8))
+        axes1 = fig.add_subplot(241)
+        sns.distplot(DSM_age_2012, kde=kde_flag, color="blue", bins=n_bins, label='DSM Simulation'),
+        sns.distplot(CBECS_age_2012, kde=kde_flag, color="black", bins=n_bins, label='2012 CBECS'),
+        # plot cdfs next to one another
+        axes2 = axes1.twinx()
+        plt.hist(q1_2012, density=True, bins=100, cumulative=True, alpha=1.0, histtype='step', label='Simulation',
+                 color='gray')
+        plt.hist(q2_2012, density=True, bins=100, cumulative=True, alpha=1.0, histtype='step', label='2012 CBECS',
+                 color='lightblue')
+        axes2.set_ylabel('CDF')
+        axes1.set_ylabel('Density')
+        plt.legend(loc=9, fontsize='x-small');
         plt.xlabel(None)
+        plt.text(1.0, 0.99, 'ks = ' + str(np.round(ks_2012[0], 4)), ha='right', va='top', transform=axes1.transAxes,
+                 fontsize='x-small')
+        # plt.show()
 
-        plt.subplot(423)
-        plt1 = sns.distplot(DSM_age_1999, rug=rug_flag, kde=kde_flag, color="blue", bins=n_bins, label='DSM Simulation')
-        plt2 = sns.distplot(CBECS_age_1999, rug=rug_flag, kde=kde_flag, color="black", bins=n_bins, label='1999 CBECS')
-        plt.legend(fontsize='x-small');
+        axes1 = fig.add_subplot(242)
+        sns.distplot(DSM_age_2003, kde=kde_flag, color="blue", bins=n_bins, label='DSM Simulation'),
+        sns.distplot(CBECS_age_2003, kde=kde_flag, color="black", bins=n_bins, label='2003 CBECS'),
+        # plot cdfs next to one another
+        axes2 = axes1.twinx()
+        plt.hist(q1_2003, density=True, bins=100, cumulative=True, alpha=1.0, histtype='step', label='Simulation',
+                 color='gray')
+        plt.hist(q2_2003, density=True, bins=100, cumulative=True, alpha=1.0, histtype='step', label='2003 CBECS',
+                 color='lightblue')
+        axes2.set_ylabel('CDF')
+        axes1.set_ylabel('Density')
+        plt.legend(loc=9, fontsize='x-small');
         plt.xlabel(None)
+        plt.text(1.0, 0.99, 'ks = ' + str(np.round(ks_2003[0], 4)), ha='right', va='top', transform=axes1.transAxes,
+                 fontsize='x-small')
 
-        plt.subplot(424)
-        plt1 = sns.distplot(DSM_age_1995, rug=rug_flag, kde=kde_flag, color="blue", bins=n_bins, label='DSM Simulation')
-        plt2 = sns.distplot(CBECS_age_1995, rug=rug_flag, kde=kde_flag, color="black", bins=n_bins, label='1995 CBECS')
-        plt.legend(fontsize='x-small');
+        axes1 = fig.add_subplot(243)
+        sns.distplot(DSM_age_1999, kde=kde_flag, color="blue", bins=n_bins, label='DSM Simulation'),
+        sns.distplot(CBECS_age_1999, kde=kde_flag, color="black", bins=n_bins, label='1999 CECS'),
+        # plot cdfs next to one another
+        axes2 = axes1.twinx()
+        plt.hist(q1_1999, density=True, bins=100, cumulative=True, alpha=1.0, histtype='step', label='Simulation',
+                 color='gray')
+        plt.hist(q2_1999, density=True, bins=100, cumulative=True, alpha=1.0, histtype='step', label='1999 CBECS',
+                 color='lightblue')
+        axes2.set_ylabel('CDF')
+        axes1.set_ylabel('Density')
+        plt.legend(loc=9, fontsize='x-small');
         plt.xlabel(None)
+        plt.text(1.0, 0.99, 'ks = ' + str(np.round(ks_1999[0], 4)), ha='right', va='top', transform=axes1.transAxes,
+                 fontsize='x-small')
 
-        plt.subplot(425)
-        plt1 = sns.distplot(DSM_age_1992, rug=rug_flag, kde=kde_flag, color="blue", bins=n_bins, label='DSM Simulation')
-        plt2 = sns.distplot(CBECS_age_1992, rug=rug_flag, kde=kde_flag, color="black", bins=n_bins, label='1992 CBECS')
-        plt.legend(fontsize='x-small');
+        axes1 = fig.add_subplot(244)
+        sns.distplot(DSM_age_1995, kde=kde_flag, color="blue", bins=n_bins, label='DSM Simulation'),
+        sns.distplot(CBECS_age_1995, kde=kde_flag, color="black", bins=n_bins, label='1995 CBECS'),
+        # plot cdfs next to one another
+        axes2 = axes1.twinx()
+        plt.hist(q1_1995, density=True, bins=100, cumulative=True, alpha=1.0, histtype='step', label='Simulation',
+                 color='gray')
+        plt.hist(q2_1995, density=True, bins=100, cumulative=True, alpha=1.0, histtype='step', label='1995 CBECS',
+                 color='lightblue')
+        axes2.set_ylabel('CDF')
+        axes1.set_ylabel('Density')
+        plt.legend(loc=9, fontsize='x-small');
         plt.xlabel(None)
+        plt.text(1.0, 0.99, 'ks = ' + str(np.round(ks_1995[0], 4)), ha='right', va='top', transform=axes1.transAxes,
+                 fontsize='x-small')
 
-        plt.subplot(426)
-        plt1 = sns.distplot(DSM_age_1986, rug=rug_flag, kde=kde_flag, color="blue", bins=n_bins, label='DSM Simulation')
-        plt2 = sns.distplot(CBECS_age_1986, rug=rug_flag, kde=kde_flag, color="black", bins=n_bins, label='1986 CBECS')
-        plt.legend(fontsize='x-small');
+        axes1 = fig.add_subplot(245)
+        sns.distplot(DSM_age_1992, kde=kde_flag, color="blue", bins=n_bins, label='DSM Simulation'),
+        sns.distplot(CBECS_age_1992, kde=kde_flag, color="black", bins=n_bins, label='1992 CBECS'),
+        # plot cdfs next to one another
+        axes2 = axes1.twinx()
+        plt.hist(q1_1992, density=True, bins=100, cumulative=True, alpha=1.0, histtype='step', label='Simulation',
+                 color='gray')
+        plt.hist(q2_1992, density=True, bins=100, cumulative=True, alpha=1.0, histtype='step', label='1992 CBECS',
+                 color='lightblue')
+        axes2.set_ylabel('CDF')
+        axes1.set_ylabel('Density')
+        plt.legend(loc=9, fontsize='x-small');
         plt.xlabel(None)
+        plt.text(1.0, 0.99, 'ks = ' + str(np.round(ks_1992[0], 4)), ha='right', va='top', transform=axes1.transAxes,
+                 fontsize='x-small')
 
-        plt.subplot(427)
-        plt1 = sns.distplot(DSM_age_1983, kde=kde_flag, color="blue", bins=n_bins, label='DSM Simulation')
-        plt2 = sns.distplot(CBECS_age_1983, kde=kde_flag, color="black", bins=n_bins, label='1983 CBECS')
-        plt.legend(fontsize='x-small');
+        axes1 = fig.add_subplot(246)
+        sns.distplot(DSM_age_1986, kde=kde_flag, color="blue", bins=n_bins, label='DSM Simulation'),
+        sns.distplot(CBECS_age_1986, kde=kde_flag, color="black", bins=n_bins, label='1986 CBECS'),
+        # plot cdfs next to one another
+        axes2 = axes1.twinx()
+        plt.hist(q1_1986, density=True, bins=100, cumulative=True, alpha=1.0, histtype='step', label='Simulation',
+                 color='gray')
+        plt.hist(q2_1986, density=True, bins=100, cumulative=True, alpha=1.0, histtype='step', label='1986 CBECS',
+                 color='lightblue')
+        axes2.set_ylabel('CDF')
+        axes1.set_ylabel('Density')
+        plt.legend(loc=9, fontsize='x-small');
+        plt.xlabel(None)
+        plt.text(1.0, 0.99, 'ks = ' + str(np.round(ks_1986[0], 4)), ha='right', va='top', transform=axes1.transAxes,
+                 fontsize='x-small')
+
+        axes1 = fig.add_subplot(247)
+        sns.distplot(DSM_age_1983, kde=kde_flag, color="blue", bins=n_bins, label='DSM Simulation'),
+        sns.distplot(CBECS_age_1983, kde=kde_flag, color="black", bins=n_bins, label='1983 CBECS'),
+        # plot cdfs next to one another
+        axes2 = axes1.twinx()
+        plt.hist(q1_1983, density=True, bins=100, cumulative=True, alpha=1.0, histtype='step', label='Simulation',
+                 color='gray')
+        plt.hist(q2_1983, density=True, bins=100, cumulative=True, alpha=1.0, histtype='step', label='1983 CBECS',
+                 color='lightblue')
+        axes2.set_ylabel('CDF')
+        axes1.set_ylabel('Density')
+        plt.legend(loc=9, fontsize='x-small');
         plt.xlabel('Age')
+        plt.text(1.0, 0.99, 'ks = ' + str(np.round(ks_1983[0], 4)), ha='right', va='top', transform=axes1.transAxes,
+                 fontsize='x-small')
 
-        plt.subplot(428)
-        plt1 = sns.distplot(DSM_age_1979, rug=rug_flag, kde=kde_flag, color="blue", bins=n_bins, label='DSM Simulation')
-        plt2 = sns.distplot(CBECS_age_1979, rug=rug_flag, kde=kde_flag, color="black", bins=n_bins, label='1979 CBECS')
-        plt.legend(fontsize='x-small');
+        axes1 = fig.add_subplot(248)
+        sns.distplot(DSM_age_1979, kde=kde_flag, color="blue", bins=n_bins, label='DSM Simulation'),
+        sns.distplot(CBECS_age_1979, kde=kde_flag, color="black", bins=n_bins, label='1979 CBECS'),
+        # plot cdfs next to one another
+        axes2 = axes1.twinx()
+        plt.hist(q1_1979, density=True, bins=100, cumulative=True, alpha=1.0, histtype='step', label='Simulation',
+                 color='gray')
+        plt.hist(q2_1979, density=True, bins=100, cumulative=True, alpha=1.0, histtype='step', label='1979 CBECS',
+                 color='lightblue')
+        axes2.set_ylabel('CDF')
+        axes1.set_ylabel('Density')
+        plt.legend(loc=9, fontsize='x-small');
         plt.xlabel('Age')
+        plt.text(1.0, 0.99, 'ks = ' + str(np.round(ks_1979[0], 4)), ha='right', va='top', transform=axes1.transAxes,
+                 fontsize='x-small')
         plt.show();
     else:
-        compare_CBECS_and_plot(year=2012, index=193, CBECS_series=CBECS_Weights.Com_Weight_2012, plot=True, n_bins=n_bins)
+        compare_CBECS_and_plot(year=2012, index_end=193, CBECS_series=CBECS_Weights.Com_Weight_2012, plot=True, n_bins=n_bins)
 
 # Save the floor area models as .csv files.
 SSP1_dsm_df = pd.DataFrame({'time': SSP1_dsm_res.t,
@@ -1012,7 +1102,8 @@ if plot_MFA_all_scenarios==True:
     plot_dsm(SSP5_dsm_com, 'SSP5 Commercial')
     plot_dsm(SSP5_dsm_pub, 'SSP5 Public')
 else:
-    plot_dsm(SSP1_dsm_res, 'SSP1 Residential')
+    print('')
+    # plot_dsm(SSP1_dsm_res, 'SSP1 Residential')
 
 # # ----------------------------------------------------------------------------------------------------------------------
 # # Plot all scenarios together for residential buildings

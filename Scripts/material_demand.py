@@ -122,7 +122,7 @@ plt.title('Annual material consumption by US building structural systems')
 plt.show();
 
 # print the material demand for a particular year
-year = 2020
+year = 2015
 print('Total steel demand in ', str(year),  ' =   ', steel_tot_i['Sum'][year], ' Mt')
 print('Total concrete demand in ', str(year),  ' =   ', conc_tot_i['Sum'][year], ' Mt')
 print('Total engineered wood demand in ', str(year),  ' =   ', engwood_tot_i['Sum'][year], ' Mt')

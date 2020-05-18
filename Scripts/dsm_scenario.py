@@ -410,6 +410,7 @@ def do_stock_driven_model(t, s, lt, plot=True, plot_name='Residential'):
     if plot==True: plot_dsm(my_dsm, plot_name=plot_name)
     return my_dsm
 
+# A function to generate lifetime distributions for use in the ODYM dsm package.
 def generate_lt(type, par1, par2):
     ''' Normal: par1  = mean, par2 = std. dev
         Weibull: par1 = shape, par2 = scale'''
@@ -478,7 +479,7 @@ if plot_lifetime_distr==True:
     plt.xlabel('Building lifespan')
     plt.show()
 
-
+# function to calculate the dynamic stock.
 def calc_MFA(scenario, lt_res, lt_com, lt_pub):
     # select a scenario to consider during debugging
     # scenario = 'SSP1'
@@ -504,18 +505,6 @@ def calc_MFA(scenario, lt_res, lt_com, lt_pub):
                                    'stock_res_'+scenario: stock_res,
                                    'stock_com_'+scenario: stock_com,
                                    'stock_pub_'+scenario: stock_pub})
-
-
-
-    # ---- Initial Conditions ----
-    # Residential floor area  age-cohort in base year: 2015
-    # S_0_res_2015 = np.flipud(RECS_Weights.Res_Weight) * stock_res[2015]
-
-    # Commercial floor area  age-cohort in base year: 2012
-    # S_0_com_2012 = np.flipud(CBECS_Weights.Com_Weight) * stock_com[2012]
-
-    # Public floor area  age-cohort in base year: 2012
-    # S_0_pub_2012 = np.flipud(CBECS_Weights.Com_Weight) * stock_pub[2012]
 
     # Residential
     t = years
@@ -552,7 +541,7 @@ SSP5_dsm_res, SSP5_dsm_com, SSP5_dsm_pub, SSP5_MFA_input = calc_MFA('SSP5', lt_r
 
 #
 # # ----------------------------------------------------------------------------------------------------------------------
-
+# Inputs for plotting the results of the dynamic stock model simulations and the DOE data
 n_bins = 20
 kde_flag = True
 rug_flag = False
@@ -1168,250 +1157,3 @@ if plot_MFA_all_same_graph == True:
     plt.ylabel('Floor Area per year')
     plt.title('Residential Floor Area flows')
     plt.show();
-
-
-# ----------------------------------------------------------------------------------------------------------------------
-# Derive distributions from CBECS and RECS data (compare against other studies distributions)
-# THIS CODE DOESN"T TELL US ANYTHING USEFUL!
-fit_distribution_to_age_structure = False
-if plot_all==True:
-    if fit_distribution_to_age_structure==True:
-        # Residential
-        # function to estimate the parameters for different lifetime distributions
-        def determine_lt_params_chi2(y=RECS_age_2015, n_bins=100, p_q_plots=True):
-            # plot initial histogram:
-            plt.hist(y, bins=n_bins)
-            plt.show();
-
-            x = np.arange(len(y))
-            size = len(y)
-            # center the data
-            y = np.array(y)
-            sc = StandardScaler()
-            yy = y.reshape(-1, 1)
-            sc.fit(yy)
-            y_std = sc.transform(yy)
-            y_std = y_std.flatten()
-            y_std
-            del yy
-
-            dist_names = ['weibull_min']
-            # dist_names = ['expon','gamma','lognorm','norm','weibull_max', 'exponweib']
-            # dist_names = [x for x in dist_names_all if x not in distributions_excluded]
-
-            # Set up empty lists to store results
-            chi_square = []
-            p_values = []
-
-            # Set up 50 bins for chi-square test
-            # Observed data will be approximately evenly distrubuted aross all bins
-            percentile_bins = np.linspace(0, 100, 51)
-            percentile_cutoffs = np.percentile(y_std, percentile_bins)
-            observed_frequency, bins = (np.histogram(y_std, bins=percentile_cutoffs))
-            cum_observed_frequency = np.cumsum(observed_frequency)
-
-            # Loop through candidate distributions
-            for distribution in dist_names:
-                # Set up distribution and get fitted distribution parameters
-                dist = getattr(stats, distribution)
-                param = dist.fit(y_std)
-
-                # Obtain the KS test P statistic, round it to 5 decimal places
-                p = stats.kstest(y_std, distribution, args=param)[1]
-                # p = np.around(p, 5)
-                p_values.append(p)
-
-                # Get expected counts in percentile bins
-                # This is based on a 'cumulative distrubution function' (cdf)
-                cdf_fitted = dist.cdf(percentile_cutoffs, *param[:-2], loc=param[-2],
-                                      scale=param[-1])
-                expected_frequency = []
-                for bin in range(len(percentile_bins) - 1):
-                    expected_cdf_area = cdf_fitted[bin + 1] - cdf_fitted[bin]
-                    expected_frequency.append(expected_cdf_area)
-
-                # calculate chi-squared
-                expected_frequency = np.array(expected_frequency) * (size)
-                cum_expected_frequency = np.cumsum(expected_frequency)
-                ss = sum(((cum_expected_frequency - cum_observed_frequency) ** 2) / cum_observed_frequency)
-                chi_square.append(ss)
-
-            # Collate results and sort by goodness of fit (best at top)
-            results = pd.DataFrame()
-            results['Distribution'] = dist_names
-            results['chi_square'] = chi_square
-            results['p_value'] = p_values
-            results.sort_values(['chi_square'], inplace=True)
-
-            # Report results
-            print('\nDistributions sorted by goodness of fit:')
-            print('----------------------------------------')
-            print(results)
-
-            # Divide the observed data into 100 bins for plotting (this can be changed)
-            number_of_bins = n_bins
-            # bin_cutoffs = np.linspace(np.percentile(y, 0), np.percentile(y, 99), number_of_bins)
-
-            # Create the plot
-            h = plt.hist(y, bins=n_bins, color='0.75')
-
-            # Get the top three distributions from the previous phase
-            number_distributions_to_plot = 5
-            dist_names = results['Distribution'].iloc[0:number_distributions_to_plot]
-
-            # Create an empty list to stroe fitted distribution parameters
-            parameters = []
-
-            # Loop through the distributions ot get line fit and paraemters
-            for dist_name in dist_names:
-                # Set up distribution and store distribution paraemters
-                dist = getattr(stats, dist_name)
-                param = dist.fit(y)
-                parameters.append(param)
-
-                # Get line for each distribution (and scale to match observed data)
-                pdf_fitted = dist.pdf(x, *param[:-2], loc=param[-2], scale=param[-1])
-                scale_pdf = np.trapz(h[0], h[1][:-1]) / np.trapz(pdf_fitted, x)
-                pdf_fitted *= scale_pdf
-
-                # Add the line to the plot
-                plt.plot(pdf_fitted, label=dist_name)
-
-                # Set the plot x axis to contain 99% of the data
-                # This can be removed, but sometimes outlier data makes the plot less clear
-                plt.xlim(0, np.percentile(y, 99))
-
-            # Add legend and display plot
-
-            plt.legend()
-            plt.show()
-
-            # Store distribution paraemters in a dataframe (this could also be saved)
-            dist_parameters = pd.DataFrame()
-            dist_parameters['Distribution'] = (
-                results['Distribution'].iloc[0:number_distributions_to_plot])
-            dist_parameters['Distribution parameters'] = parameters
-
-            # Print parameter results
-            print('\nDistribution parameters:')
-            print('------------------------')
-
-            for index, row in dist_parameters.iterrows():
-                print('\nDistribution:', row[0])
-                print('Parameters:', row[1])
-            if p_q_plots==True:
-                ## qq and pp plots
-                data = y_std.copy()
-                data.sort()
-                # Loop through selected distributions (as previously selected)
-                for distribution in dist_names:
-                    # Set up distribution
-                    dist = getattr(stats, distribution)
-                    param = dist.fit(y_std)
-
-                    # Get random numbers from distribution
-                    norm = dist.rvs(*param[0:-2], loc=param[-2], scale=param[-1], size=size)
-                    norm.sort()
-
-                    # Create figure
-                    fig = plt.figure(figsize=(8, 5))
-
-                    # qq plot
-                    ax1 = fig.add_subplot(121)  # Grid of 2x2, this is suplot 1
-                    ax1.plot(norm, data, "o")
-                    min_value = np.floor(min(min(norm), min(data)))
-                    max_value = np.ceil(max(max(norm), max(data)))
-                    ax1.plot([min_value, max_value], [min_value, max_value], 'r--')
-                    ax1.set_xlim(min_value, max_value)
-                    ax1.set_xlabel('Theoretical quantiles')
-                    ax1.set_ylabel('Observed quantiles')
-                    title = 'qq plot for ' + distribution + ' distribution'
-                    ax1.set_title(title)
-
-                    # pp plot
-                    ax2 = fig.add_subplot(122)
-
-                    # Calculate cumulative distributions
-                    bins = np.percentile(norm, range(0, 101))
-                    data_counts, bins = np.histogram(data, bins)
-                    norm_counts, bins = np.histogram(norm, bins)
-                    cum_data = np.cumsum(data_counts)
-                    cum_norm = np.cumsum(norm_counts)
-                    cum_data = cum_data / max(cum_data)
-                    cum_norm = cum_norm / max(cum_norm)
-
-                    # plot
-                    ax2.plot(cum_norm, cum_data, "o")
-                    min_value = np.floor(min(min(cum_norm), min(cum_data)))
-                    max_value = np.ceil(max(max(cum_norm), max(cum_data)))
-                    ax2.plot([min_value, max_value], [min_value, max_value], 'r--')
-                    ax2.set_xlim(min_value, max_value)
-                    ax2.set_xlabel('Theoretical cumulative distribution')
-                    ax2.set_ylabel('Observed cumulative distribution')
-                    title = 'pp plot for ' + distribution + ' distribution'
-                    ax2.set_title(title)
-
-                    # Display plot
-                    plt.tight_layout(pad=4)
-                    plt.show()
-
-        determine_lt_params_chi2(y=RECS_age_2015, n_bins=100, p_q_plots=False)
-
-        def determine_age_distribution(data=RECS_age_2015, plot=True, name='RECS 2015', return_normal=True):
-            data = np.array(data)
-            plt.hist(data, bins=50, density=True, alpha=0.5)
-            shape, loc, scale = stats.weibull_min.fit(data, floc=0)
-            mean, stddev = stats.norm.fit(data)
-
-            if plot==True:
-                plt.plot(x, stats.weibull_min(shape, loc, scale).pdf(x), label='Weibull_min '+ name)
-                plt.plot(x, stats.norm(mean, stddev).pdf(x), label='Normal ' + name)
-                plt.legend();
-                plt.xlabel("Age")
-                plt.show();
-                print('Weibull lifetime parameters are: ')
-                print('shape = ', shape, 'loc = ', loc, 'scale = ', scale)
-                print('Normal lifetime parameters are: ')
-                print('mean = ', mean, 'std dev = ', stddev)
-
-                # Plot the CDF
-                ecdf = statsmodels.distributions.ECDF(data)
-                plt.plot(x, ecdf(x), label='Empirical CDF')
-                plt.plot(x, stats.weibull_min(shape, loc, scale).cdf(x), label='Weibull_min ' + name)
-                plt.plot(x, stats.norm(mean, stddev).cdf(x), label='Normal ' + name)
-                plt.xlabel('Age')
-                plt.title('CDF comparison')
-                plt.legend()
-                plt.show();
-
-                plt.subplot(211)
-                stats.probplot(data, dist=stats.weibull_min(shape, loc, scale), plot=plt)
-                plt.title('Weibull QQ-plot')
-                plt.xlim(right=100)
-                # plt.show();
-                plt.subplot(212)
-                stats.probplot(data, dist=stats.norm(mean, stddev), plot=plt)
-                plt.title('Normal QQ-plot')
-                plt.xlim(right=100, left=0)
-                plt.show();
-            if return_normal==True:
-                return shape, loc, scale, mean, stddev
-            else:
-                return shape, scale
-
-
-        determine_age_distribution(data=RECS_age_2015, plot=True, return_normal=True)
-
-        shape_r2015, scale_r2015 = determine_age_distribution(data=RECS_age_2015, plot=False, return_normal=False)
-        shape_r2009, scale_r2009 = determine_age_distribution(data=RECS_age_2009, plot=False, return_normal=False)
-        shape_r2005, scale_r2005 = determine_age_distribution(data=RECS_age_2005, plot=False, return_normal=False)
-        shape_r2001, scale_r2001 = determine_age_distribution(data=RECS_age_2001, plot=False, return_normal=False)
-        shape_r1997, scale_r1997 = determine_age_distribution(data=RECS_age_1997, plot=False, return_normal=False)
-        shape_r1993, scale_r1993 = determine_age_distribution(data=RECS_age_1993, plot=False, return_normal=False)
-        shape_r1987, scale_r1987 = determine_age_distribution(data=RECS_age_1987, plot=False, return_normal=False)
-        shape_r1980, scale_r1980 = determine_age_distribution(data=RECS_age_1980, plot=False, return_normal=False)
-
-        np.mean([shape_r2015, shape_r2009, shape_r2005, shape_r2001, shape_r1997, shape_r1993, shape_r1987, shape_r1980])
-        np.std([shape_r2015, shape_r2009, shape_r2005, shape_r2001, shape_r1997, shape_r1993, shape_r1987, shape_r1980])
-        np.mean([scale_r2015, scale_r2009, scale_r2005, scale_r2001, scale_r1997, scale_r1993, scale_r1987, scale_r1980])
-        np.std([scale_r2015, scale_r2009, scale_r2005, scale_r2001, scale_r1997, scale_r1993, scale_r1987, scale_r1980])

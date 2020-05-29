@@ -8,13 +8,14 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 
-# load in data from other scripts
+# load in data from other scripts and excels
 structure_data_base_year = pd.read_csv('./InputData/HAZUS_weight.csv')
 FA_dsm_SSP1 = pd.read_excel('./Results/SSP_dsm.xlsx', sheet_name='SSP1')
 materials_intensity = pd.read_excel('./InputData/Material_data.xlsx', sheet_name='SSP1_density')
 materials_intensity_df = materials_intensity.set_index('Structure_Type', drop=True)
 materials_intensity_df = materials_intensity_df.transpose()
 materials_intensity_df = materials_intensity_df.drop(index='Source')
+scenario_df = pd.read_excel('./InputData/Material_data.xlsx', sheet_name='Adoption_clean')
 
 
 # get total floor area stock and flows
@@ -105,21 +106,37 @@ dimlum_tot_i['Sum'] = dimlum_tot_i.sum(axis=1)
 masonry_tot_i['Sum'] = masonry_tot_i.sum(axis=1)
 
 # plot total material demand each year (Mt)
-plt1, = plt.plot(steel_tot_i.index, steel_tot_i.Sum)
-plt2, = plt.plot(conc_tot_i.index, conc_tot_i.Sum)
-plt3, = plt.plot(engwood_tot_i.index, engwood_tot_i.Sum)
-plt4, = plt.plot(dimlum_tot_i.index, dimlum_tot_i.Sum)
-plt5, = plt.plot(masonry_tot_i.index, masonry_tot_i.Sum)
-plt6, = plt.plot([2020, 2020], [0, 200], color='k', LineStyle='--')
-plt.legend([plt1, plt2, plt3, plt4, plt5],
-           ['Steel', 'Concrete', 'Eng. Wood', 'Dim. Lumber', 'Masonry'],
-           loc='best')
-plt.xlabel('Year')
-plt.ylabel('Mt / year')
-plt.ylim(top=3000)
-plt.xlim(left=2000)
-plt.title('Annual material consumption by US building structural systems')
-plt.show();
+fig, axs = plt.subplots(3, 2)
+axs[0, 0].plot(steel_tot_i.index, steel_tot_i.Sum)
+axs[0, 0].plot([2020, 2020], [0, 1.2*steel_tot_i.Sum.max()], color='k', LineStyle='--')
+axs[0, 0].set_title('Steel')
+axs[0, 0].set_xlim(2000)
+
+axs[0, 1].plot(conc_tot_i.index, conc_tot_i.Sum, 'tab:orange')
+axs[0, 1].plot([2020, 2020], [0, 1.2*conc_tot_i.Sum.max()], color='k', LineStyle='--')
+axs[0, 1].set_title('Concrete')
+axs[0, 1].set_xlim(2000)
+
+axs[1, 0].plot(engwood_tot_i.index, engwood_tot_i.Sum, 'tab:green')
+axs[1, 0].plot([2020, 2020], [0, 1.2*engwood_tot_i.Sum.max()], color='k', LineStyle='--')
+axs[1, 0].set_title('Engineered Wood')
+axs[1, 0].set_xlim(2000)
+
+axs[1, 1].plot(dimlum_tot_i.index, dimlum_tot_i.Sum, 'tab:red')
+axs[1, 1].plot([2020, 2020], [0, 1.2*dimlum_tot_i.Sum.max()], color='k', LineStyle='--')
+axs[1, 1].set_title('Dimensioned Lumber')
+axs[1, 1].set_xlim(2000)
+
+axs[2, 0].plot(masonry_tot_i.index, masonry_tot_i.Sum, 'tab:purple')
+axs[2, 0].plot([2020, 2020], [0, 1.2*masonry_tot_i.Sum.max()], color='k', LineStyle='--')
+axs[2, 0].set_title('Masonry')
+axs[2, 0].set_xlim(2000)
+# delete the sixth space
+fig.delaxes(axs[2,1])
+# add ylabels
+for ax in axs.flat:
+    ax.set(ylabel='Mt/year')
+fig.show()
 
 # print the material demand for a particular year
 year = 2015
@@ -128,4 +145,6 @@ print('Total concrete demand in ', str(year),  ' =   ', conc_tot_i['Sum'][year],
 print('Total engineered wood demand in ', str(year),  ' =   ', engwood_tot_i['Sum'][year], ' Mt')
 print('Total dimensioned lumber demand in ', str(year),  ' =   ', dimlum_tot_i['Sum'][year], ' Mt')
 print('Total masonry demand in ', str(year),  ' =   ', masonry_tot_i['Sum'][year], ' Mt')
+
+
 

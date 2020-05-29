@@ -3,16 +3,11 @@
 # Import libraries
 import pandas as pd
 import numpy as np
-import xlsxwriter
 import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy.interpolate import interp1d
 from odym import dynamic_stock_model as dsm
 from scipy import stats
-import scipy
-from sklearn.preprocessing import StandardScaler
-import scipy.stats
-import statsmodels.distributions
 
 # Load in datasets
 data_pop_WiC = pd.read_excel('./InputData/Pop_Data.xlsx', sheet_name='US_pop_WiC')
@@ -436,9 +431,9 @@ def generate_lt(type, par1, par2):
         lt = {'Type': type, 'Shape': np.array([par1]), 'Scale': np.array([par2])}
     return lt
 
-lt_res = generate_lt('Weibull',par1=6, par2=100)
-lt_com = generate_lt('Weibull',par1=4, par2=70)
-lt_pub = generate_lt('Weibull',par1=4, par2=80)
+lt_res = generate_lt('Weibull',par1=5, par2=100)
+lt_com = generate_lt('Weibull',par1=4.8, par2=75.1)
+lt_pub = generate_lt('Weibull',par1=6.1, par2=95.6)
 
 # Plot lifetime distributions:
 plot_lifetime_distr=False
@@ -542,12 +537,12 @@ SSP5_dsm_res, SSP5_dsm_com, SSP5_dsm_pub, SSP5_MFA_input = calc_MFA('SSP5', lt_r
 #
 # # ----------------------------------------------------------------------------------------------------------------------
 # Inputs for plotting the results of the dynamic stock model simulations and the DOE data
-n_bins = 20
+n_bins = 15
 kde_flag = True
 rug_flag = False
 RECS_comparison = True
 CBECS_comparison = True
-plot_all = False
+plot_all = True
 
 # Plot all RECS data against the DSM simulation distribution
 if RECS_comparison==True:
@@ -1096,7 +1091,7 @@ else:
 
 # # ----------------------------------------------------------------------------------------------------------------------
 # # Plot all scenarios together for residential buildings
-plot_MFA_all_same_graph = False
+plot_MFA_all_same_graph = True
 no_SSP5 = True      # True for ignoring SSP5, False for including SSP5
 if plot_MFA_all_same_graph == True:
     plt.subplot(211)

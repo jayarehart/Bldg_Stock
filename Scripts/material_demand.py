@@ -31,6 +31,7 @@ materials_intensity_df = materials_intensity_df.transpose()
 materials_intensity_df = materials_intensity_df.drop(index='Source')
 
 scenario_df = pd.read_excel('./InputData/Material_data.xlsx', sheet_name='Adoption_clean')
+scenario_df = scenario_df.set_index('Scenario')
 
 
 
@@ -38,36 +39,11 @@ scenario_df = pd.read_excel('./InputData/Material_data.xlsx', sheet_name='Adopti
 # total_area = FA_dsm_SSP1[['time','stock_total','inflow_total','outflow_total']]
 # total_area = total_area.set_index('time', drop=True)
 
-# Select a scenario
-# scenario = 'S_0'    # new construction is same as exiting building stock
-scenario = 'S_timber_high'      # High timber adoption
-scenario_df  = scenario_df.set_index('Scenario')        # set index of the scenario
-structure_data_scenario = pd.DataFrame(
-    {'LF_wood': scenario_df.LF_wood[scenario],
-    'Mass_Timber': scenario_df.Mass_Timber[scenario],
-    'Steel': scenario_df.Steel[scenario],
-    'RC': scenario_df.RC[scenario],
-    'RM': scenario_df.RM[scenario],
-    'URM': scenario_df.URM[scenario],
-    'MH': scenario_df.MH[scenario]},
-index=[0])
+# Clean dataframes
 
-# separate inflow by structural system ratio for each scenario
-FA_dsm_SSP1 = FA_dsm_SSP1.set_index('time')
-inflow_SSP1_all = pd.DataFrame(
-    {'inflow_total' : FA_dsm_SSP1.loc[2016:2100, 'inflow_total'],
-     'inflow_LF_wood' : FA_dsm_SSP1.loc[2016:2100, 'inflow_total'] * structure_data_scenario.LF_wood[0],
-     'inflow_Mass_Timber': FA_dsm_SSP1.loc[2016:2100, 'inflow_total'] * structure_data_scenario.Mass_Timber[0],
-     'inflow_Steel': FA_dsm_SSP1.loc[2016:2100, 'inflow_total'] * structure_data_scenario.Steel[0],
-     'inflow_RC': FA_dsm_SSP1.loc[2016:2100, 'inflow_total'] * structure_data_scenario.RC[0],
-     'inflow_RM': FA_dsm_SSP1.loc[2016:2100, 'inflow_total'] * structure_data_scenario.RM[0],
-     'inflow_URM': FA_dsm_SSP1.loc[2016:2100, 'inflow_total'] * structure_data_scenario.URM[0],
-     'inflow_MH': FA_dsm_SSP1.loc[2016:2100, 'inflow_total'] * structure_data_scenario.MH[0],
-    }
-)
 
 # set years series
-years_future = inflow_SSP1_all.index.to_series()
+years_future = FA_dsm_SSP1['time'].loc[197:]
 years_all = FA_dsm_SSP1.index.to_series()
 
 # compute a lifetime distribution
@@ -97,6 +73,7 @@ def generate_lt(type, par1, par2):
     return lt
 
 lt_existing = generate_lt('Weibull',par1=5, par2=75)        # lifetime distribution for existing buildings (all)
+lt_future = generate_lt('Weibull', par1=5, par2=100)
 # lt_res = generate_lt('Normal',par1=35, par2=10)
 
 # area of outflow of each structural system type for already built buildings (before 2017). No new construction is considered in this analysis
@@ -152,57 +129,115 @@ SSP4_existing_outflow = determine_outflow_existing_bldgs(FA_sc_SSP=FA_sc_SSP4, p
 SSP5_existing_outflow = determine_outflow_existing_bldgs(FA_sc_SSP=FA_sc_SSP5, plot=True, plot_title='SSP5')
 
 
+def determine_inflow_outflow_new_bldg(scenario, FA_dsm_SSP=FA_dsm_SSP1, plot=True, plot_title='SSP1 '):
+    # Select a scenario
+    # scenario = 'S_0'    # new construction is same as exiting building stock
+    # scenario = 'S_timber_high'      # High timber adoption
 
-# compute a inflow driven model for each structural system
-DSM_Inflow = dsm.DynamicStockModel(t=years_future, i=inflow_SSP1_all.inflow_LF_wood, lt=lt_existing)
-CheckStr = DSM_Inflow.dimension_check()
-print(CheckStr)
+    # clean df
+    FA_dsm_SSP = FA_dsm_SSP.set_index('time')
+    structure_data_scenario = pd.DataFrame(
+        {'LF_wood': scenario_df.LF_wood[scenario],
+        'Mass_Timber': scenario_df.Mass_Timber[scenario],
+        'Steel': scenario_df.Steel[scenario],
+        'RC': scenario_df.RC[scenario],
+        'RM': scenario_df.RM[scenario],
+        'URM': scenario_df.URM[scenario],
+        'MH': scenario_df.MH[scenario]},
+    index=[0])
 
-Stock_by_cohort = DSM_Inflow.compute_s_c_inflow_driven()
-O_C = DSM_Inflow.compute_o_c_from_s_c()
-S = DSM_Inflow.compute_stock_total()
-DS = DSM_Inflow.compute_stock_change()
-#
-# Bal = DSM_Inflow
-# print(Bal.shape) # dimensions of balance are: time step x process x chemical element
-# print(np.abs(Bal).sum(axis = 0)) # reports the sum of all absolute balancing errors by process.
+    # separate inflow by structural system ratio for each scenario
+    inflow_SSP_all = pd.DataFrame(
+        {'inflow_total' : FA_dsm_SSP.loc[2017:2100, 'inflow_total'],
+         'inflow_LF_wood' : FA_dsm_SSP.loc[2017:2100, 'inflow_total'] * structure_data_scenario.LF_wood[0],
+         'inflow_Mass_Timber': FA_dsm_SSP.loc[2017:2100, 'inflow_total'] * structure_data_scenario.Mass_Timber[0],
+         'inflow_Steel': FA_dsm_SSP.loc[2017:2100, 'inflow_total'] * structure_data_scenario.Steel[0],
+         'inflow_RC': FA_dsm_SSP.loc[2017:2100, 'inflow_total'] * structure_data_scenario.RC[0],
+         'inflow_RM': FA_dsm_SSP.loc[2017:2100, 'inflow_total'] * structure_data_scenario.RM[0],
+         'inflow_URM': FA_dsm_SSP.loc[2017:2100, 'inflow_total'] * structure_data_scenario.URM[0],
+         'inflow_MH': FA_dsm_SSP.loc[2017:2100, 'inflow_total'] * structure_data_scenario.MH[0],
+        }
+    )
 
-# total stock
-plt2, = plt.plot(DSM_Inflow.t, DSM_Inflow.s)
-plt.legend([plt2], ['Stock'], loc=2)
-plt.xlabel('Year')
-plt.ylabel('Floor Area (Mm2)')
-plt.title('Floor Area Stock')
-plt.show();
+    def compute_inflow_driven_model_ea_ss(structural_system):
+        # compute a inflow driven model for each structural system
+        DSM_Inflow_x = dsm.DynamicStockModel(t=years_future, i=inflow_SSP_all['inflow_' + structural_system], lt=lt_future)
+        # CheckStr = DSM_Inflow.dimension_check()
+        # print(CheckStr)
 
-# plot inflows and outflows
-plt1, = plt.plot(DSM_Inflow.t, DSM_Inflow.i)
-plt3, = plt.plot(DSM_Inflow.t, np.sum(DSM_Inflow.o_c, axis=1))
-plt.xlabel('Year')
-plt.ylabel('Floor Area per year (Mm2)')
-plt.title('Floor Area flows')
-plt.legend([plt1, plt3], ['Inflow', 'Outflow'], loc=2)
-plt.show();
+        S_C = DSM_Inflow_x.compute_s_c_inflow_driven()
+        O_C = DSM_Inflow_x.compute_o_c_from_s_c()
+        S = DSM_Inflow_x.compute_stock_total()
+        O = DSM_Inflow_x.compute_outflow_total()
+        DSM_Inflow_x.o = pd.Series(DSM_Inflow_x.o, index=DSM_Inflow_x.t)
+        return DSM_Inflow_x
 
-# Stock by age-cohort
-plt.imshow(DSM_Inflow.s_c[:, 1:], interpolation='nearest')  # exclude the first column to have the color scale work.
-plt.xlabel('age-cohort')
-plt.ylabel('year')
-plt.title('Stock by age-cohort')
-plt.show();
+    DSM_Inflow_LF_wood = compute_inflow_driven_model_ea_ss(structural_system='LF_wood')
+    DSM_Inflow_Mass_Timber = compute_inflow_driven_model_ea_ss('Mass_Timber')
+    DSM_Inflow_Steel = compute_inflow_driven_model_ea_ss('Steel')
+    DSM_Inflow_RC = compute_inflow_driven_model_ea_ss('RC')
+    DSM_Inflow_RM = compute_inflow_driven_model_ea_ss('RM')
+    DSM_Inflow_URM = compute_inflow_driven_model_ea_ss('URM')
+    DSM_Inflow_MH = compute_inflow_driven_model_ea_ss('MH')
 
-# look at survival functions
+    # summary dataframe of all DSM stocks, inflows, outflows
+    DSM_Future_all = pd.DataFrame({
+        'LF_wood_inflow' : DSM_Inflow_LF_wood.i,
+        'LF_wood_outflow': DSM_Inflow_LF_wood.o,
+        'LF_wood_stock': DSM_Inflow_LF_wood.s,
+        'Mass_Timber_inflow': DSM_Inflow_Mass_Timber.i,
+        'Mass_Timber_outflow': DSM_Inflow_Mass_Timber.o,
+        'Mass_Timber_stock': DSM_Inflow_Mass_Timber.s,
+        'Steel_inflow': DSM_Inflow_Steel.i,
+        'Steel_outflow': DSM_Inflow_Steel.o,
+        'Steel_stock': DSM_Inflow_Steel.s,
+        'RC_inflow': DSM_Inflow_RC.i,
+        'RC_outflow': DSM_Inflow_RC.o,
+        'RC_stock': DSM_Inflow_RC.s,
+        'RM_inflow': DSM_Inflow_RM.i,
+        'RM_outflow': DSM_Inflow_RM.o,
+        'RM_stock': DSM_Inflow_RM.s,
+        'URM_inflow': DSM_Inflow_URM.i,
+        'URM_outflow': DSM_Inflow_URM.o,
+        'URM_stock': DSM_Inflow_URM.s,
+        'MH_inflow': DSM_Inflow_MH.i,
+        'MH_outflow': DSM_Inflow_MH.o,
+        'MH_stock': DSM_Inflow_MH.s,
+    })
 
-my_sf = DSM_Inflow.compute_sf()
-plt1, = plt.plot(my_sf[:,0])
-plt.xlabel('years')
-plt.title('Survival function')
-plt.show();
+    if plot==True:
+        DSM_Future_Inflow = DSM_Future_all.loc[:, DSM_Future_all.columns.str.contains('inflow')]
+        DSM_Future_Outflow = DSM_Future_all.loc[:, DSM_Future_all.columns.str.contains('outflow')]
+        DSM_Future_Stock = DSM_Future_all.loc[:, DSM_Future_all.columns.str.contains('stock')]
+
+        DSM_Future_Inflow.plot.line()
+        plt.ylabel('Floor Area (Mm2)')
+        plt.title(plot_title + ' ' + scenario + ' ' + 'Floor Area Inflow (New Construction) by Structural System')
+        plt.show();
+
+        DSM_Future_Outflow.plot.line()
+        plt.ylabel('Floor Area (Mm2)')
+        plt.title(plot_title + ' ' + scenario + ' ' + 'Floor Area Outflow (New Construction) by Structural System')
+        plt.show();
+
+        DSM_Future_Stock.plot.line()
+        plt.ylabel('Floor Area (Mm2)')
+        plt.title(plot_title + ' ' + scenario + ' ' + 'Floor Area Stock (New Construction) by Structural System')
+        plt.show();
+
+    return DSM_Future_all
+
+determine_inflow_outflow_new_bldg('S_timber_high',FA_dsm_SSP=FA_dsm_SSP1, plot=True, plot_title='SSP1 ')
+determine_inflow_outflow_new_bldg('S_timber_high',FA_dsm_SSP=FA_dsm_SSP2, plot=True, plot_title='SSP2 ')
+determine_inflow_outflow_new_bldg('S_timber_high',FA_dsm_SSP=FA_dsm_SSP3, plot=True, plot_title='SSP3 ')
+determine_inflow_outflow_new_bldg('S_timber_high',FA_dsm_SSP=FA_dsm_SSP4, plot=True, plot_title='SSP4 ')
+determine_inflow_outflow_new_bldg('S_timber_high',FA_dsm_SSP=FA_dsm_SSP5, plot=True, plot_title='SSP5 ')
 
 
 
-
-
+## Next steps
+# - add together outflows
+# - compute material inflows and material outflows from floor areas.
 
 
 

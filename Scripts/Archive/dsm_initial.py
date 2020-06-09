@@ -1,4 +1,5 @@
 # Dynamic stock model (DSM) for residential buildings
+# Old script (most up to date is in dsm_scenario.py)
 
 # Import libraries
 import pandas as pd

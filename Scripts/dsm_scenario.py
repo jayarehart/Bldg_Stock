@@ -431,9 +431,13 @@ def generate_lt(type, par1, par2):
         lt = {'Type': type, 'Shape': np.array([par1]), 'Scale': np.array([par2])}
     return lt
 
+# lt_res = generate_lt('Weibull',par1=5, par2=100)
+# lt_com = generate_lt('Weibull',par1=4.8, par2=75.1)
+# lt_pub = generate_lt('Weibull',par1=6.1, par2=95.6)
+
 lt_res = generate_lt('Weibull',par1=5, par2=100)
-lt_com = generate_lt('Weibull',par1=4.8, par2=75.1)
-lt_pub = generate_lt('Weibull',par1=6.1, par2=95.6)
+lt_com = generate_lt('Weibull',par1=5, par2=100)
+lt_pub = generate_lt('Weibull',par1=5, par2=100)
 
 # Plot lifetime distributions:
 plot_lifetime_distr=False
@@ -540,8 +544,8 @@ SSP5_dsm_res, SSP5_dsm_com, SSP5_dsm_pub, SSP5_MFA_input = calc_MFA('SSP5', lt_r
 n_bins = 15
 kde_flag = True
 rug_flag = False
-RECS_comparison = True
-CBECS_comparison = True
+RECS_comparison = False
+CBECS_comparison = False
 plot_all = True
 
 # Plot all RECS data against the DSM simulation distribution
@@ -1058,6 +1062,13 @@ SSP5_dsm_df = pd.DataFrame({'time': SSP5_dsm_res.t,
                             'outflow_total': SSP5_dsm_res.o + SSP5_dsm_com.o + SSP5_dsm_pub.o
                             })
 
+SSP1_sc_df = pd.DataFrame(SSP1_dsm_res.s_c + SSP1_dsm_com.s_c + SSP1_dsm_pub.s_c)
+SSP2_sc_df = pd.DataFrame(SSP2_dsm_res.s_c + SSP2_dsm_com.s_c + SSP2_dsm_pub.s_c)
+SSP3_sc_df = pd.DataFrame(SSP3_dsm_res.s_c + SSP3_dsm_com.s_c + SSP3_dsm_pub.s_c)
+SSP4_sc_df = pd.DataFrame(SSP4_dsm_res.s_c + SSP4_dsm_com.s_c + SSP4_dsm_pub.s_c)
+SSP5_sc_df = pd.DataFrame(SSP5_dsm_res.s_c + SSP5_dsm_com.s_c + SSP5_dsm_pub.s_c)
+
+
 # write to excel
 writer = pd.ExcelWriter('./Results/SSP_dsm.xlsx', engine='xlsxwriter')
 SSP1_dsm_df.to_excel(writer, sheet_name='SSP1')
@@ -1065,6 +1076,11 @@ SSP2_dsm_df.to_excel(writer, sheet_name='SSP2')
 SSP3_dsm_df.to_excel(writer, sheet_name='SSP3')
 SSP4_dsm_df.to_excel(writer, sheet_name='SSP4')
 SSP5_dsm_df.to_excel(writer, sheet_name='SSP5')
+SSP1_sc_df.to_excel(writer, sheet_name='SSP1_sc', index=False)
+SSP2_sc_df.to_excel(writer, sheet_name='SSP2_sc', index=False)
+SSP3_sc_df.to_excel(writer, sheet_name='SSP3_sc', index=False)
+SSP4_sc_df.to_excel(writer, sheet_name='SSP4_sc', index=False)
+SSP5_sc_df.to_excel(writer, sheet_name='SSP5_sc', index=False)
 writer.save()
 
 # Plot the material flow analyses

@@ -77,10 +77,10 @@ def generate_lt(type, par1, par2):
         lt = {'Type': type, 'Shape': np.array([par1]), 'Scale': np.array([par2])}
     return lt
 
-# lt_existing = generate_lt('Weibull',par1=5, par2=85)        # lifetime distribution for existing buildings (all)
-# lt_future = generate_lt('Weibull', par1=5, par2=85)
-lt_existing = generate_lt('Weibull',par1=((0.773497 * 5) + (0.142467 * 4.8) + (0.030018 * 6.1)), par2=((0.773497 * 100) + (0.142467 * 75.1) + (0.030018 * 95.6)))        # weighted average of res, com, and pub
-lt_future = generate_lt('Weibull',par1=((0.773497 * 5) + (0.142467 * 4.8) + (0.030018 * 6.1)), par2=((0.773497 * 100) + (0.142467 * 75.1) + (0.030018 * 95.6)))        # weighted average of res, com, and pub
+lt_existing = generate_lt('Weibull',par1=5, par2=100)        # lifetime distribution for existing buildings (all)
+lt_future = generate_lt('Weibull', par1=5, par2=100)
+# lt_existing = generate_lt('Weibull',par1=((0.773497 * 5) + (0.142467 * 4.8) + (0.030018 * 6.1)), par2=((0.773497 * 100) + (0.142467 * 75.1) + (0.030018 * 95.6)))        # weighted average of res, com, and pub
+# lt_future = generate_lt('Weibull',par1=((0.773497 * 5) + (0.142467 * 4.8) + (0.030018 * 6.1)), par2=((0.773497 * 100) + (0.142467 * 75.1) + (0.030018 * 95.6)))        # weighted average of res, com, and pub
 
 # of outflow of each structural system type for already built buildings (before 2017). No new construction is considered in this analysis
 def determine_outflow_existing_bldgs(FA_sc_SSP, plot=True, plot_title=''):
@@ -95,6 +95,7 @@ def determine_outflow_existing_bldgs(FA_sc_SSP, plot=True, plot_title=''):
         For frac_stock = 1.0, all of the stock is considered to be the same. '''
         DSM_existing_stock = dsm.DynamicStockModel(t=years_all, lt=lt_existing)
         S_C = DSM_existing_stock.compute_evolution_initialstock(InitialStock=FA_sc_SSP.loc[(switch_year - 1), 0:(switch_year - 1)] * frac_stock, SwitchTime=switch_year)
+
         # compute outflow
         O_C = DSM_existing_stock.o_c[1::, :] = -1 * np.diff(DSM_existing_stock.s_c, n=1, axis=0)
         O_C = DSM_existing_stock.o_c[np.diag_indices(len(DSM_existing_stock.t))] = 0 - np.diag(
@@ -163,7 +164,7 @@ os_existing_SSP1 = determine_outflow_existing_bldgs(FA_sc_SSP=FA_sc_SSP1, plot=T
 # os_existing_SSP5 = determine_outflow_existing_bldgs(FA_sc_SSP=FA_sc_SSP5, plot=True, plot_title='SSP5')
 
 
-def determine_inflow_outflow_new_bldg(scenario, FA_dsm_SSP=FA_dsm_SSP1, plot=True, plot_title='SSP1 '):
+def determine_inflow_outflow_new_bldg(scenario, FA_dsm_SSP=FA_dsm_SSP1, lt=lt_future, plot=True, plot_title='SSP1 '):
     # Select a scenario
     # scenario = 'S_0'    # new construction is same as exiting building stock
     # scenario = 'S_timber_high'      # High timber adoption
@@ -195,9 +196,9 @@ def determine_inflow_outflow_new_bldg(scenario, FA_dsm_SSP=FA_dsm_SSP1, plot=Tru
 
     def compute_inflow_driven_model_ea_ss(structural_system):
         ''' Compute an inflow driven model for each structural system.
-         The lifetime distribution in the future is assumed to be lt_future'''
+         The lifetime distribution in the future is assumed to be the input lt for each scenario'''
         # compute a inflow driven model for each structural system
-        DSM_Inflow_x = dsm.DynamicStockModel(t=years_future, i=inflow_SSP_all['inflow_' + structural_system], lt=lt_future)
+        DSM_Inflow_x = dsm.DynamicStockModel(t=years_future, i=inflow_SSP_all['inflow_' + structural_system], lt=lt)
         # CheckStr = DSM_Inflow.dimension_check()
         # print(CheckStr)
 
@@ -268,11 +269,11 @@ def determine_inflow_outflow_new_bldg(scenario, FA_dsm_SSP=FA_dsm_SSP1, plot=Tru
     return DSM_Future_all
 
 # area by structural system of stock, inflow, and outflow of all new buildings (built after 2017)
-sio_new_bldg_SSP1 = determine_inflow_outflow_new_bldg(scenario='S_0',FA_dsm_SSP=FA_dsm_SSP1, plot=True, plot_title='SSP1 ')
-# sio_new_bldg_SSP2 = determine_inflow_outflow_new_bldg('S_timber_high',FA_dsm_SSP=FA_dsm_SSP2, plot=False, plot_title='SSP2 ')
-# sio_new_bldg_SSP3 = determine_inflow_outflow_new_bldg('S_timber_high',FA_dsm_SSP=FA_dsm_SSP3, plot=False, plot_title='SSP3 ')
-# sio_new_bldg_SSP4 = determine_inflow_outflow_new_bldg('S_timber_high',FA_dsm_SSP=FA_dsm_SSP4, plot=False, plot_title='SSP4 ')
-# sio_new_bldg_SSP5 = determine_inflow_outflow_new_bldg('S_timber_high',FA_dsm_SSP=FA_dsm_SSP5, plot=False, plot_title='SSP5 ')
+sio_new_bldg_SSP1 = determine_inflow_outflow_new_bldg(scenario='S_0',FA_dsm_SSP=FA_dsm_SSP1, lt=lt_future, plot=True, plot_title='SSP1 ')
+# sio_new_bldg_SSP2 = determine_inflow_outflow_new_bldg('S_timber_high',FA_dsm_SSP=FA_dsm_SSP2, lt=lt_future, plot=False, plot_title='SSP2 ')
+# sio_new_bldg_SSP3 = determine_inflow_outflow_new_bldg('S_timber_high',FA_dsm_SSP=FA_dsm_SSP3,lt=lt_future,  plot=False, plot_title='SSP3 ')
+# sio_new_bldg_SSP4 = determine_inflow_outflow_new_bldg('S_timber_high',FA_dsm_SSP=FA_dsm_SSP4, lt=lt_future, plot=False, plot_title='SSP4 ')
+# sio_new_bldg_SSP5 = determine_inflow_outflow_new_bldg('S_timber_high',FA_dsm_SSP=FA_dsm_SSP5, lt=lt_future, plot=False, plot_title='SSP5 ')
 
 ## check to see if stocks match
 # initial stock check
@@ -280,13 +281,13 @@ FA_sc_SSP1_check = FA_sc_SSP1.sum(axis=1)
 FA_sc_SSP1_check.index = FA_dsm_SSP1.index
 sum(FA_sc_SSP1_check - FA_dsm_SSP1['stock_total'])
 
-#
+# Check to see if how much the inflow, outflow, and stocks differ from the original stock-driven model
 check_df_stock = pd.DataFrame({
     'existing_stock': os_existing_SSP1.loc[2017:]['total_stock'],
     'new_stock': sio_new_bldg_SSP1.loc[2017:]['total_stock'],
     'sum_stock': os_existing_SSP1.loc[2017:]['total_stock'] + sio_new_bldg_SSP1.loc[2017:]['total_stock'],
     'correct_stock': FA_dsm_SSP1.loc[2017:]['stock_total'],
-    'difference': FA_dsm_SSP1.loc[2017:]['stock_total'] - (os_existing_SSP1.loc[2017:]['total_stock'] + sio_new_bldg_SSP1.loc[2017:]['total_stock'])
+    'percent_difference': (FA_dsm_SSP1.loc[2017:]['stock_total'] - (os_existing_SSP1.loc[2017:]['total_stock'] + sio_new_bldg_SSP1.loc[2017:]['total_stock'])) / FA_dsm_SSP1.loc[2017:]['stock_total']
 })
 
 check_df_inflow = pd.DataFrame({
@@ -299,11 +300,12 @@ check_df_outflow = pd.DataFrame({
     'existing_outflow': os_existing_SSP1.loc[2017:]['total_outflow'],
     'new_outflow': sio_new_bldg_SSP1.loc[2017:]['total_outflow'],
     'correct_outflow': FA_dsm_SSP1.loc[2017:]['outflow_total'],
-    'difference': os_existing_SSP1.loc[2017:]['total_outflow'] + sio_new_bldg_SSP1.loc[2017:]['total_outflow'] - FA_dsm_SSP1.loc[2017:]['outflow_total']
+    'percent_difference': (os_existing_SSP1.loc[2017:]['total_outflow'] + sio_new_bldg_SSP1.loc[2017:]['total_outflow'] - FA_dsm_SSP1.loc[2017:]['outflow_total']) / FA_dsm_SSP1.loc[2017:]['outflow_total']
 })
+print('Mean percent difference in stock is = ' + str(np.mean(check_df_stock['percent_difference']) * 100 ) + '%')
+print('Mean  difference in inflow is = ' + str(np.mean(check_df_inflow['difference'])))
+print('Mean percent difference in outflow is = ' + str(np.mean(check_df_outflow['percent_difference']) * 100 ) + '%')
 
-
-x = (os_existing_SSP1.loc[2017:]['total_stock'] + sio_new_bldg_SSP1.loc[2017:]['total_stock']) - FA_dsm_SSP1.loc[2017:]['stock_total']
 
 
 

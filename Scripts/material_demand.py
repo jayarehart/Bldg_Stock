@@ -303,11 +303,45 @@ print('Mean  difference in inflow is = ' + str(np.mean(check_df_inflow['differen
 print('Mean percent difference in outflow is = ' + str(np.mean(check_df_outflow['percent_difference']) * 100 ) + '%')
 
 
+# # ------------------------------------------------------------------------------------
+# add together the two sub DSM models for future
+future_stock = pd.DataFrame({
+    'stock_all': os_existing_SSP1.loc[2017:]['total_stock'] + sio_new_bldg_SSP1.loc[2017:]['total_stock'],
+    'stock_LF_wood': os_existing_SSP1.loc[2017:]['stock_LF_wood'] + sio_new_bldg_SSP1.loc[2017:]['stock_LF_wood'],
+    'stock_Mass_Timber': os_existing_SSP1.loc[2017:]['stock_Mass_Timber'] + sio_new_bldg_SSP1.loc[2017:]['stock_Mass_Timber'],
+    'stock_Steel': os_existing_SSP1.loc[2017:]['stock_Steel'] + sio_new_bldg_SSP1.loc[2017:]['stock_Steel'],
+    'stock_RC': os_existing_SSP1.loc[2017:]['stock_RC'] + sio_new_bldg_SSP1.loc[2017:]['stock_RC'],
+    'stock_RM': os_existing_SSP1.loc[2017:]['stock_RM'] + sio_new_bldg_SSP1.loc[2017:]['stock_RM'],
+    'stock_URM': os_existing_SSP1.loc[2017:]['stock_URM'] + sio_new_bldg_SSP1.loc[2017:]['stock_URM'],
+    'stock_MH': os_existing_SSP1.loc[2017:]['stock_MH'] + sio_new_bldg_SSP1.loc[2017:]['stock_MH']
+})
+
+future_inflow = pd.DataFrame({
+    'inflow_all': sio_new_bldg_SSP1.loc[2017:]['total_inflow'],
+    'inflow_LF_wood': sio_new_bldg_SSP1.loc[2017:]['inflow_LF_wood'],
+    'inflow_Mass_Timber': sio_new_bldg_SSP1.loc[2017:]['inflow_Mass_Timber'],
+    'inflow_Steel': sio_new_bldg_SSP1.loc[2017:]['inflow_Steel'],
+    'inflow_RC': sio_new_bldg_SSP1.loc[2017:]['inflow_RC'],
+    'inflow_RM': sio_new_bldg_SSP1.loc[2017:]['inflow_RM'],
+    'inflow_URM': sio_new_bldg_SSP1.loc[2017:]['inflow_URM'],
+    'inflow_MH': sio_new_bldg_SSP1.loc[2017:]['inflow_MH']
+})
+
+future_outflow = pd.DataFrame({
+    'outflow_all': os_existing_SSP1.loc[2017:]['total_outflow'] + sio_new_bldg_SSP1.loc[2017:]['total_outflow'],
+    'outflow_LF_wood': os_existing_SSP1.loc[2017:]['outflow_LF_wood'] + sio_new_bldg_SSP1.loc[2017:]['outflow_LF_wood'],
+    'outflow_Mass_Timber': os_existing_SSP1.loc[2017:]['outflow_Mass_Timber'] + sio_new_bldg_SSP1.loc[2017:]['outflow_Mass_Timber'],
+    'outflow_Steel': os_existing_SSP1.loc[2017:]['outflow_Steel'] + sio_new_bldg_SSP1.loc[2017:]['outflow_Steel'],
+    'outflow_RC': os_existing_SSP1.loc[2017:]['outflow_RC'] + sio_new_bldg_SSP1.loc[2017:]['outflow_RC'],
+    'outflow_RM': os_existing_SSP1.loc[2017:]['outflow_RM'] + sio_new_bldg_SSP1.loc[2017:]['outflow_RM'],
+    'outflow_URM': os_existing_SSP1.loc[2017:]['outflow_URM'] + sio_new_bldg_SSP1.loc[2017:]['outflow_URM'],
+    'outflow_MH': os_existing_SSP1.loc[2017:]['outflow_MH'] + sio_new_bldg_SSP1.loc[2017:]['outflow_MH']
+})
+
 
 
 
 ## Next steps
-# - add together outflows
 # - compute material inflows and material outflows from floor areas.
 
 

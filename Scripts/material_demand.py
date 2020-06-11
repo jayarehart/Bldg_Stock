@@ -95,7 +95,7 @@ def determine_outflow_existing_bldgs(FA_sc_SSP, plot=True, plot_title=''):
         O_C = DSM_existing_stock.o_c[np.diag_indices(len(DSM_existing_stock.t))] = 0 - np.diag(
             DSM_existing_stock.s_c)  # allow for outflow in year 0 already
         O = DSM_existing_stock.compute_outflow_total()
-        outflow_df = pd.DataFrame({'time': DSM_existing_stock.t, 'outflow': O})
+        outflow_df = pd.DataFrame({'time': DSM_existing_stock.t, 'outflow': O, 'stock': DSM_existing_stock.s})
         return outflow_df
 
     existing_outflow_LF_wood = determine_outflow_by_ss(lt=lt_existing,FA_sc_df=FA_sc_SSP,switch_year=196, frac_stock=structure_data_historical.LF_wood[0])
@@ -106,27 +106,34 @@ def determine_outflow_existing_bldgs(FA_sc_SSP, plot=True, plot_title=''):
     existing_outflow_URM = determine_outflow_by_ss(lt=lt_existing,FA_sc_df=FA_sc_SSP,switch_year=196, frac_stock=structure_data_historical.URM[0])
     existing_outflow_MH = determine_outflow_by_ss(lt=lt_existing,FA_sc_df=FA_sc_SSP,switch_year=196, frac_stock=structure_data_historical.MH[0])
 
-    existing_outflow_all = pd.DataFrame({
-                                         'outflow_LF_wood': existing_outflow_LF_wood.outflow,
+    existing_outflow_all = pd.DataFrame({'outflow_LF_wood': existing_outflow_LF_wood.outflow,
+                                         'stock_LF_wood': existing_outflow_LF_wood.stock,
                                          'outflow_Mass_Timber': existing_outflow_Mass_Timber.outflow,
+                                         'stock_Mass_Timber': existing_outflow_Mass_Timber.stock,
                                          'outflow_Steel': existing_outflow_Steel.outflow,
+                                         'stock_Steel': existing_outflow_Steel.stock,
                                          'outflow_RC': existing_outflow_RC.outflow,
+                                         'stock_RC': existing_outflow_RC.stock,
                                          'outflow_RM': existing_outflow_RM.outflow,
+                                         'stock_RM': existing_outflow_RM.stock,
                                          'outflow_URM': existing_outflow_URM.outflow,
-                                         'outflow_MH': existing_outflow_MH.outflow})
+                                         'stock_URM': existing_outflow_URM.stock,
+                                         'outflow_MH': existing_outflow_MH.outflow,
+                                         'stock_MH': existing_outflow_MH.stock,
+                                        })
     if plot == True:
         # plot the
-        existing_outflow_all.loc[2017:].plot.line()
+        existing_outflow_all.iloc[197:].plot.line()
         plt.ylabel('Floor Area (Mm2)')
         plt.title(plot_title + ': Outflow of Buildings Constructed before 2017')
         plt.show()
     return existing_outflow_all
 
-SSP1_existing_outflow = determine_outflow_existing_bldgs(FA_sc_SSP=FA_sc_SSP1, plot=True, plot_title='SSP1')
-SSP2_existing_outflow = determine_outflow_existing_bldgs(FA_sc_SSP=FA_sc_SSP2, plot=True, plot_title='SSP2')
-SSP3_existing_outflow = determine_outflow_existing_bldgs(FA_sc_SSP=FA_sc_SSP3, plot=True, plot_title='SSP3')
-SSP4_existing_outflow = determine_outflow_existing_bldgs(FA_sc_SSP=FA_sc_SSP4, plot=True, plot_title='SSP4')
-SSP5_existing_outflow = determine_outflow_existing_bldgs(FA_sc_SSP=FA_sc_SSP5, plot=True, plot_title='SSP5')
+o_existing_SSP1 = determine_outflow_existing_bldgs(FA_sc_SSP=FA_sc_SSP1, plot=True, plot_title='SSP1')
+o_existing_SSP2 = determine_outflow_existing_bldgs(FA_sc_SSP=FA_sc_SSP2, plot=True, plot_title='SSP2')
+o_existing_SSP3 = determine_outflow_existing_bldgs(FA_sc_SSP=FA_sc_SSP3, plot=True, plot_title='SSP3')
+o_existing_SSP4 = determine_outflow_existing_bldgs(FA_sc_SSP=FA_sc_SSP4, plot=True, plot_title='SSP4')
+o_existing_SSP5 = determine_outflow_existing_bldgs(FA_sc_SSP=FA_sc_SSP5, plot=True, plot_title='SSP5')
 
 
 def determine_inflow_outflow_new_bldg(scenario, FA_dsm_SSP=FA_dsm_SSP1, plot=True, plot_title='SSP1 '):
@@ -227,11 +234,13 @@ def determine_inflow_outflow_new_bldg(scenario, FA_dsm_SSP=FA_dsm_SSP1, plot=Tru
 
     return DSM_Future_all
 
-determine_inflow_outflow_new_bldg('S_timber_high',FA_dsm_SSP=FA_dsm_SSP1, plot=True, plot_title='SSP1 ')
-determine_inflow_outflow_new_bldg('S_timber_high',FA_dsm_SSP=FA_dsm_SSP2, plot=True, plot_title='SSP2 ')
-determine_inflow_outflow_new_bldg('S_timber_high',FA_dsm_SSP=FA_dsm_SSP3, plot=True, plot_title='SSP3 ')
-determine_inflow_outflow_new_bldg('S_timber_high',FA_dsm_SSP=FA_dsm_SSP4, plot=True, plot_title='SSP4 ')
-determine_inflow_outflow_new_bldg('S_timber_high',FA_dsm_SSP=FA_dsm_SSP5, plot=True, plot_title='SSP5 ')
+sio_new_bldg_SSP1 = determine_inflow_outflow_new_bldg('S_timber_high',FA_dsm_SSP=FA_dsm_SSP1, plot=False, plot_title='SSP1 ')
+sio_new_bldg_SSP2 = determine_inflow_outflow_new_bldg('S_timber_high',FA_dsm_SSP=FA_dsm_SSP2, plot=False, plot_title='SSP2 ')
+sio_new_bldg_SSP3 = determine_inflow_outflow_new_bldg('S_timber_high',FA_dsm_SSP=FA_dsm_SSP3, plot=False, plot_title='SSP3 ')
+sio_new_bldg_SSP4 = determine_inflow_outflow_new_bldg('S_timber_high',FA_dsm_SSP=FA_dsm_SSP4, plot=False, plot_title='SSP4 ')
+sio_new_bldg_SSP5 = determine_inflow_outflow_new_bldg('S_timber_high',FA_dsm_SSP=FA_dsm_SSP5, plot=False, plot_title='SSP5 ')
+
+
 
 
 

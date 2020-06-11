@@ -431,13 +431,14 @@ def generate_lt(type, par1, par2):
         lt = {'Type': type, 'Shape': np.array([par1]), 'Scale': np.array([par2])}
     return lt
 
-# lt_res = generate_lt('Weibull',par1=5, par2=100)
-# lt_com = generate_lt('Weibull',par1=4.8, par2=75.1)
-# lt_pub = generate_lt('Weibull',par1=6.1, par2=95.6)
-
 lt_res = generate_lt('Weibull',par1=5, par2=100)
-lt_com = generate_lt('Weibull',par1=5, par2=100)
-lt_pub = generate_lt('Weibull',par1=5, par2=100)
+lt_com = generate_lt('Weibull',par1=4.8, par2=75.1)
+lt_pub = generate_lt('Weibull',par1=6.1, par2=95.6)
+
+# Debugging
+# lt_res = generate_lt('Weibull',par1=5, par2=100)
+# lt_com = generate_lt('Weibull',par1=5, par2=100)
+# lt_pub = generate_lt('Weibull',par1=5, par2=100)
 
 # Plot lifetime distributions:
 plot_lifetime_distr=False

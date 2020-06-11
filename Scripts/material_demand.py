@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 from odym import dynamic_stock_model as dsm
 import numpy as np
 
+# ----------------------------------------------------------------------------------------------------
 # load in data from other scripts and excels
 structure_data_historical = pd.read_csv('./InputData/HAZUS_weight.csv')
 
@@ -38,15 +39,7 @@ materials_intensity_df = materials_intensity_df.drop(index='Source')
 scenario_df = pd.read_excel('./InputData/Material_data.xlsx', sheet_name='Adoption_clean')
 scenario_df = scenario_df.set_index('Scenario')
 
-
-
-# get total floor area stock and flows for the specific SSP loaded
-# total_area = FA_dsm_SSP1[['time','stock_total','inflow_total','outflow_total']]
-# total_area = total_area.set_index('time', drop=True)
-
-# Clean dataframes
-
-
+## ----------------------------------------------------------------------------------------------------
 # set years series
 years_future = FA_dsm_SSP1['time'].iloc[197:]
 years_all = FA_dsm_SSP1.index.to_series()
@@ -77,10 +70,13 @@ def generate_lt(type, par1, par2):
         lt = {'Type': type, 'Shape': np.array([par1]), 'Scale': np.array([par2])}
     return lt
 
-lt_existing = generate_lt('Weibull',par1=5, par2=100)        # lifetime distribution for existing buildings (all)
-lt_future = generate_lt('Weibull', par1=5, par2=100)
-# lt_existing = generate_lt('Weibull',par1=((0.773497 * 5) + (0.142467 * 4.8) + (0.030018 * 6.1)), par2=((0.773497 * 100) + (0.142467 * 75.1) + (0.030018 * 95.6)))        # weighted average of res, com, and pub
-# lt_future = generate_lt('Weibull',par1=((0.773497 * 5) + (0.142467 * 4.8) + (0.030018 * 6.1)), par2=((0.773497 * 100) + (0.142467 * 75.1) + (0.030018 * 95.6)))        # weighted average of res, com, and pub
+# Debugging
+# lt_existing = generate_lt('Weibull',par1=5, par2=100)        # lifetime distribution for existing buildings (all)
+# lt_future = generate_lt('Weibull', par1=5, par2=100)
+
+# Lifetime parameters
+lt_existing = generate_lt('Weibull',par1=((0.773497 * 5) + (0.142467 * 4.8) + (0.030018 * 6.1)), par2=((0.773497 * 100) + (0.142467 * 75.1) + (0.030018 * 95.6)))        # weighted average of res, com, and pub
+lt_future = generate_lt('Weibull',par1=((0.773497 * 5) + (0.142467 * 4.8) + (0.030018 * 6.1)), par2=((0.773497 * 100) + (0.142467 * 75.1) + (0.030018 * 95.6)))        # weighted average of res, com, and pub
 
 # of outflow of each structural system type for already built buildings (before 2017). No new construction is considered in this analysis
 def determine_outflow_existing_bldgs(FA_sc_SSP, plot=True, plot_title=''):
@@ -311,7 +307,6 @@ print('Mean percent difference in outflow is = ' + str(np.mean(check_df_outflow[
 
 
 ## Next steps
-# - check mass balance after split out
 # - add together outflows
 # - compute material inflows and material outflows from floor areas.
 

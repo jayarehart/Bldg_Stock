@@ -14,16 +14,21 @@ import numpy as np
 structure_data_historical = pd.read_csv('./InputData/HAZUS_weight.csv')
 
 FA_dsm_SSP1 = pd.read_excel('./Results/SSP_dsm.xlsx', sheet_name='SSP1')
-FA_dsm_SSP2 = pd.read_excel('./Results/SSP_dsm.xlsx', sheet_name='SSP2')
-FA_dsm_SSP3 = pd.read_excel('./Results/SSP_dsm.xlsx', sheet_name='SSP3')
-FA_dsm_SSP4 = pd.read_excel('./Results/SSP_dsm.xlsx', sheet_name='SSP4')
-FA_dsm_SSP5 = pd.read_excel('./Results/SSP_dsm.xlsx', sheet_name='SSP5')
+FA_dsm_SSP1 = FA_dsm_SSP1.set_index('time',drop=False)
+# FA_dsm_SSP2 = pd.read_excel('./Results/SSP_dsm.xlsx', sheet_name='SSP2')
+# FA_dsm_SSP2 = FA_dsm_SSP1.set_index('time',drop=False)
+# FA_dsm_SSP3 = pd.read_excel('./Results/SSP_dsm.xlsx', sheet_name='SSP3')
+# FA_dsm_SSP3 = FA_dsm_SSP1.set_index('time',drop=False)
+# FA_dsm_SSP4 = pd.read_excel('./Results/SSP_dsm.xlsx', sheet_name='SSP4')
+# FA_dsm_SSP4 = FA_dsm_SSP1.set_index('time',drop=False)
+# FA_dsm_SSP5 = pd.read_excel('./Results/SSP_dsm.xlsx', sheet_name='SSP5')
+# FA_dsm_SSP5 = FA_dsm_SSP1.set_index('time',drop=False)
 
 FA_sc_SSP1 = pd.read_excel('./Results/SSP_dsm.xlsx', sheet_name='SSP1_sc')
-FA_sc_SSP2 = pd.read_excel('./Results/SSP_dsm.xlsx', sheet_name='SSP2_sc')
-FA_sc_SSP3 = pd.read_excel('./Results/SSP_dsm.xlsx', sheet_name='SSP3_sc')
-FA_sc_SSP4 = pd.read_excel('./Results/SSP_dsm.xlsx', sheet_name='SSP4_sc')
-FA_sc_SSP5 = pd.read_excel('./Results/SSP_dsm.xlsx', sheet_name='SSP5_sc')
+# FA_sc_SSP2 = pd.read_excel('./Results/SSP_dsm.xlsx', sheet_name='SSP2_sc')
+# FA_sc_SSP3 = pd.read_excel('./Results/SSP_dsm.xlsx', sheet_name='SSP3_sc')
+# FA_sc_SSP4 = pd.read_excel('./Results/SSP_dsm.xlsx', sheet_name='SSP4_sc')
+# FA_sc_SSP5 = pd.read_excel('./Results/SSP_dsm.xlsx', sheet_name='SSP5_sc')
 
 materials_intensity = pd.read_excel('./InputData/Material_data.xlsx', sheet_name='SSP1_density')
 materials_intensity_df = materials_intensity.set_index('Structure_Type', drop=True)
@@ -43,7 +48,7 @@ scenario_df = scenario_df.set_index('Scenario')
 
 
 # set years series
-years_future = FA_dsm_SSP1['time'].loc[197:]
+years_future = FA_dsm_SSP1['time'].iloc[197:]
 years_all = FA_dsm_SSP1.index.to_series()
 
 # compute a lifetime distribution
@@ -72,32 +77,35 @@ def generate_lt(type, par1, par2):
         lt = {'Type': type, 'Shape': np.array([par1]), 'Scale': np.array([par2])}
     return lt
 
-lt_existing = generate_lt('Weibull',par1=5, par2=75)        # lifetime distribution for existing buildings (all)
-lt_future = generate_lt('Weibull', par1=5, par2=100)
-# lt_res = generate_lt('Normal',par1=35, par2=10)
+# lt_existing = generate_lt('Weibull',par1=5, par2=85)        # lifetime distribution for existing buildings (all)
+# lt_future = generate_lt('Weibull', par1=5, par2=85)
+lt_existing = generate_lt('Weibull',par1=((0.773497 * 5) + (0.142467 * 4.8) + (0.030018 * 6.1)), par2=((0.773497 * 100) + (0.142467 * 75.1) + (0.030018 * 95.6)))        # weighted average of res, com, and pub
+lt_future = generate_lt('Weibull',par1=((0.773497 * 5) + (0.142467 * 4.8) + (0.030018 * 6.1)), par2=((0.773497 * 100) + (0.142467 * 75.1) + (0.030018 * 95.6)))        # weighted average of res, com, and pub
 
-# area of outflow of each structural system type for already built buildings (before 2017). No new construction is considered in this analysis
+# of outflow of each structural system type for already built buildings (before 2017). No new construction is considered in this analysis
 def determine_outflow_existing_bldgs(FA_sc_SSP, plot=True, plot_title=''):
     '''Input a floor area stock-cohort matrix for each SSP and compute the outflow for each structural system that are already built.
      Key assumption is that construction techniques are the same each year. '''
 
-    # compute an outflow for the existing stock using a compute evolution from initial stock method
+    # compute an outflow for the existing stock using a "compute evolution from initial stock method"
     def determine_outflow_by_ss(lt=lt_existing, FA_sc_df=FA_sc_SSP, switch_year=196, frac_stock=1.0):
         '''Compute the outflow of the existing building stock with no additional inflow.
         A switch year of 196 represents 2016.
         frac_stock is the ratio of the exisitng building stock that is a particular structural system.
         For frac_stock = 1.0, all of the stock is considered to be the same. '''
         DSM_existing_stock = dsm.DynamicStockModel(t=years_all, lt=lt_existing)
-        S_C = DSM_existing_stock.compute_evolution_initialstock(
-            InitialStock=FA_sc_SSP.loc[(switch_year - 1), 0:(switch_year - 1)] * frac_stock, SwitchTime=switch_year)
+        S_C = DSM_existing_stock.compute_evolution_initialstock(InitialStock=FA_sc_SSP.loc[(switch_year - 1), 0:(switch_year - 1)] * frac_stock, SwitchTime=switch_year)
         # compute outflow
         O_C = DSM_existing_stock.o_c[1::, :] = -1 * np.diff(DSM_existing_stock.s_c, n=1, axis=0)
         O_C = DSM_existing_stock.o_c[np.diag_indices(len(DSM_existing_stock.t))] = 0 - np.diag(
             DSM_existing_stock.s_c)  # allow for outflow in year 0 already
         O = DSM_existing_stock.compute_outflow_total()
-        outflow_df = pd.DataFrame({'time': DSM_existing_stock.t, 'outflow': O, 'stock': DSM_existing_stock.s})
+        # compute stock
+        S = DSM_existing_stock.s_c.sum(axis=1)
+        outflow_df = pd.DataFrame({'time': DSM_existing_stock.t, 'outflow': O, 'stock': S})
         return outflow_df
 
+    existing_outflow_total = determine_outflow_by_ss(lt=lt_existing,FA_sc_df=FA_sc_SSP,switch_year=196, frac_stock=1.0)
     existing_outflow_LF_wood = determine_outflow_by_ss(lt=lt_existing,FA_sc_df=FA_sc_SSP,switch_year=196, frac_stock=structure_data_historical.LF_wood[0])
     existing_outflow_Mass_Timber = determine_outflow_by_ss(lt=lt_existing,FA_sc_df=FA_sc_SSP,switch_year=196, frac_stock=structure_data_historical.Mass_Timber[0])
     existing_outflow_Steel = determine_outflow_by_ss(lt=lt_existing,FA_sc_df=FA_sc_SSP,switch_year=196, frac_stock=structure_data_historical.Steel[0])
@@ -106,7 +114,8 @@ def determine_outflow_existing_bldgs(FA_sc_SSP, plot=True, plot_title=''):
     existing_outflow_URM = determine_outflow_by_ss(lt=lt_existing,FA_sc_df=FA_sc_SSP,switch_year=196, frac_stock=structure_data_historical.URM[0])
     existing_outflow_MH = determine_outflow_by_ss(lt=lt_existing,FA_sc_df=FA_sc_SSP,switch_year=196, frac_stock=structure_data_historical.MH[0])
 
-    existing_outflow_all = pd.DataFrame({'outflow_LF_wood': existing_outflow_LF_wood.outflow,
+    existing_outflow_all = pd.DataFrame({
+                                         'outflow_LF_wood': existing_outflow_LF_wood.outflow,
                                          'stock_LF_wood': existing_outflow_LF_wood.stock,
                                          'outflow_Mass_Timber': existing_outflow_Mass_Timber.outflow,
                                          'stock_Mass_Timber': existing_outflow_Mass_Timber.stock,
@@ -120,20 +129,38 @@ def determine_outflow_existing_bldgs(FA_sc_SSP, plot=True, plot_title=''):
                                          'stock_URM': existing_outflow_URM.stock,
                                          'outflow_MH': existing_outflow_MH.outflow,
                                          'stock_MH': existing_outflow_MH.stock,
+                                         'total_outflow': existing_outflow_total.outflow,
+                                         'total_stock': existing_outflow_total.stock
                                         })
+    existing_outflow_all = existing_outflow_all.set_index(FA_dsm_SSP1['time'])
     if plot == True:
-        # plot the
-        existing_outflow_all.iloc[197:].plot.line()
+        # plot the outflow and the stock
+        existing_outflow = existing_outflow_all.loc[:, existing_outflow_all.columns.str.contains('outflow')]
+        existing_stock = existing_outflow_all.loc[:, existing_outflow_all.columns.str.contains('stock')]
+
+        existing_outflow.iloc[197:].plot.line()
         plt.ylabel('Floor Area (Mm2)')
         plt.title(plot_title + ': Outflow of Buildings Constructed before 2017')
-        plt.show()
+        plt.show();
+
+        existing_stock.iloc[197:].plot.line()
+        plt.ylabel('Floor Area (Mm2)')
+        plt.title(plot_title + ': Stock of Buildings Constructed before 2017')
+        plt.show();
+
+
+        # existing_outflow_all.iloc[197:].plot.line()
+        # plt.ylabel('Floor Area (Mm2)')
+        # plt.title(plot_title + ': Outflow of Buildings Constructed before 2017')
+        # plt.show()
     return existing_outflow_all
 
-o_existing_SSP1 = determine_outflow_existing_bldgs(FA_sc_SSP=FA_sc_SSP1, plot=True, plot_title='SSP1')
-o_existing_SSP2 = determine_outflow_existing_bldgs(FA_sc_SSP=FA_sc_SSP2, plot=True, plot_title='SSP2')
-o_existing_SSP3 = determine_outflow_existing_bldgs(FA_sc_SSP=FA_sc_SSP3, plot=True, plot_title='SSP3')
-o_existing_SSP4 = determine_outflow_existing_bldgs(FA_sc_SSP=FA_sc_SSP4, plot=True, plot_title='SSP4')
-o_existing_SSP5 = determine_outflow_existing_bldgs(FA_sc_SSP=FA_sc_SSP5, plot=True, plot_title='SSP5')
+# area by structural system of outlow and stock of all existing buildings (built before 2017)
+os_existing_SSP1 = determine_outflow_existing_bldgs(FA_sc_SSP=FA_sc_SSP1, plot=True, plot_title='SSP1')
+# os_existing_SSP2 = determine_outflow_existing_bldgs(FA_sc_SSP=FA_sc_SSP2, plot=True, plot_title='SSP2')
+# os_existing_SSP3 = determine_outflow_existing_bldgs(FA_sc_SSP=FA_sc_SSP3, plot=True, plot_title='SSP3')
+# os_existing_SSP4 = determine_outflow_existing_bldgs(FA_sc_SSP=FA_sc_SSP4, plot=True, plot_title='SSP4')
+# os_existing_SSP5 = determine_outflow_existing_bldgs(FA_sc_SSP=FA_sc_SSP5, plot=True, plot_title='SSP5')
 
 
 def determine_inflow_outflow_new_bldg(scenario, FA_dsm_SSP=FA_dsm_SSP1, plot=True, plot_title='SSP1 '):
@@ -167,6 +194,8 @@ def determine_inflow_outflow_new_bldg(scenario, FA_dsm_SSP=FA_dsm_SSP1, plot=Tru
     )
 
     def compute_inflow_driven_model_ea_ss(structural_system):
+        ''' Compute an inflow driven model for each structural system.
+         The lifetime distribution in the future is assumed to be lt_future'''
         # compute a inflow driven model for each structural system
         DSM_Inflow_x = dsm.DynamicStockModel(t=years_future, i=inflow_SSP_all['inflow_' + structural_system], lt=lt_future)
         # CheckStr = DSM_Inflow.dimension_check()
@@ -179,6 +208,7 @@ def determine_inflow_outflow_new_bldg(scenario, FA_dsm_SSP=FA_dsm_SSP1, plot=Tru
         DSM_Inflow_x.o = pd.Series(DSM_Inflow_x.o, index=DSM_Inflow_x.t)
         return DSM_Inflow_x
 
+    # compute an inflow driven model for new construction in the future
     DSM_Inflow_LF_wood = compute_inflow_driven_model_ea_ss(structural_system='LF_wood')
     DSM_Inflow_Mass_Timber = compute_inflow_driven_model_ea_ss('Mass_Timber')
     DSM_Inflow_Steel = compute_inflow_driven_model_ea_ss('Steel')
@@ -189,27 +219,30 @@ def determine_inflow_outflow_new_bldg(scenario, FA_dsm_SSP=FA_dsm_SSP1, plot=Tru
 
     # summary dataframe of all DSM stocks, inflows, outflows
     DSM_Future_all = pd.DataFrame({
-        'LF_wood_inflow' : DSM_Inflow_LF_wood.i,
-        'LF_wood_outflow': DSM_Inflow_LF_wood.o,
-        'LF_wood_stock': DSM_Inflow_LF_wood.s,
-        'Mass_Timber_inflow': DSM_Inflow_Mass_Timber.i,
-        'Mass_Timber_outflow': DSM_Inflow_Mass_Timber.o,
-        'Mass_Timber_stock': DSM_Inflow_Mass_Timber.s,
-        'Steel_inflow': DSM_Inflow_Steel.i,
-        'Steel_outflow': DSM_Inflow_Steel.o,
-        'Steel_stock': DSM_Inflow_Steel.s,
-        'RC_inflow': DSM_Inflow_RC.i,
-        'RC_outflow': DSM_Inflow_RC.o,
-        'RC_stock': DSM_Inflow_RC.s,
-        'RM_inflow': DSM_Inflow_RM.i,
-        'RM_outflow': DSM_Inflow_RM.o,
-        'RM_stock': DSM_Inflow_RM.s,
-        'URM_inflow': DSM_Inflow_URM.i,
-        'URM_outflow': DSM_Inflow_URM.o,
-        'URM_stock': DSM_Inflow_URM.s,
-        'MH_inflow': DSM_Inflow_MH.i,
-        'MH_outflow': DSM_Inflow_MH.o,
-        'MH_stock': DSM_Inflow_MH.s,
+        'inflow_LF_wood' : DSM_Inflow_LF_wood.i,
+        'outflow_LF_wood': DSM_Inflow_LF_wood.o,
+        'stock_LF_wood': DSM_Inflow_LF_wood.s,
+        'inflow_Mass_Timber': DSM_Inflow_Mass_Timber.i,
+        'outflow_Mass_Timber': DSM_Inflow_Mass_Timber.o,
+        'stock_Mass_Timber': DSM_Inflow_Mass_Timber.s,
+        'inflow_Steel': DSM_Inflow_Steel.i,
+        'outflow_Steel': DSM_Inflow_Steel.o,
+        'stock_Steel': DSM_Inflow_Steel.s,
+        'inflow_RC': DSM_Inflow_RC.i,
+        'outflow_RC': DSM_Inflow_RC.o,
+        'stock_RC': DSM_Inflow_RC.s,
+        'inflow_RM': DSM_Inflow_RM.i,
+        'outflow_RM': DSM_Inflow_RM.o,
+        'stock_RM': DSM_Inflow_RM.s,
+        'inflow_URM': DSM_Inflow_URM.i,
+        'outflow_URM': DSM_Inflow_URM.o,
+        'stock_URM': DSM_Inflow_URM.s,
+        'inflow_MH': DSM_Inflow_MH.i,
+        'outflow_MH': DSM_Inflow_MH.o,
+        'stock_MH': DSM_Inflow_MH.s,
+        'total_inflow':  DSM_Inflow_LF_wood.i + DSM_Inflow_Mass_Timber.i + DSM_Inflow_Steel.i + DSM_Inflow_RC.i + DSM_Inflow_RM.i + DSM_Inflow_URM.i + DSM_Inflow_MH.i,
+        'total_outflow': DSM_Inflow_LF_wood.o + DSM_Inflow_Mass_Timber.o + DSM_Inflow_Steel.o + DSM_Inflow_RC.o + DSM_Inflow_RM.o + DSM_Inflow_URM.o + DSM_Inflow_MH.o,
+        'total_stock':   DSM_Inflow_LF_wood.s + DSM_Inflow_Mass_Timber.s + DSM_Inflow_Steel.s + DSM_Inflow_RC.s + DSM_Inflow_RM.s + DSM_Inflow_URM.s + DSM_Inflow_MH.s
     })
 
     if plot==True:
@@ -234,17 +267,49 @@ def determine_inflow_outflow_new_bldg(scenario, FA_dsm_SSP=FA_dsm_SSP1, plot=Tru
 
     return DSM_Future_all
 
-sio_new_bldg_SSP1 = determine_inflow_outflow_new_bldg('S_timber_high',FA_dsm_SSP=FA_dsm_SSP1, plot=False, plot_title='SSP1 ')
-sio_new_bldg_SSP2 = determine_inflow_outflow_new_bldg('S_timber_high',FA_dsm_SSP=FA_dsm_SSP2, plot=False, plot_title='SSP2 ')
-sio_new_bldg_SSP3 = determine_inflow_outflow_new_bldg('S_timber_high',FA_dsm_SSP=FA_dsm_SSP3, plot=False, plot_title='SSP3 ')
-sio_new_bldg_SSP4 = determine_inflow_outflow_new_bldg('S_timber_high',FA_dsm_SSP=FA_dsm_SSP4, plot=False, plot_title='SSP4 ')
-sio_new_bldg_SSP5 = determine_inflow_outflow_new_bldg('S_timber_high',FA_dsm_SSP=FA_dsm_SSP5, plot=False, plot_title='SSP5 ')
+# area by structural system of stock, inflow, and outflow of all new buildings (built after 2017)
+sio_new_bldg_SSP1 = determine_inflow_outflow_new_bldg(scenario='S_0',FA_dsm_SSP=FA_dsm_SSP1, plot=True, plot_title='SSP1 ')
+# sio_new_bldg_SSP2 = determine_inflow_outflow_new_bldg('S_timber_high',FA_dsm_SSP=FA_dsm_SSP2, plot=False, plot_title='SSP2 ')
+# sio_new_bldg_SSP3 = determine_inflow_outflow_new_bldg('S_timber_high',FA_dsm_SSP=FA_dsm_SSP3, plot=False, plot_title='SSP3 ')
+# sio_new_bldg_SSP4 = determine_inflow_outflow_new_bldg('S_timber_high',FA_dsm_SSP=FA_dsm_SSP4, plot=False, plot_title='SSP4 ')
+# sio_new_bldg_SSP5 = determine_inflow_outflow_new_bldg('S_timber_high',FA_dsm_SSP=FA_dsm_SSP5, plot=False, plot_title='SSP5 ')
 
+## check to see if stocks match
+# initial stock check
+FA_sc_SSP1_check = FA_sc_SSP1.sum(axis=1)
+FA_sc_SSP1_check.index = FA_dsm_SSP1.index
+sum(FA_sc_SSP1_check - FA_dsm_SSP1['stock_total'])
+
+#
+check_df_stock = pd.DataFrame({
+    'existing_stock': os_existing_SSP1.loc[2017:]['total_stock'],
+    'new_stock': sio_new_bldg_SSP1.loc[2017:]['total_stock'],
+    'sum_stock': os_existing_SSP1.loc[2017:]['total_stock'] + sio_new_bldg_SSP1.loc[2017:]['total_stock'],
+    'correct_stock': FA_dsm_SSP1.loc[2017:]['stock_total'],
+    'difference': FA_dsm_SSP1.loc[2017:]['stock_total'] - (os_existing_SSP1.loc[2017:]['total_stock'] + sio_new_bldg_SSP1.loc[2017:]['total_stock'])
+})
+
+check_df_inflow = pd.DataFrame({
+    'new_inflow': sio_new_bldg_SSP1.loc[2017:]['total_inflow'],
+    'correct_inflow': FA_dsm_SSP1.loc[2017:]['inflow_total'],
+    'difference': sio_new_bldg_SSP1.loc[2017:]['total_inflow'] - FA_dsm_SSP1.loc[2017:]['inflow_total']
+})
+
+check_df_outflow = pd.DataFrame({
+    'existing_outflow': os_existing_SSP1.loc[2017:]['total_outflow'],
+    'new_outflow': sio_new_bldg_SSP1.loc[2017:]['total_outflow'],
+    'correct_outflow': FA_dsm_SSP1.loc[2017:]['outflow_total'],
+    'difference': os_existing_SSP1.loc[2017:]['total_outflow'] + sio_new_bldg_SSP1.loc[2017:]['total_outflow'] - FA_dsm_SSP1.loc[2017:]['outflow_total']
+})
+
+
+x = (os_existing_SSP1.loc[2017:]['total_stock'] + sio_new_bldg_SSP1.loc[2017:]['total_stock']) - FA_dsm_SSP1.loc[2017:]['stock_total']
 
 
 
 
 ## Next steps
+# - check mass balance after split out
 # - add together outflows
 # - compute material inflows and material outflows from floor areas.
 

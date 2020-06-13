@@ -41,7 +41,7 @@ scenario_df = scenario_df.set_index('Scenario')
 
 ## ----------------------------------------------------------------------------------------------------
 # set years series
-years_future = FA_dsm_SSP1['time'].iloc[197:]
+years_future = FA_dsm_SSP1['time'].iloc[197:]       #2017 is 197
 years_all = FA_dsm_SSP1.index.to_series()
 
 # compute a lifetime distribution
@@ -81,7 +81,7 @@ lt_future = generate_lt('Weibull', par1=((0.773497 * 5) + (0.142467 * 4.8) + (0.
             (0.773497 * 100) + (0.142467 * 75.1) + (0.030018 * 95.6)))  # weighted average of res, com, and pub
 
 ## ----------------------------------------------------------------------------------------------------
-
+# All Functions
 # of outflow of each structural system type for already built buildings (before 2017). No new construction is considered in this analysis
 def determine_outflow_existing_bldgs(FA_sc_SSP, plot=True, plot_title=''):
     '''Input a floor area stock-cohort matrix for each SSP and compute the outflow for each structural system that are already built.
@@ -164,15 +164,6 @@ def determine_outflow_existing_bldgs(FA_sc_SSP, plot=True, plot_title=''):
         # plt.show()
     return existing_outflow_all
 
-
-# area by structural system of outlow and stock of all existing buildings (built before 2017)
-os_existing_SSP1 = determine_outflow_existing_bldgs(FA_sc_SSP=FA_sc_SSP1, plot=True, plot_title='SSP1')
-# os_existing_SSP2 = determine_outflow_existing_bldgs(FA_sc_SSP=FA_sc_SSP2, plot=True, plot_title='SSP2')
-os_existing_SSP3 = determine_outflow_existing_bldgs(FA_sc_SSP=FA_sc_SSP3, plot=True, plot_title='SSP3')
-# os_existing_SSP4 = determine_outflow_existing_bldgs(FA_sc_SSP=FA_sc_SSP4, plot=True, plot_title='SSP4')
-# os_existing_SSP5 = determine_outflow_existing_bldgs(FA_sc_SSP=FA_sc_SSP5, plot=True, plot_title='SSP5')
-
-
 def determine_inflow_outflow_new_bldg(scenario, FA_dsm_SSP=FA_dsm_SSP1, lt=lt_future, plot=True, plot_title='SSP1 '):
     # Select a scenario
     # scenario = 'S_0'    # new construction is same as exiting building stock
@@ -190,7 +181,7 @@ def determine_inflow_outflow_new_bldg(scenario, FA_dsm_SSP=FA_dsm_SSP1, lt=lt_fu
          'MH': scenario_df.MH[scenario]},
         index=[0])
 
-    # separate inflow by structural system ratio for each scenario
+    # separate inflow by structural system ratio for each scenario              # CAN IMPLEMENT VARIABLE ADOPTION HERE
     inflow_SSP_all = pd.DataFrame(
         {'inflow_total': FA_dsm_SSP.loc[2017:2100, 'inflow_total'],
          'inflow_LF_wood': FA_dsm_SSP.loc[2017:2100, 'inflow_total'] * structure_data_scenario.LF_wood[0],
@@ -283,54 +274,6 @@ def determine_inflow_outflow_new_bldg(scenario, FA_dsm_SSP=FA_dsm_SSP1, lt=lt_fu
 
     return DSM_Future_all
 
-
-# area by structural system of stock, inflow, and outflow of all new buildings (built after 2017)
-# Scenario 1
-sio_new_bldg_SSP1_S_0 = determine_inflow_outflow_new_bldg(scenario='S_0', FA_dsm_SSP=FA_dsm_SSP1,
-                                                                    lt=lt_future, plot=False, plot_title='SSP1 ')
-# Scenario 2
-sio_new_bldg_SSP1_S_timber_high = determine_inflow_outflow_new_bldg(scenario='S_timber_high', FA_dsm_SSP=FA_dsm_SSP1,
-                                                                    lt=lt_future, plot=False, plot_title='SSP1 ')
-# Scenario 3
-sio_new_bldg_SSP1_S_dens_40p = determine_inflow_outflow_new_bldg(scenario='S_densification_40p_LF_wood', FA_dsm_SSP=FA_dsm_SSP1,
-                                                                    lt=lt_future, plot=True, plot_title='SSP1 ')
-# Scenario 4
-sio_new_bldg_SSP3_S_0 = determine_inflow_outflow_new_bldg(scenario='S_0', FA_dsm_SSP=FA_dsm_SSP3,
-                                                                    lt=lt_future, plot=False, plot_title='SSP3 ')
-# Scenario 5
-sio_new_bldg_SSP3_S_timber_high = determine_inflow_outflow_new_bldg(scenario='S_timber_high', FA_dsm_SSP=FA_dsm_SSP3,
-                                                                    lt=lt_future, plot=False, plot_title='SSP3 ')
-
-## Check to see if stocks match:
-# check to see if how much the inflow, outflow, and stocks differ from the original stock-driven model for SSP1
-check_df_stock = pd.DataFrame({
-    'existing_stock': os_existing_SSP1.loc[2017:]['total_stock'],
-    'new_stock': sio_new_bldg_SSP1_S_0.loc[2017:]['total_stock'],
-    'sum_stock': os_existing_SSP1.loc[2017:]['total_stock'] + sio_new_bldg_SSP1_S_0.loc[2017:]['total_stock'],
-    'correct_stock': FA_dsm_SSP1.loc[2017:]['stock_total'],
-    'percent_difference': (FA_dsm_SSP1.loc[2017:]['stock_total'] - (
-                os_existing_SSP1.loc[2017:]['total_stock'] + sio_new_bldg_SSP1_S_0.loc[2017:]['total_stock'])) /
-                          FA_dsm_SSP1.loc[2017:]['stock_total']
-})
-check_df_inflow = pd.DataFrame({
-    'new_inflow': sio_new_bldg_SSP1_S_0.loc[2017:]['total_inflow'],
-    'correct_inflow': FA_dsm_SSP1.loc[2017:]['inflow_total'],
-    'difference': sio_new_bldg_SSP1_S_0.loc[2017:]['total_inflow'] - FA_dsm_SSP1.loc[2017:]['inflow_total']
-})
-check_df_outflow = pd.DataFrame({
-    'existing_outflow': os_existing_SSP1.loc[2017:]['total_outflow'],
-    'new_outflow': sio_new_bldg_SSP1_S_0.loc[2017:]['total_outflow'],
-    'correct_outflow': FA_dsm_SSP1.loc[2017:]['outflow_total'],
-    'percent_difference': (os_existing_SSP1.loc[2017:]['total_outflow'] + sio_new_bldg_SSP1_S_0.loc[2017:][
-        'total_outflow'] - FA_dsm_SSP1.loc[2017:]['outflow_total']) / FA_dsm_SSP1.loc[2017:]['outflow_total']
-})
-# print results of the check
-print('Mean percent difference in stock is = ' + str(np.mean(check_df_stock['percent_difference']) * 100) + '%')
-print('Mean  difference in inflow is = ' + str(np.mean(check_df_inflow['difference'])))
-print('Mean percent difference in outflow is = ' + str(np.mean(check_df_outflow['percent_difference']) * 100) + '%')
-
-
-# # ------------------------------------------------------------------------------------
 # combine and plot area inflow and outflows after differentiating between existing buildings and new construction
 def combine_area_existing_and_new(os_existing, sio_new_bldg, plot=True, plot_title='SSP#, Scenario'):
     area_stock_2017_2100 = pd.DataFrame({
@@ -416,24 +359,6 @@ def combine_area_existing_and_new(os_existing, sio_new_bldg, plot=True, plot_tit
 
     return area_inflow_2017_2100, area_outflow_2017_2100, area_stock_2017_2100
 
-# Scenario 1
-area_inflow_2017_2100_SSP1_S_0, area_outflow_2017_2100_SSP1_S_0, area_stock_2017_2100_SSP1_S0 = combine_area_existing_and_new(
-    os_existing=os_existing_SSP1, sio_new_bldg=sio_new_bldg_SSP1_S_0, plot=False, plot_title='SSP1, S0')
-# Scenario 2
-area_inflow_2017_2100_SSP1_S_timber_high, area_outflow_2017_2100_SSP1_S_timber_high, area_stock_2017_2100_SSP1_S_timber_high = combine_area_existing_and_new(
-    os_existing=os_existing_SSP1, sio_new_bldg=sio_new_bldg_SSP1_S_timber_high, plot=False, plot_title='SSP1, S_timber_high')
-# Scenario 3
-area_inflow_2017_2100_SSP1_S_dens_40p, area_outflow_2017_2100_SSP1_S_dens_40p, area_stock_2017_2100_SSP1_S_dens_40p = combine_area_existing_and_new(
-    os_existing=os_existing_SSP1, sio_new_bldg=sio_new_bldg_SSP1_S_dens_40p, plot=False, plot_title='SSP1, dens-40p')
-# Scenario 4
-area_inflow_2017_2100_SSP3_S_0, area_outflow_2017_2100_SSP3_S_0, area_stock_2017_2100_SSP3_S_0, = combine_area_existing_and_new(
-    os_existing=os_existing_SSP3, sio_new_bldg=sio_new_bldg_SSP3_S_0, plot=False, plot_title='SSP3, S0')
-# Scenario 5
-area_inflow_2017_2100_SSP3_S_timber_high, area_outflow_2017_2100_SSP3_S_timber_high, area_stock_2017_2100_SSP3_S_timber_high = combine_area_existing_and_new(
-    os_existing = os_existing_SSP3, sio_new_bldg=sio_new_bldg_SSP3_S_timber_high, plot=False, plot_title='SSP3, S_timber_high')
-
-
-# # ------------------------------------------------------------------------------------
 # Calculate material demand by structural system
 def calc_inflow_outflow_stock_mats(area_inflow_2017_2100, area_outflow_2017_2100, area_stock_2017_2100,
                                    materials_intensity_df, print_year=2020, detailed=False):
@@ -760,45 +685,97 @@ def calc_inflow_outflow_stock_mats(area_inflow_2017_2100, area_outflow_2017_2100
                                                                                            inflow_mat_all.columns.str.contains(
                                                                                                'Sum')]
 
+## ----------------------------------------------------------------------------------------------------
 
-# List of all inflows, outflows, and stocks
+# area by structural system of outlow and stock of all existing buildings (built before 2017)
+os_existing_SSP1 = determine_outflow_existing_bldgs(FA_sc_SSP=FA_sc_SSP1, plot=False, plot_title='SSP1')
+# os_existing_SSP2 = determine_outflow_existing_bldgs(FA_sc_SSP=FA_sc_SSP2, plot=False, plot_title='SSP2')
+os_existing_SSP3 = determine_outflow_existing_bldgs(FA_sc_SSP=FA_sc_SSP3, plot=False, plot_title='SSP3')
+# os_existing_SSP4 = determine_outflow_existing_bldgs(FA_sc_SSP=FA_sc_SSP4, plot=False, plot_title='SSP4')
+# os_existing_SSP5 = determine_outflow_existing_bldgs(FA_sc_SSP=FA_sc_SSP5, plot=False, plot_title='SSP5')
 
+# # ------------------------------------------------------------------------------------
+# SCENARIO DEFINITIONS
 # Scenario 1
-my_inflow_SSP1_S0, my_outflow_SSP1_S0, my_stock_SSP1_S0 = calc_inflow_outflow_stock_mats(
-    area_inflow_2017_2100=area_inflow_2017_2100_SSP1_S_0,
-    area_outflow_2017_2100=area_outflow_2017_2100_SSP1_S_0,
-    area_stock_2017_2100=area_stock_2017_2100_SSP1_S0,
-    materials_intensity_df=materials_intensity_df,
-    print_year=2020)
-# Scenario 2
-my_inflow_SSP1_S_timber_high, my_outflow_SSP1_S_timber_high, my_stock_SSP1_S_timber_high = calc_inflow_outflow_stock_mats(
-    area_inflow_2017_2100=area_inflow_2017_2100_SSP1_S_timber_high,
-    area_outflow_2017_2100=area_outflow_2017_2100_SSP1_S_timber_high,
-    area_stock_2017_2100=area_stock_2017_2100_SSP1_S_timber_high,
-    materials_intensity_df=materials_intensity_df,
-    print_year=2020)
-# Scenario 3
-my_inflow_SSP1_S_dens_40p, my_outflow_SSP1_S_dens_40p, my_stock_SSP1_S_dens_40p, = calc_inflow_outflow_stock_mats(
-    area_inflow_2017_2100=area_inflow_2017_2100_SSP1_S_dens_40p,
-    area_outflow_2017_2100=area_outflow_2017_2100_SSP1_S_dens_40p,
-    area_stock_2017_2100= area_stock_2017_2100_SSP1_S_dens_40p,
-    materials_intensity_df= materials_intensity_df,
-    print_year=2020)
-# Scenario 4
-my_inflow_SSP3_S_0, my_outflow_SSP3_S_0, my_stock_SSP3_S_0, = calc_inflow_outflow_stock_mats(
-    area_inflow_2017_2100=area_inflow_2017_2100_SSP3_S_0,
-    area_outflow_2017_2100=area_outflow_2017_2100_SSP3_S_0,
-    area_stock_2017_2100= area_stock_2017_2100_SSP3_S_0,
-    materials_intensity_df= materials_intensity_df,
-    print_year=2020)
-# Scenario 5
-my_inflow_SSP3_S_timber_high, my_outflow_SSP3_S_timber_high, my_stock_SSP3_S_timber_high = calc_inflow_outflow_stock_mats(
-    area_inflow_2017_2100=area_inflow_2017_2100_SSP3_S_timber_high,
-    area_outflow_2017_2100=area_outflow_2017_2100_SSP3_S_timber_high,
-    area_stock_2017_2100= area_stock_2017_2100_SSP3_S_timber_high,
+S1_sio_new = determine_inflow_outflow_new_bldg(scenario='S_0',
+                                               FA_dsm_SSP=FA_dsm_SSP1,
+                                               lt=lt_future,
+                                               plot=False, plot_title='SSP1 ')
+S1_area_i, S1_area_o, S1_area_s = combine_area_existing_and_new(
+    os_existing=os_existing_SSP1,
+    sio_new_bldg=S1_sio_new,
+    plot=False, plot_title='SSP1, S0')
+S1_mat_i, S1_mat_o, S1_mat_s = calc_inflow_outflow_stock_mats(
+    area_inflow_2017_2100=S1_area_i,
+    area_outflow_2017_2100=S1_area_o,
+    area_stock_2017_2100=S1_area_s,
     materials_intensity_df=materials_intensity_df,
     print_year=2020)
 
+# Scenario 2
+S2_sio_new = determine_inflow_outflow_new_bldg(scenario='S_timber_high',
+                                               FA_dsm_SSP=FA_dsm_SSP1,
+                                               lt=lt_future,
+                                               plot=False, plot_title='SSP1 ')
+S2_area_i, S2_area_o, S2_area_s = combine_area_existing_and_new(
+    os_existing=os_existing_SSP1,
+    sio_new_bldg=S1_sio_new,
+    plot=False, plot_title='SSP1, S_timber_high')
+S2_mat_i, S2_mat_o, S2_mat_s = calc_inflow_outflow_stock_mats(
+    area_inflow_2017_2100=S2_area_i,
+    area_outflow_2017_2100=S2_area_o,
+    area_stock_2017_2100=S2_area_s,
+    materials_intensity_df=materials_intensity_df,
+    print_year=2020)
+
+# Scenario 3
+S3_sio_new = determine_inflow_outflow_new_bldg(scenario='S_densification_40p_LF_wood',
+                                               FA_dsm_SSP=FA_dsm_SSP1,
+                                               lt=lt_future,
+                                               plot=False, plot_title='SSP1 ')
+S3_area_i, S3_area_o, S3_area_s = combine_area_existing_and_new(
+    os_existing=os_existing_SSP1,
+    sio_new_bldg=S3_sio_new,
+    plot=False, plot_title='SSP1, dens-40p')
+S3_mat_i, S3_mat_o, S3_mat_s, = calc_inflow_outflow_stock_mats(
+    area_inflow_2017_2100=S3_area_i,
+    area_outflow_2017_2100=S3_area_o,
+    area_stock_2017_2100= S3_area_s,
+    materials_intensity_df= materials_intensity_df,
+    print_year=2020)
+
+# Scenario 4
+S4_sio_new = determine_inflow_outflow_new_bldg(scenario='S_0', FA_dsm_SSP=FA_dsm_SSP3,
+                                               lt=lt_future,
+                                               plot=False, plot_title='SSP3 ')
+S4_area_i, S4_area_o, S4_area_s, = combine_area_existing_and_new(
+    os_existing=os_existing_SSP3,
+    sio_new_bldg=S4_sio_new,
+    plot=False, plot_title='SSP3, S0')
+S4_mat_i, S4_mat_o, S4_mat_s, = calc_inflow_outflow_stock_mats(
+    area_inflow_2017_2100=S4_area_i,
+    area_outflow_2017_2100=S4_area_o,
+    area_stock_2017_2100= S4_area_s,
+    materials_intensity_df= materials_intensity_df,
+    print_year=2020)
+
+# Scenario 5
+S5_sio_new = determine_inflow_outflow_new_bldg(scenario='S_timber_high', FA_dsm_SSP=FA_dsm_SSP3,
+                                               lt=lt_future,
+                                               plot=False, plot_title='SSP3 ')
+S5_area_i, S5_area_o, S5_area_s = combine_area_existing_and_new(
+    os_existing = os_existing_SSP3,
+    sio_new_bldg=S5_sio_new,
+    plot=False, plot_title='SSP3, S_timber_high')
+S5_mat_i, S5_mat_o, S5_mat_s = calc_inflow_outflow_stock_mats(
+    area_inflow_2017_2100=S5_area_i,
+    area_outflow_2017_2100=S5_area_o,
+    area_stock_2017_2100= S5_area_s,
+    materials_intensity_df=materials_intensity_df,
+    print_year=2020)
+
+
+# # ------------------------------------------------------------------------------------
 # Function to plot stock/inflow/outflow for different scenarios
 def plot_sio_materials(s1_inflow=None, s2_inflow=None, s3_inflow=None, s4_inflow=None, s5_inflow=None,
                        s1_outflow=None, s2_outflow=None, s3_outflow=None, s4_outflow=None, s5_outflow=None,
@@ -949,16 +926,48 @@ def plot_sio_materials(s1_inflow=None, s2_inflow=None, s3_inflow=None, s4_inflow
     fig.show()
 
 
-# Plot scenarios against one another for stock/inflow/outflow
-plot_sio_materials(s1_inflow=my_inflow_SSP1_S0, s1_outflow=my_outflow_SSP1_S0, s1_stock=my_stock_SSP1_S0/1000,
-                   s2_inflow= my_inflow_SSP1_S_timber_high, s2_outflow= my_outflow_SSP1_S_timber_high, s2_stock=my_stock_SSP1_S_timber_high/1000,
-                   s3_inflow=my_inflow_SSP1_S_dens_40p, s3_outflow=my_outflow_SSP1_S_dens_40p, s3_stock=my_stock_SSP1_S_dens_40p/1000,
-                   s4_inflow=my_inflow_SSP3_S_0, s4_outflow=my_outflow_SSP3_S_0, s4_stock=my_stock_SSP3_S_0/1000,
-                   s5_inflow=my_inflow_SSP3_S_timber_high, s5_outflow=my_outflow_SSP3_S_timber_high, s5_stock=my_stock_SSP3_S_timber_high/1000,
-                   legend=['SSP1: S0', 'SSP1: S_timber_high', 'SSP1: S_dens_40p', 'SSP3: S0', 'SSP3: S_timber_high'])
+# Plot scenarios against one another for stock/inflow/outflow (up to 5 scenarios)
+plot_sio_materials(s1_inflow=S1_mat_i, s1_outflow=S1_mat_o, s1_stock=S1_mat_s/1000,
+                   s2_inflow= S2_mat_i, s2_outflow= S2_mat_o, s2_stock=S2_mat_s/1000,
+                   s3_inflow=S3_mat_i, s3_outflow=S3_mat_o, s3_stock=S3_mat_s/1000,
+                   s4_inflow=S4_mat_i, s4_outflow=S4_mat_o, s4_stock=S4_mat_s/1000,
+                   s5_inflow=S5_mat_i, s5_outflow=S5_mat_o, s5_stock=S5_mat_s/1000,
+                   legend=['Scenario 1', 'Scenario 2', 'Scenario 3', 'Scenario 4', 'Scenario 5'])
+
+
+
+
+# Check to see if how much the inflow, outflow, and stocks differ from the original stock-driven model for SSP1
+check_stocks = False
+if check_stocks == True:
+    check_df_stock = pd.DataFrame({
+        'existing_stock': os_existing_SSP1.loc[2017:]['total_stock'],
+        'new_stock': S1_sio_new.loc[2017:]['total_stock'],
+        'sum_stock': os_existing_SSP1.loc[2017:]['total_stock'] + S1_sio_new.loc[2017:]['total_stock'],
+        'correct_stock': FA_dsm_SSP1.loc[2017:]['stock_total'],
+        'percent_difference': (FA_dsm_SSP1.loc[2017:]['stock_total'] - (
+                    os_existing_SSP1.loc[2017:]['total_stock'] + S1_sio_new[2017:]['total_stock'])) /
+                              FA_dsm_SSP1.loc[2017:]['stock_total']
+    })
+    check_df_inflow = pd.DataFrame({
+        'new_inflow': S1_sio_new.loc[2017:]['total_inflow'],
+        'correct_inflow': FA_dsm_SSP1.loc[2017:]['inflow_total'],
+        'difference': S1_sio_new.loc[2017:]['total_inflow'] - FA_dsm_SSP1.loc[2017:]['inflow_total']
+    })
+    check_df_outflow = pd.DataFrame({
+        'existing_outflow': os_existing_SSP1.loc[2017:]['total_outflow'],
+        'new_outflow': S1_sio_new.loc[2017:]['total_outflow'],
+        'correct_outflow': FA_dsm_SSP1.loc[2017:]['outflow_total'],
+        'percent_difference': (os_existing_SSP1.loc[2017:]['total_outflow'] + S1_sio_new.loc[2017:][
+            'total_outflow'] - FA_dsm_SSP1.loc[2017:]['outflow_total']) / FA_dsm_SSP1.loc[2017:]['outflow_total']
+    })
+    # print results of the check
+    print('Mean percent difference in stock is = ' + str(np.mean(check_df_stock['percent_difference']) * 100) + '%')
+    print('Mean  difference in inflow is = ' + str(np.mean(check_df_inflow['difference'])))
+    print('Mean percent difference in outflow is = ' + str(np.mean(check_df_outflow['percent_difference']) * 100) + '%')
+
 
 ## Next steps
 # - check that materials are calculated correctly
-# - plot material inflows, outflows, and stocks as a check against floor area
-# - extend to other SSPs
-# - extend to other building scenarios
+# - add ability for custom adoption (not just adoption in 2020 being constant into the future). May need to couple this with excel.
+# - Montecarlo simulation for

@@ -9,6 +9,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from odym import dynamic_stock_model as dsm
 import numpy as np
+from scipy.interpolate import interp1d
 
 # ----------------------------------------------------------------------------------------------------
 # load in data from other scripts and excels
@@ -166,11 +167,101 @@ def determine_outflow_existing_bldgs(FA_sc_SSP, plot=True, plot_title=''):
 
 def determine_inflow_outflow_new_bldg(scenario, FA_dsm_SSP=FA_dsm_SSP1, lt=lt_future, plot=True, plot_title='SSP1 '):
     # Select a scenario
-    # scenario = 'S_0'    # new construction is same as exiting building stock
+    # scenario = 'S_1'    # new construction is same as exiting building stock
     # scenario = 'S_timber_high'      # High timber adoption
 
     # clean df
     FA_dsm_SSP = FA_dsm_SSP.set_index('time')
+
+    def construction_ea_year(year1=2017, year2=2100, scenario_df=scenario_df, type='linear'):
+        ''' Create a dataframe of the construction in each year for each structure type based upon the scenario.
+            Do this in a 'linear' or 's-curve' manner by specifying the adoption in the year2 (2100)
+        '''
+        if type=='flat':
+            year1_adoption = scenario_df.loc[scenario, 'LF_wood':'RM']
+
+            x = np.linspace(year1, year2, num=(year2 - year1 + 1), endpoint=True)
+            x_array = np.repeat(x[:, np.newaxis], 7, 1)
+            year1_adoption_array = np.repeat(year1_adoption[:, np.newaxis], (year2 - year1 + 1), 1).transpose()
+            adoption_df = pd.DataFrame(year1_adoption_array)
+            adoption_df['time'] = FA_dsm_SSP.loc[year1:year2].index
+            adoption_df = adoption_df.set_index('time')
+            adoption_df.columns = list(scenario_df.columns)[2:9]
+
+            # plot adoption data:
+            adoption_df.plot()
+            # plt.text(x=2100, y=0.7, ha='right', fontsize=8, s='(Growth Rate: ' + str(growth_rate) + ', ' + 'Max Growth Year: ' + str(Max_growth_yr) + ')')
+            plt.legend(loc=(1.04, 0.5), title='Flat Adoption')
+            plt.title('Scenario: ' + scenario + ' Type of Construction each Year')
+            plt.show()
+
+            return adoption_df
+        if type=='linear':
+            year1_adoption = scenario_df.loc['S_0', 'LF_wood':'RM']
+            year2_adoption = scenario_df.loc[scenario, 'LF_wood':'RM']
+            adoption_rate = (year2_adoption - year1_adoption) / (year2 - year1)
+
+            x = np.linspace(year1, year2, num=(year2 - year1 + 1), endpoint=True)
+            x_array = np.repeat(x[:,np.newaxis], 7, 1)
+            year1_adoption_array = np.repeat(year1_adoption[:, np.newaxis],(year2 - year1 + 1),1).transpose()
+            adoption_df = pd.DataFrame(year1_adoption_array + (x_array - year1) * np.repeat(adoption_rate[:, np.newaxis], (year2 - year1 + 1), 1).transpose())
+            adoption_df['time'] = FA_dsm_SSP.loc[year1:year2].index
+            adoption_df = adoption_df.set_index('time')
+            adoption_df.columns = list(scenario_df.columns)[2:9]
+
+            # plot adoption data:
+            adoption_df.plot()
+            # plt.text(x=2100, y=0.7, ha='right', fontsize=8, s='(Growth Rate: ' + str(growth_rate) + ', ' + 'Max Growth Year: ' + str(Max_growth_yr) + ')')
+            plt.legend(loc=(1.04, 0.5), title='Linear Adoption')
+            plt.title('Scenario: ' + scenario + ' Type of Construction each Year')
+            plt.show()
+
+            return adoption_df
+        if type=='richards-curve':
+            year1_adoption = scenario_df.loc['S_0', 'LF_wood':'RM']
+            year2_adoption = scenario_df.loc[scenario, 'LF_wood':'RM']
+
+            def compute_logistic(structural_system, year1_adoption, year2_adoption, growth_rate=0.1, M=2050):
+                # structural_system = 'LF_wood'
+                # carrying capacity
+                B = year2_adoption[structural_system]
+                A = year1_adoption[structural_system]
+                # logistic growth rate:
+                t = np.linspace(year1, year2, num=(year2 - year1 + 1), endpoint=True)
+                t_0 = (year1 + year2) / 2
+                y = A + (B - A) / (1 +  np.exp(-growth_rate * (t-M)))
+                # plt.plot(t, y)
+                # plt.show();
+                return y
+
+            # INPUT PARAMETERS
+            growth_rate = 0.2
+            Max_growth_yr = 2030
+
+            adoption_df = pd.DataFrame()
+            adoption_df['time'] = FA_dsm_SSP.loc[year1:year2].index
+            adoption_df['LF_wood'] = compute_logistic('LF_wood', year1_adoption, year2_adoption, growth_rate=growth_rate, M=Max_growth_yr)
+            adoption_df['URM'] = compute_logistic('URM', year1_adoption, year2_adoption, growth_rate=growth_rate, M=Max_growth_yr)
+            adoption_df['MH'] = compute_logistic('MH', year1_adoption, year2_adoption, growth_rate=growth_rate, M=Max_growth_yr)
+            adoption_df['Mass_Timber'] = compute_logistic('Mass_Timber', year1_adoption, year2_adoption, growth_rate=growth_rate, M=Max_growth_yr)
+            adoption_df['Steel'] = compute_logistic('Steel', year1_adoption, year2_adoption, growth_rate=growth_rate, M=Max_growth_yr)
+            adoption_df['RC'] = compute_logistic('RC', year1_adoption, year2_adoption, growth_rate=growth_rate, M=Max_growth_yr)
+            adoption_df['RM'] = compute_logistic('RM', year1_adoption, year2_adoption, growth_rate=growth_rate, M=Max_growth_yr)
+            adoption_df = adoption_df.set_index('time')
+
+            adoption_df.plot()
+            # plt.text(x=2100, y=0.7, ha='right', fontsize=8, s='(Growth Rate: ' + str(growth_rate) + ', ' + 'Max Growth Year: ' + str(Max_growth_yr) + ')')
+            plt.legend(loc=(1.04, 0.5), title='(Growth Rate: ' + str(growth_rate) + ', ' '\n' + 'Max Growth Year: ' + str(Max_growth_yr) + ')')
+            plt.title('Scenario: ' + scenario + ' Type of Construction each Year')
+            plt.show()
+            return adoption_df
+
+    construction_ea_year_df = construction_ea_year(year1=2017, year2=2100, scenario_df=scenario_df, type='richards-curve')
+    # construction_ea_year_df = construction_ea_year(year1=2017, year2=2100, scenario_df=scenario_df, type='flat')
+    # construction_ea_year_df = construction_ea_year(year1=2017, year2=2100, scenario_df=scenario_df, type='linear')
+
+
+    # Percentage in each year of structural systems built.
     structure_data_scenario = pd.DataFrame(
         {'LF_wood': scenario_df.LF_wood[scenario],
          'Mass_Timber': scenario_df.Mass_Timber[scenario],
@@ -181,16 +272,16 @@ def determine_inflow_outflow_new_bldg(scenario, FA_dsm_SSP=FA_dsm_SSP1, lt=lt_fu
          'MH': scenario_df.MH[scenario]},
         index=[0])
 
-    # separate inflow by structural system ratio for each scenario              # CAN IMPLEMENT VARIABLE ADOPTION HERE
+    # separate inflow by structural system ratio for each scenario
     inflow_SSP_all = pd.DataFrame(
         {'inflow_total': FA_dsm_SSP.loc[2017:2100, 'inflow_total'],
-         'inflow_LF_wood': FA_dsm_SSP.loc[2017:2100, 'inflow_total'] * structure_data_scenario.LF_wood[0],
-         'inflow_Mass_Timber': FA_dsm_SSP.loc[2017:2100, 'inflow_total'] * structure_data_scenario.Mass_Timber[0],
-         'inflow_Steel': FA_dsm_SSP.loc[2017:2100, 'inflow_total'] * structure_data_scenario.Steel[0],
-         'inflow_RC': FA_dsm_SSP.loc[2017:2100, 'inflow_total'] * structure_data_scenario.RC[0],
-         'inflow_RM': FA_dsm_SSP.loc[2017:2100, 'inflow_total'] * structure_data_scenario.RM[0],
-         'inflow_URM': FA_dsm_SSP.loc[2017:2100, 'inflow_total'] * structure_data_scenario.URM[0],
-         'inflow_MH': FA_dsm_SSP.loc[2017:2100, 'inflow_total'] * structure_data_scenario.MH[0],
+         'inflow_LF_wood': FA_dsm_SSP.loc[2017:2100, 'inflow_total'] * construction_ea_year_df.LF_wood,
+         'inflow_Mass_Timber': FA_dsm_SSP.loc[2017:2100, 'inflow_total'] * construction_ea_year_df.Mass_Timber,
+         'inflow_Steel': FA_dsm_SSP.loc[2017:2100, 'inflow_total'] * construction_ea_year_df.Steel,
+         'inflow_RC': FA_dsm_SSP.loc[2017:2100, 'inflow_total'] * construction_ea_year_df.RC,
+         'inflow_RM': FA_dsm_SSP.loc[2017:2100, 'inflow_total'] * construction_ea_year_df.RM,
+         'inflow_URM': FA_dsm_SSP.loc[2017:2100, 'inflow_total'] * construction_ea_year_df.URM,
+         'inflow_MH': FA_dsm_SSP.loc[2017:2100, 'inflow_total'] * construction_ea_year_df.MH,
          }
     )
 
@@ -969,5 +1060,4 @@ if check_stocks == True:
 
 ## Next steps
 # - check that materials are calculated correctly
-# - add ability for custom adoption (not just adoption in 2020 being constant into the future). May need to couple this with excel.
 # - Montecarlo simulation for

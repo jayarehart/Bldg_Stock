@@ -10,6 +10,13 @@ import matplotlib.pyplot as plt
 from odym import dynamic_stock_model as dsm
 import numpy as np
 import scipy.stats as st
+import seaborn as sns
+from statsmodels.distributions.empirical_distribution import ECDF
+import statsmodels.api as sm
+import statsmodels.api as sm
+import matplotlib.pyplot as plt
+from statsmodels.distributions.mixture_rvs import mixture_rvs
+from statsmodels.nonparametric.kde import kernel_switch
 
 # ----------------------------------------------------------------------------------------------------
 # load in data from other scripts and excels
@@ -37,6 +44,14 @@ materials_intensity_df = materials_intensity.set_index('Structure_Type', drop=Tr
 materials_intensity_df = materials_intensity_df.transpose()
 materials_intensity_df = materials_intensity_df.drop(index='Source')
 
+mi_LF_wood = pd.read_excel('./InputData/Material_data.xlsx', sheet_name='LF_wood_MI')[['Steel_kgm2','Concrete_kgm2', 'Eng_wood_kgm2', 'Dim_lumber_kgm2', 'Masonry_kgm2']]
+mi_Mass_Timber = pd.read_excel('./InputData/Material_data.xlsx', sheet_name='Mass_Timber_MI')[['Steel_kgm2','Concrete_kgm2', 'Eng_wood_kgm2', 'Dim_lumber_kgm2', 'Masonry_kgm2']]
+mi_RM = pd.read_excel('./InputData/Material_data.xlsx', sheet_name='RM_MI')[['Steel_kgm2','Concrete_kgm2', 'Eng_wood_kgm2', 'Dim_lumber_kgm2', 'Masonry_kgm2']]
+mi_URM = pd.read_excel('./InputData/Material_data.xlsx', sheet_name='URM_MI')[['Steel_kgm2','Concrete_kgm2', 'Eng_wood_kgm2', 'Dim_lumber_kgm2', 'Masonry_kgm2']]
+mi_RC = pd.read_excel('./InputData/Material_data.xlsx', sheet_name='RC_MI')[['Steel_kgm2','Concrete_kgm2', 'Eng_wood_kgm2', 'Dim_lumber_kgm2', 'Masonry_kgm2']]
+mi_Steel = pd.read_excel('./InputData/Material_data.xlsx', sheet_name='Steel_MI')[['Steel_kgm2','Concrete_kgm2', 'Eng_wood_kgm2', 'Dim_lumber_kgm2', 'Masonry_kgm2']]
+
+
 scenario_df = pd.read_excel('./InputData/Material_data.xlsx', sheet_name='Scenarios')
 scenario_df = scenario_df.set_index('Scenario')
 
@@ -44,6 +59,196 @@ scenario_df = scenario_df.set_index('Scenario')
 # set years series
 years_future = FA_dsm_SSP1['time'].iloc[197:]       #2017 is 197
 years_all = FA_dsm_SSP1.index.to_series()
+
+## ----------------------------------------------------------------------------------------------------
+# Calculate material intensity distributions
+
+def calculate_kernel(data, dist_type, bandwidth, plot=True):
+    kde = sm.nonparametric.KDEUnivariate(data)
+    kde.fit(bw=bandwidth, kernel=dist_type, fft=False) # Estimate the densities
+    if plot==True:
+        fig = plt.figure(figsize=(12, 5))
+        ax = fig.add_subplot(111)
+        ax.plot(kde.support, kde.density, lw=2)
+        ax.hist(data, density=True, alpha=0.5)
+        plt.show()
+    return kde
+
+# create kde for each structure type
+# LF wood
+kde_LF_wood__Steel = calculate_kernel(data=mi_LF_wood['Steel_kgm2'], dist_type='gau', bandwidth=5, plot=True)
+kde_LF_wood__Concrete = calculate_kernel(data=mi_LF_wood['Concrete_kgm2'], dist_type='uni', bandwidth=0.0001, plot=True)
+kde_LF_wood__Eng_wood = calculate_kernel(data=mi_LF_wood['Eng_wood_kgm2'], dist_type='gau', bandwidth=5, plot=True)
+kde_LF_wood__Dim_lumber = calculate_kernel(data=mi_LF_wood['Dim_lumber_kgm2'], dist_type='gau', bandwidth=7, plot=True)
+kde_LF_wood__Masonry = calculate_kernel(data=mi_LF_wood['Masonry_kgm2'], dist_type='uni', bandwidth=0.0001, plot=True)
+
+# Mass Timber
+kde_Mass_Timber__Steel = calculate_kernel(data=mi_Mass_Timber['Steel_kgm2'], dist_type='gau', bandwidth=0.5, plot=True)
+kde_Mass_Timber__Concrete = calculate_kernel(data=mi_Mass_Timber['Concrete_kgm2'], dist_type='uni', bandwidth=0.0001, plot=True)
+kde_Mass_Timber__Eng_wood = calculate_kernel(data=mi_Mass_Timber['Eng_wood_kgm2'], dist_type='gau', bandwidth=3, plot=True)
+kde_Mass_Timber__Dim_lumber = calculate_kernel(data=mi_Mass_Timber['Dim_lumber_kgm2'], dist_type='uni', bandwidth=0.0001, plot=True)
+kde_Mass_Timber__Masonry = calculate_kernel(data=mi_Mass_Timber['Masonry_kgm2'], dist_type='uni', bandwidth=0.0001, plot=True)
+
+# Steel
+kde_Steel__Steel = calculate_kernel(data=mi_Steel['Steel_kgm2'], dist_type='gau', bandwidth=5, plot=True)
+kde_Steel__Concrete = calculate_kernel(data=mi_Steel['Concrete_kgm2'], dist_type='gau', bandwidth=3, plot=True)
+kde_Steel__Eng_wood = calculate_kernel(data=mi_Steel['Eng_wood_kgm2'], dist_type='gau', bandwidth=5, plot=True)
+kde_Steel__Dim_lumber = calculate_kernel(data=mi_Steel['Dim_lumber_kgm2'], dist_type='gau', bandwidth=0.0001, plot=True)
+kde_Steel__Masonry = calculate_kernel(data=mi_Steel['Masonry_kgm2'], dist_type='uni', bandwidth=0.0001, plot=True)
+
+# RC
+kde_RC__Steel = calculate_kernel(data=mi_RC['Steel_kgm2'], dist_type='gau', bandwidth=1, plot=True)
+kde_RC__Concrete = calculate_kernel(data=mi_RC['Concrete_kgm2'], dist_type='uni', bandwidth=20, plot=True)
+kde_RC__Eng_wood = calculate_kernel(data=mi_RC['Eng_wood_kgm2'], dist_type='gau', bandwidth=0.0001, plot=True)
+kde_RC__Dim_lumber = calculate_kernel(data=mi_RC['Dim_lumber_kgm2'], dist_type='gau', bandwidth=0.0001, plot=True)
+kde_RC__Masonry = calculate_kernel(data=mi_RC['Masonry_kgm2'], dist_type='uni', bandwidth=0.0001, plot=True)
+
+# RM and URM
+kde_RM__Steel = calculate_kernel(data=mi_RM['Steel_kgm2'], dist_type='uni', bandwidth=2, plot=True)
+kde_RM__Concrete = calculate_kernel(data=mi_RM['Concrete_kgm2'], dist_type='uni', bandwidth=0.0001, plot=True)
+kde_RM__Eng_wood = calculate_kernel(data=mi_RM['Eng_wood_kgm2'], dist_type='uni', bandwidth=1, plot=True)
+kde_RM__Dim_lumber = calculate_kernel(data=mi_RM['Dim_lumber_kgm2'], dist_type='uni', bandwidth=2, plot=True)
+kde_RM__Masonry = calculate_kernel(data=mi_RM['Masonry_kgm2'], dist_type='uni', bandwidth=5, plot=True)
+
+plot_material_intensity = True
+#
+# if plot_material_intensity==True:
+#     # plot the material intensities of all data
+#     fig, (axs1, axs2, axs3, axs4, axs5) = plt.subplots(5, figsize=(7, 8))
+#
+#     # plot steel
+#     sns.kdeplot(mi_LF_wood['Steel_kgm2'], shade=True, bw=5, ax=axs1)
+#     sns.kdeplot(mi_Mass_Timber['Steel_kgm2'], shade=True, bw=1, ax=axs1)
+#     sns.kdeplot(mi_Steel['Steel_kgm2'], shade=True, bw=1, ax=axs1)
+#     sns.kdeplot(mi_RC['Steel_kgm2'], shade=True, bw=1, ax=axs1)
+#     sns.kdeplot(mi_RM['Steel_kgm2'], shade=True, bw=1, ax=axs1)
+#     # sns.kdeplot(mi_URM['Steel_kgm2'], shade=True, bw=1, ax=axs1)
+#     axs1.title.set_text('Steel')
+#     axs1.set_xlabel('Material Intensity $kg / m^2 $')
+#     axs1.legend_.remove()
+#     axs1.set_xlim(left=0, right=120)
+#
+#     # plot concrete
+#     sns.kdeplot(mi_LF_wood['Concrete_kgm2'], shade=True, bw=5, ax=axs2)
+#     sns.kdeplot(mi_Mass_Timber['Concrete_kgm2'], shade=True, bw=5, ax=axs2)
+#     sns.kdeplot(mi_Steel['Concrete_kgm2'], shade=True, bw=10, ax=axs2)
+#     sns.kdeplot(mi_RC['Concrete_kgm2'], shade=True, bw=5, ax=axs2)
+#     sns.kdeplot(mi_RM['Concrete_kgm2'], shade=True, bw=5, ax=axs2)
+#     # sns.kdeplot(mi_URM['Concrete_kgm2'], shade=True, bw=5, ax=axs2)
+#     axs2.title.set_text('Concrete')
+#     axs2.set_xlabel('Material Intensity $kg / m^2 $')
+#     axs2.legend_.remove()
+#     axs2.set_xlim(left=0)
+#
+#
+#     # plot Engineered wood
+#     sns.kdeplot(mi_LF_wood['Eng_wood_kgm2'], shade=True, bw=5, ax=axs3)
+#     sns.kdeplot(mi_Mass_Timber['Eng_wood_kgm2'], shade=True, bw=1, ax=axs3)
+#     sns.kdeplot(mi_Steel['Eng_wood_kgm2'], shade=True, bw=10, ax=axs3)
+#     sns.kdeplot(mi_RC['Eng_wood_kgm2'], shade=True, bw=5, ax=axs3)
+#     sns.kdeplot(mi_RM['Eng_wood_kgm2'], shade=True, bw=5, ax=axs3)
+#     # sns.kdeplot(mi_URM['Eng_wood_kgm2'], shade=True, bw=5, ax=axs3)
+#     axs3.title.set_text('Engineered Wood')
+#     axs3.set_xlabel('Material Intensity $kg / m^2 $')
+#     axs3.legend_.remove()
+#     axs3.set_xlim(left=0)
+#
+#     # plot dimensioned lumber
+#     sns.kdeplot(mi_LF_wood['Dim_lumber_kgm2'], shade=True, bw=12, ax=axs4)
+#     sns.kdeplot(mi_Mass_Timber['Dim_lumber_kgm2'], shade=True, bw=1, ax=axs4)
+#     sns.kdeplot(mi_Steel['Dim_lumber_kgm2'], shade=True, bw=10, ax=axs4)
+#     sns.kdeplot(mi_RC['Dim_lumber_kgm2'], shade=True, bw=5, ax=axs4)
+#     sns.kdeplot(mi_RM['Dim_lumber_kgm2'], shade=True, bw=5, ax=axs4)
+#     # sns.kdeplot(mi_URM['Dim_lumber_kgm2'], shade=True, bw=5, ax=axs4)
+#     axs4.title.set_text('Dimensioned Lumber')
+#     axs4.set_xlabel('Material Intensity $kg / m^2 $')
+#     axs4.legend_.remove()
+#     axs4.set_xlim(left=0)
+#
+#     # plot masonry
+#     sns.kdeplot(mi_LF_wood['Masonry_kgm2'], shade=True, bw=1, ax=axs5)
+#     sns.kdeplot(mi_Mass_Timber['Masonry_kgm2'], shade=True, bw=1, ax=axs5)
+#     sns.kdeplot(mi_Steel['Masonry_kgm2'], shade=True, bw=1, ax=axs5)
+#     sns.kdeplot(mi_RC['Masonry_kgm2'], shade=True, bw=1, ax=axs5)
+#     sns.kdeplot(np.random.uniform(mi_RM['Masonry_kgm2'].min(), mi_RM['Masonry_kgm2'].max(), 50000), shade=True, ax=axs5)
+#     # sns.kdeplot(np.random.uniform(mi_URM['Masonry_kgm2'].min(), mi_URM['Masonry_kgm2'].max(), 50000), shade=True, ax=axs5)
+#     axs5.title.set_text('Masonry')
+#     axs5.set_xlabel('Material Intensity $kg / m^2 $')
+#     axs5.set_xlim(left=120, right=180)
+#     axs5.legend_.remove()
+#
+#     axs3.legend(['LF Wood', 'Mass Timber', 'Steel', 'RC', 'RM and URM'], loc="center left",  bbox_to_anchor=(1.04, 0.5))
+#
+#     fig.tight_layout()
+#     # fig.subplots_adjust(right=1)
+#     # fig.legend([axs1, axs2, axs2, axs4, axs5], labels=['LF Wood', 'Mass Timber', 'Steel', 'RC', 'RM', 'URM'], fontsize=6, loc=(1.04, 0.5))
+#     plt.show()
+if plot_material_intensity==True:
+    # plot the material intensities of all data
+    fig, (axs1, axs2, axs3, axs4, axs5) = plt.subplots(5, figsize=(7, 8))
+
+    # plot steel
+    axs1.plot(kde_LF_wood__Steel.support, kde_LF_wood__Steel.density, color='blue')
+    axs1.plot(kde_Mass_Timber__Steel.support, kde_Mass_Timber__Steel.density, color='orange')
+    axs1.plot(kde_Steel__Steel.support, kde_Steel__Steel.density, color='green')
+    axs1.plot(kde_RC__Steel.support, kde_RC__Steel.density, color='red')
+    axs1.plot(kde_RM__Steel.support, kde_RM__Steel.density, color='purple')
+    axs1.title.set_text('Steel')
+    axs1.set_xlabel('Material Intensity $kg / m^2 $')
+    axs1.set_xlim(left=0, right=120)
+    axs1.legend(['LF Wood', 'Mass Timber', 'Steel', 'RC', 'RM and URM'], loc="center left",  bbox_to_anchor=(1.04, 0.5))
+
+
+    # plot concrete
+    # axs2.plot(kde_LF_wood__Concrete.support, kde_LF_wood__Concrete.density, color='blue')
+    # axs2.plot(kde_Mass_Timber__Concrete.support, kde_Mass_Timber__Concrete.density, color='orange')
+    axs2.plot(kde_Steel__Concrete.support, kde_Steel__Concrete.density, color='green')
+    axs2.plot(kde_RC__Concrete.support, kde_RC__Concrete.density, color='red')
+    # axs2.plot(kde_RM__Concrete.support, kde_RM__Concrete.density, color='purple')
+    axs2.title.set_text('Concrete')
+    axs2.set_xlabel('Material Intensity $kg / m^2 $')
+    axs2.set_xlim(left=0)
+
+    # plot Engineered wood
+    axs3.plot(kde_LF_wood__Eng_wood.support, kde_LF_wood__Eng_wood.density, color='blue')
+    axs3.plot(kde_Mass_Timber__Eng_wood.support, kde_Mass_Timber__Eng_wood.density, color='orange')
+    # axs3.plot(kde_Steel__Eng_wood.support, kde_Steel__Eng_wood.density, color='green')
+    # axs3.plot(kde_RC__Eng_wood.support, kde_RC__Eng_wood.density, color='red')
+    axs3.plot(kde_RM__Eng_wood.support, kde_RM__Eng_wood.density, color='purple')
+    axs3.title.set_text('Engineered Wood')
+    axs3.set_xlabel('Material Intensity $kg / m^2 $')
+    axs3.set_xlim(left=0)
+
+    # plot dimensioned lumber
+    axs4.plot(kde_LF_wood__Dim_lumber.support, kde_LF_wood__Dim_lumber.density, color='blue')
+    # axs4.plot(kde_Mass_Timber__Dim_lumber.support, kde_Mass_Timber__Dim_lumber.density, color='orange')
+    # axs4.plot(kde_Steel__Dim_lumber.support, kde_Steel__Dim_lumber.density, color='green')
+    # axs4.plot(kde_RC__Dim_lumber.support, kde_RC__Dim_lumber.density, color='red')
+    axs4.plot(kde_RM__Dim_lumber.support, kde_RM__Dim_lumber.density, color='purple')
+    axs4.title.set_text('Dimensioned Lumber')
+    axs4.set_xlabel('Material Intensity $kg / m^2 $')
+    axs4.set_xlim(left=0)
+
+    # plot masonry
+    # axs5.plot(kde_LF_wood__Masonry.support, kde_LF_wood__Masonry.density, color='blue')
+    # axs5.plot(kde_Mass_Timber__Masonry.support, kde_Mass_Timber__Masonry.density, color='orange')
+    # axs5.plot(kde_Steel__Masonry.support, kde_Steel__Masonry.density, color='green')
+    # axs5.plot(kde_RC__Masonry.support, kde_RC__Masonry.density, color='red')
+    axs5.plot(kde_RM__Masonry.support, kde_RM__Masonry.density, color='purple')
+
+    axs5.title.set_text('Masonry')
+    axs5.set_xlabel('Material Intensity $kg / m^2 $')
+    axs5.set_xlim(left=150, right=170)
+
+    fig.tight_layout()
+    # fig.subplots_adjust(right=1)
+    # fig.legend([axs1, axs2, axs2, axs4, axs5], labels=['LF Wood', 'Mass Timber', 'Steel', 'RC', 'RM', 'URM'], fontsize=6, loc=(1.04, 0.5))
+    plt.show()
+
+# function to sample the kde distribution
+def get_mi(kde):
+        return (np.quantile(kde.icdf, np.random.uniform(0, 1)))
+
 
 ## ----------------------------------------------------------------------------------------------------
 # All Functions
@@ -794,14 +999,29 @@ os_existing_SSP3 = determine_outflow_existing_bldgs(FA_sc_SSP=FA_sc_SSP3,   lt=l
 # SCENARIO DEFINITIONS
 # Scenario 1
 # scenario 1 MC:
-num_iter = 10
+num_iter = 100
 S1_mat_i_list = {}
 S1_mat_o_list = {}
 S1_mat_s_list = {}
 for i in range(num_iter):
     # print(lt_future)
 
-    S1_sio_new = determine_inflow_outflow_new_bldg(scenario='S_timber_high',
+    def make_mi_df_sample_df():
+        materials_intensity_df_sample = pd.DataFrame()
+        materials_intensity_df_sample['Structure_Type'] = ['Steel_kgm2_mean', 'Concrete_kgm2_mean', 'Eng_wood_kgm2_mean', 'Dim_lumber_kgm2_mean', 'Masonry_kgm2_mean']
+        materials_intensity_df_sample = materials_intensity_df_sample.set_index('Structure_Type')
+        materials_intensity_df_sample['LF_wood'] = [get_mi(kde_LF_wood__Steel), get_mi(kde_LF_wood__Concrete), get_mi(kde_LF_wood__Eng_wood), get_mi(kde_LF_wood__Dim_lumber), get_mi(kde_LF_wood__Masonry)]
+        materials_intensity_df_sample['Mass_Timber'] = [get_mi(kde_Mass_Timber__Steel), get_mi(kde_Mass_Timber__Concrete),get_mi(kde_Mass_Timber__Eng_wood), get_mi(kde_Mass_Timber__Dim_lumber),get_mi(kde_Mass_Timber__Masonry)]
+        materials_intensity_df_sample['Steel'] = [get_mi(kde_Steel__Steel), get_mi(kde_Steel__Concrete), get_mi(kde_Steel__Eng_wood), get_mi(kde_Steel__Dim_lumber),get_mi(kde_Steel__Masonry)]
+        materials_intensity_df_sample['RC'] = [get_mi(kde_RC__Steel), get_mi(kde_RC__Concrete), get_mi(kde_RC__Eng_wood), get_mi(kde_RC__Dim_lumber),get_mi(kde_RC__Masonry)]
+        materials_intensity_df_sample['RM'] = [get_mi(kde_RM__Steel), get_mi(kde_RM__Concrete), get_mi(kde_RM__Eng_wood), get_mi(kde_RM__Dim_lumber),get_mi(kde_RM__Masonry)]
+        materials_intensity_df_sample['URM'] = [get_mi(kde_RM__Steel), get_mi(kde_RM__Concrete), get_mi(kde_RM__Eng_wood), get_mi(kde_RM__Dim_lumber),get_mi(kde_RM__Masonry)]
+        materials_intensity_df_sample['MH'] = [0, 0, 0, 0, 0]
+        return materials_intensity_df_sample
+    # print(materials_intensity_df_sample)
+
+
+    S1_sio_new = determine_inflow_outflow_new_bldg(scenario='S_0',
                                                    FA_dsm_SSP=FA_dsm_SSP1,
                                                    lt=lt_future,
                                                    plot=False, plot_title='SSP1 ')
@@ -814,7 +1034,7 @@ for i in range(num_iter):
         area_inflow_2017_2100=S1_area_i,
         area_outflow_2017_2100=S1_area_o,
         area_stock_2017_2100=S1_area_s,
-        materials_intensity_df=materials_intensity_df,
+        materials_intensity_df=make_mi_df_sample_df(),
         print_year=0)
 
     S1_mat_i_list[i] = S1_mat_i
@@ -842,7 +1062,7 @@ S2_mat_i, S2_mat_o, S2_mat_s = calc_inflow_outflow_stock_mats(
     area_inflow_2017_2100=S2_area_i,
     area_outflow_2017_2100=S2_area_o,
     area_stock_2017_2100=S2_area_s,
-    materials_intensity_df=materials_intensity_df,
+    materials_intensity_df=make_mi_df_sample_df(),
     print_year=0)
 
 # Scenario 3
@@ -858,7 +1078,7 @@ S3_mat_i, S3_mat_o, S3_mat_s, = calc_inflow_outflow_stock_mats(
     area_inflow_2017_2100=S3_area_i,
     area_outflow_2017_2100=S3_area_o,
     area_stock_2017_2100= S3_area_s,
-    materials_intensity_df= materials_intensity_df,
+    materials_intensity_df= make_mi_df_sample_df(),
     print_year=0)
 
 # Scenario 4
@@ -873,7 +1093,7 @@ S4_mat_i, S4_mat_o, S4_mat_s, = calc_inflow_outflow_stock_mats(
     area_inflow_2017_2100=S4_area_i,
     area_outflow_2017_2100=S4_area_o,
     area_stock_2017_2100= S4_area_s,
-    materials_intensity_df= materials_intensity_df,
+    materials_intensity_df= make_mi_df_sample_df(),
     print_year=0)
 
 # Scenario 5
@@ -888,7 +1108,7 @@ S5_mat_i, S5_mat_o, S5_mat_s = calc_inflow_outflow_stock_mats(
     area_inflow_2017_2100=S5_area_i,
     area_outflow_2017_2100=S5_area_o,
     area_stock_2017_2100= S5_area_s,
-    materials_intensity_df=materials_intensity_df,
+    materials_intensity_df=make_mi_df_sample_df(),
     print_year=0)
 
 

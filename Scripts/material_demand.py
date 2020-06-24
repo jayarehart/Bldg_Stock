@@ -24,8 +24,8 @@ structure_data_historical = pd.read_csv('./InputData/HAZUS_weight.csv')
 
 FA_dsm_SSP1 = pd.read_excel('./Results/SSP_dsm.xlsx', sheet_name='SSP1')
 FA_dsm_SSP1 = FA_dsm_SSP1.set_index('time', drop=False)
-# FA_dsm_SSP2 = pd.read_excel('./Results/SSP_dsm.xlsx', sheet_name='SSP2')
-# FA_dsm_SSP2 = FA_dsm_SSP2.set_index('time',drop=False)
+FA_dsm_SSP2 = pd.read_excel('./Results/SSP_dsm.xlsx', sheet_name='SSP2')
+FA_dsm_SSP2 = FA_dsm_SSP2.set_index('time',drop=False)
 FA_dsm_SSP3 = pd.read_excel('./Results/SSP_dsm.xlsx', sheet_name='SSP3')
 FA_dsm_SSP3 = FA_dsm_SSP3.set_index('time',drop=False)
 # FA_dsm_SSP4 = pd.read_excel('./Results/SSP_dsm.xlsx', sheet_name='SSP4')
@@ -34,7 +34,7 @@ FA_dsm_SSP3 = FA_dsm_SSP3.set_index('time',drop=False)
 # FA_dsm_SSP5 = FA_dsm_SSP5.set_index('time',drop=False)
 
 FA_sc_SSP1 = pd.read_excel('./Results/SSP_dsm.xlsx', sheet_name='SSP1_sc')
-# FA_sc_SSP2 = pd.read_excel('./Results/SSP_dsm.xlsx', sheet_name='SSP2_sc')
+FA_sc_SSP2 = pd.read_excel('./Results/SSP_dsm.xlsx', sheet_name='SSP2_sc')
 FA_sc_SSP3 = pd.read_excel('./Results/SSP_dsm.xlsx', sheet_name='SSP3_sc')
 # FA_sc_SSP4 = pd.read_excel('./Results/SSP_dsm.xlsx', sheet_name='SSP4_sc')
 # FA_sc_SSP5 = pd.read_excel('./Results/SSP_dsm.xlsx', sheet_name='SSP5_sc')
@@ -108,7 +108,7 @@ kde_RM__Steel = calculate_kernel(data=mi_RM['Steel_kgm2'], dist_type='uni', band
 kde_RM__Concrete = calculate_kernel(data=mi_RM['Concrete_kgm2'], dist_type='uni', bandwidth=0.0001, plot=False)
 kde_RM__Eng_wood = calculate_kernel(data=mi_RM['Eng_wood_kgm2'], dist_type='uni', bandwidth=1, plot=False)
 kde_RM__Dim_lumber = calculate_kernel(data=mi_RM['Dim_lumber_kgm2'], dist_type='uni', bandwidth=2, plot=False)
-kde_RM__Masonry = calculate_kernel(data=mi_RM['Masonry_kgm2'], dist_type='uni', bandwidth=10, plot=True)
+kde_RM__Masonry = calculate_kernel(data=mi_RM['Masonry_kgm2'], dist_type='uni', bandwidth=10, plot=False)
 
 plot_material_intensity = True
 if plot_material_intensity==True:
@@ -174,7 +174,7 @@ if plot_material_intensity==True:
 
 # function to sample the kde distribution
 def get_mi(kde):
-        return (np.quantile(kde.icdf, np.random.uniform(0, 1)))
+    return (np.quantile(kde.icdf, np.random.uniform(0, 1)))
 
 # function to make the dataframe of material intensities
 def make_mi_df_sample_df():
@@ -304,9 +304,6 @@ def determine_outflow_existing_bldgs(FA_sc_SSP, lt, plot=True, plot_title=''):
     return existing_outflow_all
 
 def determine_inflow_outflow_new_bldg(scenario, FA_dsm_SSP=FA_dsm_SSP1, lt=lt_dummy, plot=True, plot_title='SSP1 '):
-    # Select a scenario
-    # scenario = 'S_1'    # new construction is same as exiting building stock
-    # scenario = 'S_timber_high'      # High timber adoption
 
     # clean df
     FA_dsm_SSP = FA_dsm_SSP.set_index('time')
@@ -356,7 +353,7 @@ def determine_inflow_outflow_new_bldg(scenario, FA_dsm_SSP=FA_dsm_SSP1, lt=lt_du
 
             return adoption_df
         if type=='richards-curve':
-            year1_adoption = scenario_df.loc['S_0', 'LF_wood':'RM']
+            year1_adoption = scenario_df.loc['S_2017', 'LF_wood':'RM']
             year2_adoption = scenario_df.loc[scenario, 'LF_wood':'RM']
 
             def compute_logistic(structural_system, year1_adoption, year2_adoption, growth_rate=0.1, M=2050):
@@ -373,8 +370,8 @@ def determine_inflow_outflow_new_bldg(scenario, FA_dsm_SSP=FA_dsm_SSP1, lt=lt_du
                 return y
 
             # INPUT PARAMETERS
-            growth_rate = 0.2
-            Max_growth_yr = 2030
+            growth_rate = 0.3
+            Max_growth_yr = scenario_df['Year_Max_Growth'][scenario]
 
             adoption_df = pd.DataFrame()
             adoption_df['time'] = FA_dsm_SSP.loc[year1:year2].index
@@ -391,11 +388,12 @@ def determine_inflow_outflow_new_bldg(scenario, FA_dsm_SSP=FA_dsm_SSP1, lt=lt_du
                 # plt.text(x=2100, y=0.7, ha='right', fontsize=8, s='(Growth Rate: ' + str(growth_rate) + ', ' + 'Max Growth Year: ' + str(Max_growth_yr) + ')')
                 plt.legend(loc=(1.04, 0.5), title='(Growth Rate: ' + str(growth_rate) + ', ' '\n' + 'Max Growth Year: ' + str(Max_growth_yr) + ')')
                 plt.title('Scenario: ' + scenario + ' Type of Construction each Year')
+                plt.ylim(top=1.0)
                 plt.show()
 
             return adoption_df
 
-    construction_ea_year_df = construction_ea_year(year1=2017, year2=2100, scenario_df=scenario_df, type='richards-curve', plot=True)
+    construction_ea_year_df = construction_ea_year(year1=2017, year2=2100, scenario_df=scenario_df, type='richards-curve', plot=False)
     # construction_ea_year_df = construction_ea_year(year1=2017, year2=2100, scenario_df=scenario_df, type='flat')
     # construction_ea_year_df = construction_ea_year(year1=2017, year2=2100, scenario_df=scenario_df, type='linear')
 
@@ -925,13 +923,13 @@ lt_existing = generate_lt('Weibull', par1=((0.773497 * 5) + (0.142467 * 4.8) + (
 # lt_existing = generate_lt('Weibull',par1=5, par2=100)        # lifetime distribution for existing buildings (all)
 lt_future = generate_lt('Weibull', par1=((0.773497 * 5) + (0.142467 * 4.8) + (0.030018 * 6.1)), par2=(
             (0.773497 * 100) + (0.142467 * 75.1) + (0.030018 * 95.6)))  # weighted average of res, com, and pub
-# lt_future = generate_lt('Weibull', par1=5, par2=100)
+lt_long = generate_lt('Weibull', par1=8, par2=100)
 
 ## ----------------------------------------------------------------------------------------------------
 
 # area by structural system of outlow and stock of all existing buildings (built before 2017)
 os_existing_SSP1 = determine_outflow_existing_bldgs(FA_sc_SSP=FA_sc_SSP1,   lt=lt_existing, plot=False, plot_title='SSP1')
-# os_existing_SSP2 = determine_outflow_existing_bldgs(FA_sc_SSP=FA_sc_SSP2, lt=lt_existing, plot=False, plot_title='SSP2')
+os_existing_SSP2 = determine_outflow_existing_bldgs(FA_sc_SSP=FA_sc_SSP2, lt=lt_existing, plot=False, plot_title='SSP2')
 os_existing_SSP3 = determine_outflow_existing_bldgs(FA_sc_SSP=FA_sc_SSP3,   lt=lt_existing, plot=False, plot_title='SSP3')
 # os_existing_SSP4 = determine_outflow_existing_bldgs(FA_sc_SSP=FA_sc_SSP4, lt=lt_existing, plot=False, plot_title='SSP4')
 # os_existing_SSP5 = determine_outflow_existing_bldgs(FA_sc_SSP=FA_sc_SSP5, lt=lt_existing, plot=False, plot_title='SSP5')
@@ -960,15 +958,15 @@ if MC_sim == True:
     S5_mat_s_list = {}
     for i in range(num_iter):
         # Scenario 1
-        S1_sio_new = determine_inflow_outflow_new_bldg(scenario='S_0',
+        S1_sio_new = determine_inflow_outflow_new_bldg(scenario='S_1',
                                                        FA_dsm_SSP=FA_dsm_SSP1,
-                                                       lt=lt_future,
+                                                       lt=lt_long,
                                                        plot=False, plot_title='SSP1 ')
         # print(S1_sio_new)
         S1_area_i, S1_area_o, S1_area_s = combine_area_existing_and_new(
-            os_existing=os_existing_SSP1,
+            os_existing=os_existing_SSP2,
             sio_new_bldg=S1_sio_new,
-            plot=False, plot_title='SSP1, S0')
+            plot=False, plot_title='SSP1 + Low Density')
         S1_mat_i, S1_mat_o, S1_mat_s = calc_inflow_outflow_stock_mats(
             area_inflow_2017_2100=S1_area_i,
             area_outflow_2017_2100=S1_area_o,
@@ -980,14 +978,14 @@ if MC_sim == True:
         S1_mat_s_list[i] = S1_mat_s
 
         # Scenario 2
-        S2_sio_new = determine_inflow_outflow_new_bldg(scenario='S_timber_high',
+        S2_sio_new = determine_inflow_outflow_new_bldg(scenario='S_2',
                                                        FA_dsm_SSP=FA_dsm_SSP1,
-                                                       lt=lt_future,
+                                                       lt=lt_long,
                                                        plot=False, plot_title='SSP1 ')
         S2_area_i, S2_area_o, S2_area_s = combine_area_existing_and_new(
             os_existing=os_existing_SSP1,
             sio_new_bldg=S1_sio_new,
-            plot=False, plot_title='SSP1, S_timber_high')
+            plot=False, plot_title='SSP1 + Medium Density')
         S2_mat_i, S2_mat_o, S2_mat_s = calc_inflow_outflow_stock_mats(
             area_inflow_2017_2100=S2_area_i,
             area_outflow_2017_2100=S2_area_o,
@@ -999,14 +997,14 @@ if MC_sim == True:
         S2_mat_s_list[i] = S2_mat_s
 
         # Scenario 3
-        S3_sio_new = determine_inflow_outflow_new_bldg(scenario='S_densification_40p_LF_wood',
+        S3_sio_new = determine_inflow_outflow_new_bldg(scenario='S_3',
                                                        FA_dsm_SSP=FA_dsm_SSP1,
-                                                       lt=lt_future,
+                                                       lt=lt_long,
                                                        plot=False, plot_title='SSP1 ')
         S3_area_i, S3_area_o, S3_area_s = combine_area_existing_and_new(
             os_existing=os_existing_SSP1,
             sio_new_bldg=S3_sio_new,
-            plot=False, plot_title='SSP1, dens-40p')
+            plot=False, plot_title='SSP1 + High Density')
         S3_mat_i, S3_mat_o, S3_mat_s, = calc_inflow_outflow_stock_mats(
             area_inflow_2017_2100=S3_area_i,
             area_outflow_2017_2100=S3_area_o,
@@ -1018,13 +1016,13 @@ if MC_sim == True:
         S3_mat_s_list[i] = S3_mat_s
 
         # Scenario 4
-        S4_sio_new = determine_inflow_outflow_new_bldg(scenario='S_0', FA_dsm_SSP=FA_dsm_SSP3,
+        S4_sio_new = determine_inflow_outflow_new_bldg(scenario='S_4', FA_dsm_SSP=FA_dsm_SSP3,
                                                        lt=lt_future,
                                                        plot=False, plot_title='SSP3 ')
         S4_area_i, S4_area_o, S4_area_s, = combine_area_existing_and_new(
             os_existing=os_existing_SSP3,
             sio_new_bldg=S4_sio_new,
-            plot=False, plot_title='SSP3, S0')
+            plot=False, plot_title='SSP3 + No Mass Timber Growth')
         S4_mat_i, S4_mat_o, S4_mat_s, = calc_inflow_outflow_stock_mats(
             area_inflow_2017_2100=S4_area_i,
             area_outflow_2017_2100=S4_area_o,
@@ -1036,13 +1034,13 @@ if MC_sim == True:
         S4_mat_s_list[i] = S4_mat_s
 
         # Scenario 5
-        S5_sio_new = determine_inflow_outflow_new_bldg(scenario='S_timber_high', FA_dsm_SSP=FA_dsm_SSP3,
+        S5_sio_new = determine_inflow_outflow_new_bldg(scenario='S_5', FA_dsm_SSP=FA_dsm_SSP3,
                                                        lt=lt_future,
                                                        plot=False, plot_title='SSP3 ')
         S5_area_i, S5_area_o, S5_area_s = combine_area_existing_and_new(
             os_existing=os_existing_SSP3,
             sio_new_bldg=S5_sio_new,
-            plot=False, plot_title='SSP3, S_timber_high')
+            plot=False, plot_title='SSP3 + Moderate Mass Timber Growth')
         S5_mat_i, S5_mat_o, S5_mat_s = calc_inflow_outflow_stock_mats(
             area_inflow_2017_2100=S5_area_i,
             area_outflow_2017_2100=S5_area_o,
@@ -1053,7 +1051,7 @@ if MC_sim == True:
         S5_mat_o_list[i] = S4_mat_o
         S5_mat_s_list[i] = S4_mat_s
 
-    # Calculate mean and standard devviation
+    # Calculate mean and standard deviation
     S1_mat_i_mean = pd.concat(S1_mat_i_list).groupby(level=1).mean()
     S1_mat_i_std = pd.concat(S1_mat_i_list).groupby(level=1).std()
     S1_mat_o_mean = pd.concat(S1_mat_o_list).groupby(level=1).mean()
@@ -1255,7 +1253,7 @@ def plot_sio_materials(s1_inflow=None, s2_inflow=None, s3_inflow=None, s4_inflow
 
     # add legend in place of 6th plot
     axs[2, 1].axis('off')
-    fig.legend(legend, title='Material Inflow Scenarios', loc='lower right', bbox_to_anchor=(0.9, 0.1), fancybox=True)
+    fig.legend(legend, title='Material Inflow Scenarios', loc='lower right', bbox_to_anchor=(0.98, 0.1), fancybox=True)
     # add ylabels
     for ax in axs.flat:
         ax.set(ylabel='Mt/year')
@@ -1410,7 +1408,7 @@ def plot_sio_materials(s1_inflow=None, s2_inflow=None, s3_inflow=None, s4_inflow
 
     # add legend in place of 6th plot
     axs[2, 1].axis('off')
-    fig.legend(legend, title='Material Outflows by Scenarios', loc='lower right', bbox_to_anchor=(0.9, 0.1), fancybox=True)
+    fig.legend(legend, title='Material Outflows by Scenarios', loc='lower right', bbox_to_anchor=(0.98, 0.1), fancybox=True)
     # add ylabels
     for ax in axs.flat:
         ax.set(ylabel='Mt/year')
@@ -1565,7 +1563,7 @@ def plot_sio_materials(s1_inflow=None, s2_inflow=None, s3_inflow=None, s4_inflow
 
     # add legend in place of 6th plot
     axs[2, 1].axis('off')
-    fig.legend(legend, title='Material Stocks by Scenario', loc='lower right', bbox_to_anchor=(0.9, 0.1), fancybox=True)
+    fig.legend(legend, title='Material Stocks by Scenario', loc='lower right', bbox_to_anchor=(0.98, 0.1), fancybox=True)
     # add ylabels
     for ax in axs.flat:
         ax.set(ylabel='Gt')
@@ -1583,11 +1581,12 @@ plot_sio_materials(s1_inflow=S1_mat_i_mean, s1_outflow=S1_mat_o_mean, s1_stock=S
                    s4_inflow_ci=S4_mat_i_std, s4_outflow_ci=S4_mat_o_std, s4_stock_ci=S4_mat_s_std/1000,
                    s5_inflow=S5_mat_i, s5_outflow=S5_mat_o, s5_stock=S5_mat_s/1000,
                    s5_inflow_ci=S5_mat_i_std, s5_outflow_ci=S5_mat_o_std, s5_stock_ci=S5_mat_s_std/1000,
-                   legend=['Scenario 1', 'Scenario 2', 'Scenario 3', 'Scenario 4', 'Scenario 5'], plot_error=True)
+                   legend=['SSP1 + Low Density', 'SSP1 + Medium Density', 'SSP1 + High Density', 'SSP3 + No Mass Timber', 'SSP3 + Moderate Mass Timber'],
+                   plot_error=False)
 
-plot_sio_materials(s1_inflow=S1_mat_i_mean, s1_outflow=S1_mat_o_mean, s1_stock=S1_mat_s_mean/1000,
-                   s1_inflow_ci=S1_mat_i_std, s1_outflow_ci=S1_mat_o_std, s1_stock_ci=S1_mat_s_std/1000,
-                   legend=['Scenario 1'])
+# plot_sio_materials(s1_inflow=S1_mat_i_mean, s1_outflow=S1_mat_o_mean, s1_stock=S1_mat_s_mean/1000,
+#                    s1_inflow_ci=S1_mat_i_std, s1_outflow_ci=S1_mat_o_std, s1_stock_ci=S1_mat_s_std/1000,
+#                    legend=['Scenario 1'])
 
 
 

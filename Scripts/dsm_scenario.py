@@ -340,7 +340,7 @@ years, US_pop = interpolate_population(data_pop=data_pop_WiC, data_source='WiC',
 US_gdp = interpolate_gdp(data_gdp, year1=year1, year2=year2, SSP='All', kind='cubic', plot=False)
 # calculate total floor area elasticity
 FA_all = FA_elasticity_EDGE(US_gdp, US_pop, SSP='All',
-                       base_year=2016,FA_base_year=347, Area_country=9.14759e6, gamma=-0.03,
+                       base_year=2016,FA_base_year=110, Area_country=9.14759e6, gamma=-0.03,
                        plot=False)
 
 
@@ -547,7 +547,7 @@ kde_flag = True
 rug_flag = False
 RECS_comparison = False
 CBECS_comparison = False
-plot_all = True
+plot_all = False
 
 # Plot all RECS data against the DSM simulation distribution
 if RECS_comparison==True:
@@ -1116,7 +1116,7 @@ if plot_MFA_all_same_graph == True:
     plt2, = plt.plot(SSP2_dsm_res.t, SSP2_dsm_res.s)
     plt3, = plt.plot(SSP3_dsm_res.t, SSP3_dsm_res.s)
     plt4, = plt.plot(SSP4_dsm_res.t, SSP4_dsm_res.s)
-    plt16, = plt.plot([base_year, base_year], [0, 100000], color='k', LineStyle='--')
+    plt16, = plt.plot([base_year, base_year], [0, 75000], color='k', LineStyle='--')
     if no_SSP5 == True:
         temp = 'bleh'
     else:
@@ -1148,7 +1148,7 @@ if plot_MFA_all_same_graph == True:
         plt9, = plt.plot(SSP5_dsm_res.t, SSP5_dsm_res.i, LineStyle='dashed')
         plt0, = plt.plot(SSP5_dsm_res.t, SSP5_dsm_res.o)
 
-    plt11, = plt.plot([base_year, base_year], [0, 4000], color='k', LineStyle='--')
+    plt11, = plt.plot([base_year, base_year], [0, 1000], color='k', LineStyle='--')
 
     if no_SSP5 == True:
         plt.legend([plt1, plt2, plt3, plt4, plt5, plt6, plt7, plt8],

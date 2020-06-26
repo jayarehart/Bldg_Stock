@@ -596,74 +596,74 @@ def calc_inflow_outflow_stock_mats(area_inflow_2017_2100, area_outflow_2017_2100
         # Inflow of materials in (unit = Megaton, Mt)
         inflow_mat = pd.DataFrame()
         inflow_mat['LF_wood_steel_inflow'] = area_inflow_2017_2100['inflow_LF_wood'] * \
-                                             materials_intensity_df['LF_wood']['Steel_kgm2_mean'] * 10e6 / 10e9
+                                             materials_intensity_df['LF_wood']['Steel_kgm2_mean'] * 1e6 / 1e9
         inflow_mat['LF_wood_conc_inflow'] = area_inflow_2017_2100['inflow_LF_wood'] * materials_intensity_df['LF_wood'][
-            'Concrete_kgm2_mean'] * 10e6 / 10e9
+            'Concrete_kgm2_mean'] * 1e6 / 1e9
         inflow_mat['LF_wood_engwood_inflow'] = area_inflow_2017_2100['inflow_LF_wood'] * \
-                                               materials_intensity_df['LF_wood']['Eng_wood_kgm2_mean'] * 10e6 / 10e9
+                                               materials_intensity_df['LF_wood']['Eng_wood_kgm2_mean'] * 1e6 / 1e9
         inflow_mat['LF_wood_dimlum_inflow'] = area_inflow_2017_2100['inflow_LF_wood'] * \
-                                              materials_intensity_df['LF_wood']['Dim_lumber_kgm2_mean'] * 10e6 / 10e9
+                                              materials_intensity_df['LF_wood']['Dim_lumber_kgm2_mean'] * 1e6 / 1e9
         inflow_mat['LF_wood_masonry_inflow'] = area_inflow_2017_2100['inflow_LF_wood'] * \
-                                               materials_intensity_df['LF_wood']['Masonry_kgm2_mean'] * 10e6 / 10e9
+                                               materials_intensity_df['LF_wood']['Masonry_kgm2_mean'] * 1e6 / 1e9
 
         inflow_mat['Mass_Timber_steel_inflow'] = area_inflow_2017_2100['inflow_Mass_Timber'] * \
-                                                 materials_intensity_df['Mass_Timber']['Steel_kgm2_mean'] * 10e6 / 10e9
+                                                 materials_intensity_df['Mass_Timber']['Steel_kgm2_mean'] * 1e6 / 1e9
         inflow_mat['Mass_Timber_conc_inflow'] = area_inflow_2017_2100['inflow_Mass_Timber'] * \
                                                 materials_intensity_df['Mass_Timber'][
-                                                    'Concrete_kgm2_mean'] * 10e6 / 10e9
+                                                    'Concrete_kgm2_mean'] * 1e6 / 1e9
         inflow_mat['Mass_Timber_engwood_inflow'] = area_inflow_2017_2100['inflow_Mass_Timber'] * \
                                                    materials_intensity_df['Mass_Timber'][
-                                                       'Eng_wood_kgm2_mean'] * 10e6 / 10e9
+                                                       'Eng_wood_kgm2_mean'] * 1e6 / 1e9
         inflow_mat['Mass_Timber_dimlum_inflow'] = area_inflow_2017_2100['inflow_Mass_Timber'] * \
                                                   materials_intensity_df['Mass_Timber'][
-                                                      'Dim_lumber_kgm2_mean'] * 10e6 / 10e9
+                                                      'Dim_lumber_kgm2_mean'] * 1e6 / 1e9
         inflow_mat['Mass_Timber_masonry_inflow'] = area_inflow_2017_2100['inflow_Mass_Timber'] * \
                                                    materials_intensity_df['Mass_Timber'][
-                                                       'Masonry_kgm2_mean'] * 10e6 / 10e9
+                                                       'Masonry_kgm2_mean'] * 1e6 / 1e9
 
         inflow_mat['Steel_steel_inflow'] = area_inflow_2017_2100['inflow_Steel'] * materials_intensity_df['Steel'][
-            'Steel_kgm2_mean'] * 10e6 / 10e9
+            'Steel_kgm2_mean'] * 1e6 / 1e9
         inflow_mat['Steel_conc_inflow'] = area_inflow_2017_2100['inflow_Steel'] * materials_intensity_df['Steel'][
-            'Concrete_kgm2_mean'] * 10e6 / 10e9
+            'Concrete_kgm2_mean'] * 1e6 / 1e9
         inflow_mat['Steel_engwood_inflow'] = area_inflow_2017_2100['inflow_Steel'] * materials_intensity_df['Steel'][
-            'Eng_wood_kgm2_mean'] * 10e6 / 10e9
+            'Eng_wood_kgm2_mean'] * 1e6 / 1e9
         inflow_mat['Steel_dimlum_inflow'] = area_inflow_2017_2100['inflow_Steel'] * materials_intensity_df['Steel'][
-            'Dim_lumber_kgm2_mean'] * 10e6 / 10e9
+            'Dim_lumber_kgm2_mean'] * 1e6 / 1e9
         inflow_mat['Steel_masonry_inflow'] = area_inflow_2017_2100['inflow_Steel'] * materials_intensity_df['Steel'][
-            'Masonry_kgm2_mean'] * 10e6 / 10e9
+            'Masonry_kgm2_mean'] * 1e6 / 1e9
 
         inflow_mat['RC_steel_inflow'] = area_inflow_2017_2100['inflow_RC'] * materials_intensity_df['RC'][
-            'Steel_kgm2_mean'] * 10e6 / 10e9
+            'Steel_kgm2_mean'] * 1e6 / 1e9
         inflow_mat['RC_conc_inflow'] = area_inflow_2017_2100['inflow_RC'] * materials_intensity_df['RC'][
-            'Concrete_kgm2_mean'] * 10e6 / 10e9
+            'Concrete_kgm2_mean'] * 1e6 / 1e9
         inflow_mat['RC_engwood_inflow'] = area_inflow_2017_2100['inflow_RC'] * materials_intensity_df['RC'][
-            'Eng_wood_kgm2_mean'] * 10e6 / 10e9
+            'Eng_wood_kgm2_mean'] * 1e6 / 1e9
         inflow_mat['RC_dimlum_inflow'] = area_inflow_2017_2100['inflow_RC'] * materials_intensity_df['RC'][
-            'Dim_lumber_kgm2_mean'] * 10e6 / 10e9
+            'Dim_lumber_kgm2_mean'] * 1e6 / 1e9
         inflow_mat['RC_masonry_inflow'] = area_inflow_2017_2100['inflow_RC'] * materials_intensity_df['RC'][
-            'Masonry_kgm2_mean'] * 10e6 / 10e9
+            'Masonry_kgm2_mean'] * 1e6 / 1e9
 
         inflow_mat['RM_steel_inflow'] = area_inflow_2017_2100['inflow_RM'] * materials_intensity_df['RM'][
-            'Steel_kgm2_mean'] * 10e6 / 10e9
+            'Steel_kgm2_mean'] * 1e6 / 1e9
         inflow_mat['RM_conc_inflow'] = area_inflow_2017_2100['inflow_RM'] * materials_intensity_df['RM'][
-            'Concrete_kgm2_mean'] * 10e6 / 10e9
+            'Concrete_kgm2_mean'] * 1e6 / 1e9
         inflow_mat['RM_engwood_inflow'] = area_inflow_2017_2100['inflow_RM'] * materials_intensity_df['RM'][
-            'Eng_wood_kgm2_mean'] * 10e6 / 10e9
+            'Eng_wood_kgm2_mean'] * 1e6 / 1e9
         inflow_mat['RM_dimlum_inflow'] = area_inflow_2017_2100['inflow_RM'] * materials_intensity_df['RM'][
-            'Dim_lumber_kgm2_mean'] * 10e6 / 10e9
+            'Dim_lumber_kgm2_mean'] * 1e6 / 1e9
         inflow_mat['RM_masonry_inflow'] = area_inflow_2017_2100['inflow_RM'] * materials_intensity_df['RM'][
-            'Masonry_kgm2_mean'] * 10e6 / 10e9
+            'Masonry_kgm2_mean'] * 1e6 / 1e9
 
         inflow_mat['URM_steel_inflow'] = area_inflow_2017_2100['inflow_URM'] * materials_intensity_df['URM'][
-            'Steel_kgm2_mean'] * 10e6 / 10e9
+            'Steel_kgm2_mean'] * 1e6 / 1e9
         inflow_mat['URM_conc_inflow'] = area_inflow_2017_2100['inflow_URM'] * materials_intensity_df['URM'][
-            'Concrete_kgm2_mean'] * 10e6 / 10e9
+            'Concrete_kgm2_mean'] * 1e6 / 1e9
         inflow_mat['URM_engwood_inflow'] = area_inflow_2017_2100['inflow_URM'] * materials_intensity_df['URM'][
-            'Eng_wood_kgm2_mean'] * 10e6 / 10e9
+            'Eng_wood_kgm2_mean'] * 1e6 / 1e9
         inflow_mat['URM_dimlum_inflowv'] = area_inflow_2017_2100['inflow_URM'] * materials_intensity_df['URM'][
-            'Dim_lumber_kgm2_mean'] * 10e6 / 10e9
+            'Dim_lumber_kgm2_mean'] * 1e6 / 1e9
         inflow_mat['URM_masonry_inflow'] = area_inflow_2017_2100['inflow_URM'] * materials_intensity_df['URM'][
-            'Masonry_kgm2_mean'] * 10e6 / 10e9
+            'Masonry_kgm2_mean'] * 1e6 / 1e9
 
         # Total inflows of each material (by structure type), unit = Mt
         steel_tot_inflow = inflow_mat.filter(regex='_steel', axis=1)
@@ -701,80 +701,80 @@ def calc_inflow_outflow_stock_mats(area_inflow_2017_2100, area_outflow_2017_2100
         outflow_mat = pd.DataFrame()
         outflow_mat['LF_wood_steel_outflow'] = area_outflow_2017_2100['outflow_LF_wood'] * \
                                                materials_intensity_df['LF_wood'][
-                                                   'Steel_kgm2_mean'] * 10e6 / 10e9
+                                                   'Steel_kgm2_mean'] * 1e6 / 1e9
         outflow_mat['LF_wood_conc_outflow'] = area_outflow_2017_2100['outflow_LF_wood'] * \
                                               materials_intensity_df['LF_wood'][
-                                                  'Concrete_kgm2_mean'] * 10e6 / 10e9
+                                                  'Concrete_kgm2_mean'] * 1e6 / 1e9
         outflow_mat['LF_wood_engwood_outflow'] = area_outflow_2017_2100['outflow_LF_wood'] * \
                                                  materials_intensity_df['LF_wood'][
-                                                     'Eng_wood_kgm2_mean'] * 10e6 / 10e9
+                                                     'Eng_wood_kgm2_mean'] * 1e6 / 1e9
         outflow_mat['LF_wood_dimlum_outflow'] = area_outflow_2017_2100['outflow_LF_wood'] * \
                                                 materials_intensity_df['LF_wood'][
-                                                    'Dim_lumber_kgm2_mean'] * 10e6 / 10e9
+                                                    'Dim_lumber_kgm2_mean'] * 1e6 / 1e9
         outflow_mat['LF_wood_masonry_outflow'] = area_outflow_2017_2100['outflow_LF_wood'] * \
                                                  materials_intensity_df['LF_wood'][
-                                                     'Masonry_kgm2_mean'] * 10e6 / 10e9
+                                                     'Masonry_kgm2_mean'] * 1e6 / 1e9
 
         outflow_mat['Mass_Timber_steel_outflow'] = area_outflow_2017_2100['outflow_Mass_Timber'] * \
                                                    materials_intensity_df['Mass_Timber'][
-                                                       'Steel_kgm2_mean'] * 10e6 / 10e9
+                                                       'Steel_kgm2_mean'] * 1e6 / 1e9
         outflow_mat['Mass_Timber_conc_outflow'] = area_outflow_2017_2100['outflow_Mass_Timber'] * \
                                                   materials_intensity_df['Mass_Timber'][
-                                                      'Concrete_kgm2_mean'] * 10e6 / 10e9
+                                                      'Concrete_kgm2_mean'] * 1e6 / 1e9
         outflow_mat['Mass_Timber_engwood_outflow'] = area_outflow_2017_2100['outflow_Mass_Timber'] * \
                                                      materials_intensity_df['Mass_Timber'][
-                                                         'Eng_wood_kgm2_mean'] * 10e6 / 10e9
+                                                         'Eng_wood_kgm2_mean'] * 1e6 / 1e9
         outflow_mat['Mass_Timber_dimlum_outflow'] = area_outflow_2017_2100['outflow_Mass_Timber'] * \
                                                     materials_intensity_df['Mass_Timber'][
-                                                        'Dim_lumber_kgm2_mean'] * 10e6 / 10e9
+                                                        'Dim_lumber_kgm2_mean'] * 1e6 / 1e9
         outflow_mat['Mass_Timber_masonry_outflow'] = area_outflow_2017_2100['outflow_Mass_Timber'] * \
                                                      materials_intensity_df['Mass_Timber'][
-                                                         'Masonry_kgm2_mean'] * 10e6 / 10e9
+                                                         'Masonry_kgm2_mean'] * 1e6 / 1e9
 
         outflow_mat['Steel_steel_outflow'] = area_outflow_2017_2100['outflow_Steel'] * materials_intensity_df['Steel'][
-            'Steel_kgm2_mean'] * 10e6 / 10e9
+            'Steel_kgm2_mean'] * 1e6 / 1e9
         outflow_mat['Steel_conc_outflow'] = area_outflow_2017_2100['outflow_Steel'] * materials_intensity_df['Steel'][
-            'Concrete_kgm2_mean'] * 10e6 / 10e9
+            'Concrete_kgm2_mean'] * 1e6 / 1e9
         outflow_mat['Steel_engwood_outflow'] = area_outflow_2017_2100['outflow_Steel'] * \
                                                materials_intensity_df['Steel'][
-                                                   'Eng_wood_kgm2_mean'] * 10e6 / 10e9
+                                                   'Eng_wood_kgm2_mean'] * 1e6 / 1e9
         outflow_mat['Steel_dimlum_outflow'] = area_outflow_2017_2100['outflow_Steel'] * materials_intensity_df['Steel'][
-            'Dim_lumber_kgm2_mean'] * 10e6 / 10e9
+            'Dim_lumber_kgm2_mean'] * 1e6 / 1e9
         outflow_mat['Steel_masonry_outflow'] = area_outflow_2017_2100['outflow_Steel'] * \
                                                materials_intensity_df['Steel'][
-                                                   'Masonry_kgm2_mean'] * 10e6 / 10e9
+                                                   'Masonry_kgm2_mean'] * 1e6 / 1e9
 
         outflow_mat['RC_steel_outflow'] = area_outflow_2017_2100['outflow_RC'] * materials_intensity_df['RC'][
-            'Steel_kgm2_mean'] * 10e6 / 10e9
+            'Steel_kgm2_mean'] * 1e6 / 1e9
         outflow_mat['RC_conc_outflow'] = area_outflow_2017_2100['outflow_RC'] * materials_intensity_df['RC'][
-            'Concrete_kgm2_mean'] * 10e6 / 10e9
+            'Concrete_kgm2_mean'] * 1e6 / 1e9
         outflow_mat['RC_engwood_outflow'] = area_outflow_2017_2100['outflow_RC'] * materials_intensity_df['RC'][
-            'Eng_wood_kgm2_mean'] * 10e6 / 10e9
+            'Eng_wood_kgm2_mean'] * 1e6 / 1e9
         outflow_mat['RC_dimlum_outflow'] = area_outflow_2017_2100['outflow_RC'] * materials_intensity_df['RC'][
-            'Dim_lumber_kgm2_mean'] * 10e6 / 10e9
+            'Dim_lumber_kgm2_mean'] * 1e6 / 1e9
         outflow_mat['RC_masonry_outflow'] = area_outflow_2017_2100['outflow_RC'] * materials_intensity_df['RC'][
-            'Masonry_kgm2_mean'] * 10e6 / 10e9
+            'Masonry_kgm2_mean'] * 1e6 / 1e9
 
         outflow_mat['RM_steel_outflow'] = area_outflow_2017_2100['outflow_RM'] * materials_intensity_df['RM'][
-            'Steel_kgm2_mean'] * 10e6 / 10e9
+            'Steel_kgm2_mean'] * 1e6 / 1e9
         outflow_mat['RM_conc_outflow'] = area_outflow_2017_2100['outflow_RM'] * materials_intensity_df['RM'][
-            'Concrete_kgm2_mean'] * 10e6 / 10e9
+            'Concrete_kgm2_mean'] * 1e6 / 1e9
         outflow_mat['RM_engwood_outflow'] = area_outflow_2017_2100['outflow_RM'] * materials_intensity_df['RM'][
-            'Eng_wood_kgm2_mean'] * 10e6 / 10e9
+            'Eng_wood_kgm2_mean'] * 1e6 / 1e9
         outflow_mat['RM_dimlum_outflow'] = area_outflow_2017_2100['outflow_RM'] * materials_intensity_df['RM'][
-            'Dim_lumber_kgm2_mean'] * 10e6 / 10e9
+            'Dim_lumber_kgm2_mean'] * 1e6 / 1e9
         outflow_mat['RM_masonry_outflow'] = area_outflow_2017_2100['outflow_RM'] * materials_intensity_df['RM'][
-            'Masonry_kgm2_mean'] * 10e6 / 10e9
+            'Masonry_kgm2_mean'] * 1e6 / 1e9
         outflow_mat['URM_steel_outflow'] = area_outflow_2017_2100['outflow_URM'] * materials_intensity_df['URM'][
-            'Steel_kgm2_mean'] * 10e6 / 10e9
+            'Steel_kgm2_mean'] * 1e6 / 1e9
         outflow_mat['URM_conc_outflow'] = area_outflow_2017_2100['outflow_URM'] * materials_intensity_df['URM'][
-            'Concrete_kgm2_mean'] * 10e6 / 10e9
+            'Concrete_kgm2_mean'] * 1e6 / 1e9
         outflow_mat['URM_engwood_outflow'] = area_outflow_2017_2100['outflow_URM'] * materials_intensity_df['URM'][
-            'Eng_wood_kgm2_mean'] * 10e6 / 10e9
+            'Eng_wood_kgm2_mean'] * 1e6 / 1e9
         outflow_mat['URM_dimlum_outflow'] = area_outflow_2017_2100['outflow_URM'] * materials_intensity_df['URM'][
-            'Dim_lumber_kgm2_mean'] * 10e6 / 10e9
+            'Dim_lumber_kgm2_mean'] * 1e6 / 1e9
         outflow_mat['URM_masonry_outflow'] = area_outflow_2017_2100['outflow_URM'] * materials_intensity_df['URM'][
-            'Masonry_kgm2_mean'] * 10e6 / 10e9
+            'Masonry_kgm2_mean'] * 1e6 / 1e9
 
         # Total outflows of each material (by structure type), unit = Mt
         steel_tot_outflow = outflow_mat.filter(regex='_steel', axis=1)
@@ -811,73 +811,73 @@ def calc_inflow_outflow_stock_mats(area_inflow_2017_2100, area_outflow_2017_2100
         # Stocks of materials in (unit = Megaton, Mt)
         stock_mat = pd.DataFrame()
         stock_mat['LF_wood_steel_stock'] = area_stock_2017_2100['stock_LF_wood'] * materials_intensity_df['LF_wood'][
-            'Steel_kgm2_mean'] * 10e6 / 10e9
+            'Steel_kgm2_mean'] * 1e6 / 1e9
         stock_mat['LF_wood_conc_stock'] = area_stock_2017_2100['stock_LF_wood'] * materials_intensity_df['LF_wood'][
-            'Concrete_kgm2_mean'] * 10e6 / 10e9
+            'Concrete_kgm2_mean'] * 1e6 / 1e9
         stock_mat['LF_wood_engwood_stock'] = area_stock_2017_2100['stock_LF_wood'] * materials_intensity_df['LF_wood'][
-            'Eng_wood_kgm2_mean'] * 10e6 / 10e9
+            'Eng_wood_kgm2_mean'] * 1e6 / 1e9
         stock_mat['LF_wood_dimlum_stock'] = area_stock_2017_2100['stock_LF_wood'] * materials_intensity_df['LF_wood'][
-            'Dim_lumber_kgm2_mean'] * 10e6 / 10e9
+            'Dim_lumber_kgm2_mean'] * 1e6 / 1e9
         stock_mat['LF_wood_masonry_stock'] = area_stock_2017_2100['stock_LF_wood'] * materials_intensity_df['LF_wood'][
-            'Masonry_kgm2_mean'] * 10e6 / 10e9
+            'Masonry_kgm2_mean'] * 1e6 / 1e9
 
         stock_mat['Mass_Timber_steel_stock'] = area_stock_2017_2100['stock_Mass_Timber'] * \
-                                               materials_intensity_df['Mass_Timber']['Steel_kgm2_mean'] * 10e6 / 10e9
+                                               materials_intensity_df['Mass_Timber']['Steel_kgm2_mean'] * 1e6 / 1e9
         stock_mat['Mass_Timber_conc_stock'] = area_stock_2017_2100['stock_Mass_Timber'] * \
-                                              materials_intensity_df['Mass_Timber']['Concrete_kgm2_mean'] * 10e6 / 10e9
+                                              materials_intensity_df['Mass_Timber']['Concrete_kgm2_mean'] * 1e6 / 1e9
         stock_mat['Mass_Timber_engwood_stock'] = area_stock_2017_2100['stock_Mass_Timber'] * \
                                                  materials_intensity_df['Mass_Timber'][
-                                                     'Eng_wood_kgm2_mean'] * 10e6 / 10e9
+                                                     'Eng_wood_kgm2_mean'] * 1e6 / 1e9
         stock_mat['Mass_Timber_dimlum_stock'] = area_stock_2017_2100['stock_Mass_Timber'] * \
                                                 materials_intensity_df['Mass_Timber'][
-                                                    'Dim_lumber_kgm2_mean'] * 10e6 / 10e9
+                                                    'Dim_lumber_kgm2_mean'] * 1e6 / 1e9
         stock_mat['Mass_Timber_masonry_stock'] = area_stock_2017_2100['stock_Mass_Timber'] * \
                                                  materials_intensity_df['Mass_Timber'][
-                                                     'Masonry_kgm2_mean'] * 10e6 / 10e9
+                                                     'Masonry_kgm2_mean'] * 1e6 / 1e9
 
         stock_mat['Steel_steel_stock'] = area_stock_2017_2100['stock_Steel'] * materials_intensity_df['Steel'][
-            'Steel_kgm2_mean'] * 10e6 / 10e9
+            'Steel_kgm2_mean'] * 1e6 / 1e9
         stock_mat['Steel_conc_stock'] = area_stock_2017_2100['stock_Steel'] * materials_intensity_df['Steel'][
-            'Concrete_kgm2_mean'] * 10e6 / 10e9
+            'Concrete_kgm2_mean'] * 1e6 / 1e9
         stock_mat['Steel_engwood_stock'] = area_stock_2017_2100['stock_Steel'] * materials_intensity_df['Steel'][
-            'Eng_wood_kgm2_mean'] * 10e6 / 10e9
+            'Eng_wood_kgm2_mean'] * 1e6 / 1e9
         stock_mat['Steel_dimlum_stock'] = area_stock_2017_2100['stock_Steel'] * materials_intensity_df['Steel'][
-            'Dim_lumber_kgm2_mean'] * 10e6 / 10e9
+            'Dim_lumber_kgm2_mean'] * 1e6 / 1e9
         stock_mat['Steel_masonry_stock'] = area_stock_2017_2100['stock_Steel'] * materials_intensity_df['Steel'][
-            'Masonry_kgm2_mean'] * 10e6 / 10e9
+            'Masonry_kgm2_mean'] * 1e6 / 1e9
 
         stock_mat['RC_steel_stock'] = area_stock_2017_2100['stock_RC'] * materials_intensity_df['RC'][
-            'Steel_kgm2_mean'] * 10e6 / 10e9
+            'Steel_kgm2_mean'] * 1e6 / 1e9
         stock_mat['RC_conc_stock'] = area_stock_2017_2100['stock_RC'] * materials_intensity_df['RC'][
-            'Concrete_kgm2_mean'] * 10e6 / 10e9
+            'Concrete_kgm2_mean'] * 1e6 / 1e9
         stock_mat['RC_engwood_stock'] = area_stock_2017_2100['stock_RC'] * materials_intensity_df['RC'][
-            'Eng_wood_kgm2_mean'] * 10e6 / 10e9
+            'Eng_wood_kgm2_mean'] * 1e6 / 1e9
         stock_mat['RC_dimlum_stock'] = area_stock_2017_2100['stock_RC'] * materials_intensity_df['RC'][
-            'Dim_lumber_kgm2_mean'] * 10e6 / 10e9
+            'Dim_lumber_kgm2_mean'] * 1e6 / 1e9
         stock_mat['RC_masonry_stock'] = area_stock_2017_2100['stock_RC'] * materials_intensity_df['RC'][
-            'Masonry_kgm2_mean'] * 10e6 / 10e9
+            'Masonry_kgm2_mean'] * 1e6 / 1e9
 
         stock_mat['RM_steel_stock'] = area_stock_2017_2100['stock_RM'] * materials_intensity_df['RM'][
-            'Steel_kgm2_mean'] * 10e6 / 10e9
+            'Steel_kgm2_mean'] * 1e6 / 1e9
         stock_mat['RM_conc_stock'] = area_stock_2017_2100['stock_RM'] * materials_intensity_df['RM'][
-            'Concrete_kgm2_mean'] * 10e6 / 10e9
+            'Concrete_kgm2_mean'] * 1e6 / 1e9
         stock_mat['RM_engwood_stock'] = area_stock_2017_2100['stock_RM'] * materials_intensity_df['RM'][
-            'Eng_wood_kgm2_mean'] * 10e6 / 10e9
+            'Eng_wood_kgm2_mean'] * 1e6 / 1e9
         stock_mat['RM_dimlum_stock'] = area_stock_2017_2100['stock_RM'] * materials_intensity_df['RM'][
-            'Dim_lumber_kgm2_mean'] * 10e6 / 10e9
+            'Dim_lumber_kgm2_mean'] * 1e6 / 1e9
         stock_mat['RM_masonry_stock'] = area_stock_2017_2100['stock_RM'] * materials_intensity_df['RM'][
-            'Masonry_kgm2_mean'] * 10e6 / 10e9
+            'Masonry_kgm2_mean'] * 1e6 / 1e9
 
         stock_mat['URM_steel_stock'] = area_stock_2017_2100['stock_URM'] * materials_intensity_df['URM'][
-            'Steel_kgm2_mean'] * 10e6 / 10e9
+            'Steel_kgm2_mean'] * 1e6 / 1e9
         stock_mat['URM_conc_stock'] = area_stock_2017_2100['stock_URM'] * materials_intensity_df['URM'][
-            'Concrete_kgm2_mean'] * 10e6 / 10e9
+            'Concrete_kgm2_mean'] * 1e6 / 1e9
         stock_mat['URM_engwood_stock'] = area_stock_2017_2100['stock_URM'] * materials_intensity_df['URM'][
-            'Eng_wood_kgm2_mean'] * 10e6 / 10e9
+            'Eng_wood_kgm2_mean'] * 1e6 / 1e9
         stock_mat['URM_dimlum_stock'] = area_stock_2017_2100['stock_URM'] * materials_intensity_df['URM'][
-            'Dim_lumber_kgm2_mean'] * 10e6 / 10e9
+            'Dim_lumber_kgm2_mean'] * 1e6 / 1e9
         stock_mat['URM_masonry_stock'] = area_stock_2017_2100['stock_URM'] * materials_intensity_df['URM'][
-            'Masonry_kgm2_mean'] * 10e6 / 10e9
+            'Masonry_kgm2_mean'] * 1e6 / 1e9
 
         # Total stocks of each material (by structure type), unit = Mt
         steel_tot_stock = stock_mat.filter(regex='_steel', axis=1)

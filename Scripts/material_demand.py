@@ -938,7 +938,7 @@ os_existing_SSP3 = determine_outflow_existing_bldgs(FA_sc_SSP=FA_sc_SSP3,   lt=l
 # SCENARIO DEFINITIONS
 
 MC_sim = True
-num_iter = 100
+num_iter = 10
 if MC_sim == True:
     # scenario 1 MC:
     S1_mat_i_list = {}

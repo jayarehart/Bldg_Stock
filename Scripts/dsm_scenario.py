@@ -213,7 +213,7 @@ def FA_elasticity_linear(year1=1900, year2=2100, base_year=2016,
 
 # function to calculate the floor area elasticity by the methodology of the EDGE model
 def FA_elasticity_EDGE(US_gdp, US_pop, SSP='All',
-                       base_year=2016,FA_base_year=347, Area_country=9.14759e6, gamma=-0.03,
+                       base_year=2016,FA_base_year=316, Area_country=9.14759e6, gamma=-0.03,
                        plot=True):
     """ Area of the USA is 9.834 million km².
         Base year floor are elasticity for all buildings is 347 m2/person as determined by article (in review)"""
@@ -337,11 +337,11 @@ base_year = 2016
 years, US_pop = interpolate_population(data_pop=data_pop_WiC, data_source='WiC', year1=year1, year2=year2, proj='All', plot=False)
 
 # interpolate gdp data for the US.
-US_gdp = interpolate_gdp(data_gdp, year1=year1, year2=year2, SSP='All', kind='cubic', plot=False)
+US_gdp = interpolate_gdp(data_gdp, year1=year1, year2=year2, SSP='All', kind='cubic', plot=True)
 # calculate total floor area elasticity
 FA_all = FA_elasticity_EDGE(US_gdp, US_pop, SSP='All',
-                       base_year=2016,FA_base_year=110, Area_country=9.14759e6, gamma=-0.03,
-                       plot=False)
+                       base_year=2016,FA_base_year=316, Area_country=8081867, gamma=-0.03,
+                       plot=False)      # area of continguous 48 = 8081867, area of all = 9833517
 
 
 US_pop = US_pop.set_index('Year', drop=False)
@@ -431,7 +431,7 @@ def generate_lt(type, par1, par2):
         lt = {'Type': type, 'Shape': np.array([par1]), 'Scale': np.array([par2])}
     return lt
 
-lt_res = generate_lt('Weibull',par1=5, par2=100)
+lt_res = generate_lt('Weibull',par1=5.5, par2=85.8)
 lt_com = generate_lt('Weibull',par1=4.8, par2=75.1)
 lt_pub = generate_lt('Weibull',par1=6.1, par2=95.6)
 
@@ -545,9 +545,9 @@ SSP5_dsm_res, SSP5_dsm_com, SSP5_dsm_pub, SSP5_MFA_input = calc_MFA('SSP5', lt_r
 n_bins = 15
 kde_flag = True
 rug_flag = False
-RECS_comparison = False
-CBECS_comparison = False
-plot_all = False
+RECS_comparison = True
+CBECS_comparison = True
+plot_all = True
 
 # Plot all RECS data against the DSM simulation distribution
 if RECS_comparison==True:
@@ -1107,6 +1107,54 @@ else:
     # plot_dsm(SSP1_dsm_res, 'SSP1 Residential')
 
 # # ----------------------------------------------------------------------------------------------------------------------
+# # Plot all scenarios together for all buildings
+plot_MFA_all_same_graph = True
+no_SSP5 = True      # True for ignoring SSP5, False for including SSP5
+if plot_MFA_all_same_graph == True:
+    plt.subplot(211)
+    plt1, = plt.plot(SSP1_dsm_res.t, SSP1_dsm_res.s + SSP1_dsm_com.s + SSP1_dsm_pub.s)
+    plt2, = plt.plot(SSP2_dsm_res.t, SSP2_dsm_res.s + SSP2_dsm_com.s + SSP2_dsm_pub.s)
+    plt3, = plt.plot(SSP3_dsm_res.t, SSP3_dsm_res.s + SSP3_dsm_com.s + SSP3_dsm_pub.s)
+    plt4, = plt.plot(SSP4_dsm_res.t, SSP4_dsm_res.s + SSP4_dsm_com.s + SSP4_dsm_pub.s)
+    plt16, = plt.plot([base_year, base_year], [0, 200000], color='k', LineStyle='--')
+
+    plt.legend([plt1, plt2, plt3, plt4], ['SSP1', 'SSP2', 'SSP3', 'SSP4'], loc=(1.05, 0.5))
+    # plt.legend([plt1, plt2, plt3, plt4, plt5], ['SSP1', 'SSP2', 'SSP3', 'SSP4', 'SSP5'], loc=(1.05, 0.5))
+    # plt.legend(loc=(1.05, 0.5))
+    plt.tight_layout()
+    plt.xlabel('Year')
+    plt.xlim(left=1980)
+    plt.ylabel('million $m^2$')
+    plt.title('Total Floor Space - Stock')
+    # plt.show();
+
+    plt.subplot(212)
+    plt1, = plt.plot(SSP1_dsm_res.t, SSP1_dsm_res.i + SSP1_dsm_com.i + SSP1_dsm_pub.i, LineStyle='dashed')
+    plt2, = plt.plot(SSP1_dsm_res.t, SSP1_dsm_res.o + SSP1_dsm_com.o + SSP1_dsm_pub.o)
+    plt3, = plt.plot(SSP2_dsm_res.t, SSP2_dsm_res.i + SSP2_dsm_com.i + SSP2_dsm_pub.i, LineStyle='dashed')
+    plt4, = plt.plot(SSP2_dsm_res.t, SSP2_dsm_res.o + SSP2_dsm_com.o + SSP2_dsm_pub.o)
+    plt5, = plt.plot(SSP3_dsm_res.t, SSP3_dsm_res.i + SSP3_dsm_com.i + SSP3_dsm_pub.i, LineStyle='dashed')
+    plt6, = plt.plot(SSP3_dsm_res.t, SSP3_dsm_res.o + SSP3_dsm_com.o + SSP3_dsm_pub.o)
+    plt7, = plt.plot(SSP4_dsm_res.t, SSP4_dsm_res.i + SSP4_dsm_com.i + SSP4_dsm_pub.i, LineStyle='dashed')
+    plt8, = plt.plot(SSP4_dsm_res.t, SSP4_dsm_res.o + SSP4_dsm_com.o + SSP4_dsm_pub.o)
+
+    plt11, = plt.plot([base_year, base_year], [0, 3000], color='k', LineStyle='--')
+
+    plt.legend([plt1, plt2, plt3, plt4, plt5, plt6, plt7, plt8],
+               ['Inflow SSP1', 'Outflow SSP1',
+                'Inflow SSP2', 'Outflow SSP2',
+                'Inflow SSP3', 'Outflow SSP3',
+                'Inflow SSP4', 'Outflow SSP4'], loc='center left', bbox_to_anchor=(1, 0.5))
+
+    # plt.ylim(top=5000)
+    # plt.xlim(left=SSP1_dsm_res.t[0] + 5)
+    plt.xlim(left=1980)
+    plt.xlabel('Year')
+    plt.ylabel('million m$^2/year$')
+    plt.title('Total Floor Area flows')
+    plt.show();
+
+
 # # Plot all scenarios together for residential buildings
 plot_MFA_all_same_graph = True
 no_SSP5 = True      # True for ignoring SSP5, False for including SSP5
@@ -1116,7 +1164,7 @@ if plot_MFA_all_same_graph == True:
     plt2, = plt.plot(SSP2_dsm_res.t, SSP2_dsm_res.s)
     plt3, = plt.plot(SSP3_dsm_res.t, SSP3_dsm_res.s)
     plt4, = plt.plot(SSP4_dsm_res.t, SSP4_dsm_res.s)
-    plt16, = plt.plot([base_year, base_year], [0, 75000], color='k', LineStyle='--')
+    plt16, = plt.plot([base_year, base_year], [0, 175000], color='k', LineStyle='--')
     if no_SSP5 == True:
         temp = 'bleh'
     else:
@@ -1129,7 +1177,8 @@ if plot_MFA_all_same_graph == True:
     # plt.legend(loc=(1.05, 0.5))
     plt.tight_layout()
     plt.xlabel('Year')
-    plt.ylabel('Floor Area')
+    plt.xlim(left=1980)
+    plt.ylabel('million $m^2$')
     plt.title('Residential Floor Space - Stock')
     # plt.show();
 
@@ -1148,7 +1197,7 @@ if plot_MFA_all_same_graph == True:
         plt9, = plt.plot(SSP5_dsm_res.t, SSP5_dsm_res.i, LineStyle='dashed')
         plt0, = plt.plot(SSP5_dsm_res.t, SSP5_dsm_res.o)
 
-    plt11, = plt.plot([base_year, base_year], [0, 1000], color='k', LineStyle='--')
+    plt11, = plt.plot([base_year, base_year], [0, 2500], color='k', LineStyle='--')
 
     if no_SSP5 == True:
         plt.legend([plt1, plt2, plt3, plt4, plt5, plt6, plt7, plt8],
@@ -1164,8 +1213,140 @@ if plot_MFA_all_same_graph == True:
                     'Inflow SSP4', 'Outflow SSP4',
                     'Inflow SSP5', 'Outflow SSP5'], loc='center left', bbox_to_anchor=(1, 0.5))
     # plt.ylim(top=5000)
-    plt.xlim(left=SSP1_dsm_res.t[0] + 5)
+    # plt.xlim(left=SSP1_dsm_res.t[0] + 5)
+    plt.xlim(left=1980)
     plt.xlabel('Year')
-    plt.ylabel('Floor Area per year')
+    plt.ylabel('million m$^2/year$')
     plt.title('Residential Floor Area flows')
+    plt.show();
+
+
+# # Plot all scenarios together for commercial buildings
+plot_MFA_all_same_graph = True
+no_SSP5 = True      # True for ignoring SSP5, False for including SSP5
+if plot_MFA_all_same_graph == True:
+    plt.subplot(211)
+    plt1, = plt.plot(SSP1_dsm_com.t, SSP1_dsm_com.s)
+    plt2, = plt.plot(SSP2_dsm_com.t, SSP2_dsm_com.s)
+    plt3, = plt.plot(SSP3_dsm_com.t, SSP3_dsm_com.s)
+    plt4, = plt.plot(SSP4_dsm_com.t, SSP4_dsm_com.s)
+    plt16, = plt.plot([base_year, base_year], [0, 35000], color='k', LineStyle='--')
+    if no_SSP5 == True:
+        temp = 'bleh'
+    else:
+        plt5, = plt.plot(SSP5_dsm_com.t, SSP5_dsm_com.s)
+    if no_SSP5 == True:
+        plt.legend([plt1, plt2, plt3, plt4], ['SSP1', 'SSP2', 'SSP3', 'SSP4'], loc=(1.05, 0.5))
+    else:
+        plt.legend([plt1, plt2, plt3, plt4, plt5], ['SSP1', 'SSP2', 'SSP3', 'SSP4', 'SSP5'], loc=(1.05, 0.5))
+    # plt.legend([plt1, plt2, plt3, plt4, plt5], ['SSP1', 'SSP2', 'SSP3', 'SSP4', 'SSP5'], loc=(1.05, 0.5))
+    # plt.legend(loc=(1.05, 0.5))
+    plt.tight_layout()
+    plt.xlim(left=1980)
+    plt.xlabel('Year')
+    plt.ylabel('million $m^2$')
+    plt.title('Commercial Floor Space Stock')
+    # plt.show();
+
+    plt.subplot(212)
+    plt1, = plt.plot(SSP1_dsm_com.t, SSP1_dsm_com.i, LineStyle='dashed')
+    plt2, = plt.plot(SSP1_dsm_com.t, SSP1_dsm_com.o)
+    plt3, = plt.plot(SSP2_dsm_com.t, SSP2_dsm_com.i, LineStyle='dashed')
+    plt4, = plt.plot(SSP2_dsm_com.t, SSP2_dsm_com.o)
+    plt5, = plt.plot(SSP3_dsm_com.t, SSP3_dsm_com.i, LineStyle='dashed')
+    plt6, = plt.plot(SSP3_dsm_com.t, SSP3_dsm_com.o)
+    plt7, = plt.plot(SSP4_dsm_com.t, SSP4_dsm_com.i, LineStyle='dashed')
+    plt8, = plt.plot(SSP4_dsm_com.t, SSP4_dsm_com.o)
+    if no_SSP5 == True:
+        temp = 'bleh'
+    else:
+        plt9, = plt.plot(SSP5_dsm_com.t, SSP5_dsm_com.i, LineStyle='dashed')
+        plt0, = plt.plot(SSP5_dsm_com.t, SSP5_dsm_com.o)
+
+    plt11, = plt.plot([base_year, base_year], [0, 600], color='k', LineStyle='--')
+
+    if no_SSP5 == True:
+        plt.legend([plt1, plt2, plt3, plt4, plt5, plt6, plt7, plt8],
+                   ['Inflow SSP1', 'Outflow SSP1',
+                    'Inflow SSP2', 'Outflow SSP2',
+                    'Inflow SSP3', 'Outflow SSP3',
+                    'Inflow SSP4', 'Outflow SSP4'], loc='center left', bbox_to_anchor=(1, 0.5))
+    else:
+        plt.legend([plt1, plt2, plt3, plt4, plt5, plt6, plt7, plt8, plt9, plt0],
+                   ['Inflow SSP1', 'Outflow SSP1',
+                    'Inflow SSP2', 'Outflow SSP2',
+                    'Inflow SSP3', 'Outflow SSP3',
+                    'Inflow SSP4', 'Outflow SSP4',
+                    'Inflow SSP5', 'Outflow SSP5'], loc='center left', bbox_to_anchor=(1, 0.5))
+    # plt.ylim(top=5000)
+    # plt.xlim(left=SSP1_dsm_com.t[0] + 5)
+    plt.xlim(left=1980)
+    plt.xlabel('Year')
+    plt.ylabel('million m$^2/year$')
+    plt.title('Commercial Floor Space Flows')
+    plt.show();
+
+
+# # Plot all scenarios together for public buildings
+plot_MFA_all_same_graph = True
+no_SSP5 = True      # True for ignoring SSP5, False for including SSP5
+if plot_MFA_all_same_graph == True:
+    plt.subplot(211)
+    plt1, = plt.plot(SSP1_dsm_pub.t, SSP1_dsm_pub.s)
+    plt2, = plt.plot(SSP2_dsm_pub.t, SSP2_dsm_pub.s)
+    plt3, = plt.plot(SSP3_dsm_pub.t, SSP3_dsm_pub.s)
+    plt4, = plt.plot(SSP4_dsm_pub.t, SSP4_dsm_pub.s)
+    plt16, = plt.plot([base_year, base_year], [0, 6500], color='k', LineStyle='--')
+    if no_SSP5 == True:
+        temp = 'bleh'
+    else:
+        plt5, = plt.plot(SSP5_dsm_pub.t, SSP5_dsm_pub.s)
+    if no_SSP5 == True:
+        plt.legend([plt1, plt2, plt3, plt4], ['SSP1', 'SSP2', 'SSP3', 'SSP4'], loc=(1.05, 0.5))
+    else:
+        plt.legend([plt1, plt2, plt3, plt4, plt5], ['SSP1', 'SSP2', 'SSP3', 'SSP4', 'SSP5'], loc=(1.05, 0.5))
+    # plt.legend([plt1, plt2, plt3, plt4, plt5], ['SSP1', 'SSP2', 'SSP3', 'SSP4', 'SSP5'], loc=(1.05, 0.5))
+    # plt.legend(loc=(1.05, 0.5))
+    plt.tight_layout()
+    plt.xlabel('Year')
+    plt.xlim(left=1980)
+    plt.ylabel('million $m^2$ ')
+    plt.title('Public Floor Space Stock')
+    # plt.show();
+
+    plt.subplot(212)
+    plt1, = plt.plot(SSP1_dsm_pub.t, SSP1_dsm_pub.i, LineStyle='dashed')
+    plt2, = plt.plot(SSP1_dsm_pub.t, SSP1_dsm_pub.o)
+    plt3, = plt.plot(SSP2_dsm_pub.t, SSP2_dsm_pub.i, LineStyle='dashed')
+    plt4, = plt.plot(SSP2_dsm_pub.t, SSP2_dsm_pub.o)
+    plt6, = plt.plot(SSP3_dsm_pub.t, SSP3_dsm_pub.o)
+    plt7, = plt.plot(SSP4_dsm_pub.t, SSP4_dsm_pub.i, LineStyle='dashed')
+    plt8, = plt.plot(SSP4_dsm_pub.t, SSP4_dsm_pub.o)
+    if no_SSP5 == True:
+        temp = 'bleh'
+    else:
+        plt9, = plt.plot(SSP5_dsm_pub.t, SSP5_dsm_pub.i, LineStyle='dashed')
+        plt0, = plt.plot(SSP5_dsm_pub.t, SSP5_dsm_pub.o)
+
+    plt11, = plt.plot([base_year, base_year], [0, 100], color='k', LineStyle='--')
+
+    if no_SSP5 == True:
+        plt.legend([plt1, plt2, plt3, plt4, plt5, plt6, plt7, plt8],
+                   ['Inflow SSP1', 'Outflow SSP1',
+                    'Inflow SSP2', 'Outflow SSP2',
+                    'Inflow SSP3', 'Outflow SSP3',
+                    'Inflow SSP4', 'Outflow SSP4'], loc='center left', bbox_to_anchor=(1, 0.5))
+    else:
+        plt.legend([plt1, plt2, plt3, plt4, plt5, plt6, plt7, plt8, plt9, plt0],
+                   ['Inflow SSP1', 'Outflow SSP1',
+                    'Inflow SSP2', 'Outflow SSP2',
+                    'Inflow SSP3', 'Outflow SSP3',
+                    'Inflow SSP4', 'Outflow SSP4',
+                    'Inflow SSP5', 'Outflow SSP5'], loc='center left', bbox_to_anchor=(1, 0.5))
+    # plt.ylim(top=5000)
+    # plt.xlim(left=SSP1_dsm_pub.t[0] + 5)
+    plt.xlim(left=1980)
+    plt.xlabel('Year')
+    plt.ylabel('million m$^2/year$')
+    plt.title('Public Floor Area Flows')
     plt.show();

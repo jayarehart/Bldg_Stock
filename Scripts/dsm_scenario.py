@@ -334,14 +334,14 @@ year2 = 2100
 base_year = 2016
 
 # interpolate population data for the US.
-years, US_pop = interpolate_population(data_pop=data_pop_WiC, data_source='WiC', year1=year1, year2=year2, proj='All', plot=False)
+years, US_pop = interpolate_population(data_pop=data_pop_WiC, data_source='WiC', year1=year1, year2=year2, proj='All', plot=True)
 
 # interpolate gdp data for the US.
 US_gdp = interpolate_gdp(data_gdp, year1=year1, year2=year2, SSP='All', kind='cubic', plot=True)
 # calculate total floor area elasticity
 FA_all = FA_elasticity_EDGE(US_gdp, US_pop, SSP='All',
                        base_year=2016,FA_base_year=316, Area_country=8081867, gamma=-0.03,
-                       plot=False)      # area of continguous 48 = 8081867, area of all = 9833517
+                       plot=True)      # area of continguous 48 = 8081867, area of all = 9833517
 
 
 US_pop = US_pop.set_index('Year', drop=False)

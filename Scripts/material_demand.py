@@ -356,7 +356,7 @@ def determine_inflow_outflow_new_bldg(scenario, FA_dsm_SSP=FA_dsm_SSP1, lt=lt_du
             year1_adoption = scenario_df.loc['S_2017', 'LF_wood':'RM']
             year2_adoption = scenario_df.loc[scenario, 'LF_wood':'RM']
 
-            def compute_logistic(structural_system, year1_adoption, year2_adoption, growth_rate=0.1, M=2050):
+            def compute_logistic(structural_system, year1_adoption, year2_adoption, growth_rate=0.2, M=2050):
                 # structural_system = 'LF_wood'
                 # carrying capacity
                 B = year2_adoption[structural_system]
@@ -370,7 +370,7 @@ def determine_inflow_outflow_new_bldg(scenario, FA_dsm_SSP=FA_dsm_SSP1, lt=lt_du
                 return y
 
             # INPUT PARAMETERS
-            growth_rate = 0.3
+            growth_rate = 0.2
             Max_growth_yr = scenario_df['Year_Max_Growth'][scenario]
 
             adoption_df = pd.DataFrame()
@@ -387,7 +387,7 @@ def determine_inflow_outflow_new_bldg(scenario, FA_dsm_SSP=FA_dsm_SSP1, lt=lt_du
                 adoption_df.plot()
                 # plt.text(x=2100, y=0.7, ha='right', fontsize=8, s='(Growth Rate: ' + str(growth_rate) + ', ' + 'Max Growth Year: ' + str(Max_growth_yr) + ')')
                 plt.legend(loc=(1.04, 0.5), title='(Growth Rate: ' + str(growth_rate) + ', ' '\n' + 'Max Growth Year: ' + str(Max_growth_yr) + ')')
-                plt.title('Scenario: ' + scenario + ' Type of Construction each Year')
+                plt.title('Scenario: ' + scenario)
                 plt.ylim(top=1.0)
                 plt.show()
 
@@ -938,7 +938,7 @@ os_existing_SSP3 = determine_outflow_existing_bldgs(FA_sc_SSP=FA_sc_SSP3,   lt=l
 # SCENARIO DEFINITIONS
 
 MC_sim = True
-num_iter = 10
+num_iter = 5
 if MC_sim == True:
     # scenario 1 MC:
     S1_mat_i_list = {}
@@ -956,7 +956,14 @@ if MC_sim == True:
     S5_mat_i_list = {}
     S5_mat_o_list = {}
     S5_mat_s_list = {}
+    S6_mat_i_list = {}
+    S6_mat_o_list = {}
+    S6_mat_s_list = {}
+    S7_mat_i_list = {}
+    S7_mat_o_list = {}
+    S7_mat_s_list = {}
     for i in range(num_iter):
+        print(i)
         # Scenario 1
         S1_sio_new = determine_inflow_outflow_new_bldg(scenario='S_1',
                                                        FA_dsm_SSP=FA_dsm_SSP1,
@@ -1047,9 +1054,45 @@ if MC_sim == True:
             area_stock_2017_2100=S5_area_s,
             materials_intensity_df=make_mi_df_sample_df(),
             print_year=0)
-        S5_mat_i_list[i] = S4_mat_i
-        S5_mat_o_list[i] = S4_mat_o
-        S5_mat_s_list[i] = S4_mat_s
+        S5_mat_i_list[i] = S5_mat_i
+        S5_mat_o_list[i] = S5_mat_o
+        S5_mat_s_list[i] = S5_mat_s
+
+        # Scenario 6
+        S6_sio_new = determine_inflow_outflow_new_bldg(scenario='S_6', FA_dsm_SSP=FA_dsm_SSP2,
+                                                       lt=lt_future,
+                                                       plot=False, plot_title='SSP2 ')
+        S6_area_i, S6_area_o, S6_area_s, = combine_area_existing_and_new(
+            os_existing=os_existing_SSP2,
+            sio_new_bldg=S6_sio_new,
+            plot=False, plot_title='SSP2 + Moderate Mass Timber Growth')
+        S6_mat_i, S6_mat_o, S6_mat_s, = calc_inflow_outflow_stock_mats(
+            area_inflow_2017_2100=S6_area_i,
+            area_outflow_2017_2100=S6_area_o,
+            area_stock_2017_2100=S6_area_s,
+            materials_intensity_df=make_mi_df_sample_df(),
+            print_year=0)
+        S6_mat_i_list[i] = S6_mat_i
+        S6_mat_o_list[i] = S6_mat_o
+        S6_mat_s_list[i] = S6_mat_s
+
+        # Scenario 7
+        S7_sio_new = determine_inflow_outflow_new_bldg(scenario='S_7', FA_dsm_SSP=FA_dsm_SSP2,
+                                                       lt=lt_future,
+                                                       plot=False, plot_title='SSP2 ')
+        S7_area_i, S7_area_o, S7_area_s = combine_area_existing_and_new(
+            os_existing=os_existing_SSP2,
+            sio_new_bldg=S7_sio_new,
+            plot=False, plot_title='SSP2 + Low Mass Timber Growth')
+        S7_mat_i, S7_mat_o, S7_mat_s = calc_inflow_outflow_stock_mats(
+            area_inflow_2017_2100=S7_area_i,
+            area_outflow_2017_2100=S7_area_o,
+            area_stock_2017_2100=S7_area_s,
+            materials_intensity_df=make_mi_df_sample_df(),
+            print_year=0)
+        S7_mat_i_list[i] = S7_mat_i
+        S7_mat_o_list[i] = S7_mat_o
+        S7_mat_s_list[i] = S7_mat_s
 
     # Calculate mean and standard deviation
     S1_mat_i_mean = pd.concat(S1_mat_i_list).groupby(level=1).mean()
@@ -1087,16 +1130,29 @@ if MC_sim == True:
     S5_mat_s_mean = pd.concat(S5_mat_s_list).groupby(level=1).mean()
     S5_mat_s_std = pd.concat(S5_mat_s_list).groupby(level=1).std()
 
+    S6_mat_i_mean = pd.concat(S6_mat_i_list).groupby(level=1).mean()
+    S6_mat_i_std = pd.concat(S6_mat_i_list).groupby(level=1).std()
+    S6_mat_o_mean = pd.concat(S6_mat_o_list).groupby(level=1).mean()
+    S6_mat_o_std = pd.concat(S6_mat_o_list).groupby(level=1).std()
+    S6_mat_s_mean = pd.concat(S6_mat_s_list).groupby(level=1).mean()
+    S6_mat_s_std = pd.concat(S6_mat_s_list).groupby(level=1).std()
+
+    S7_mat_i_mean = pd.concat(S7_mat_i_list).groupby(level=1).mean()
+    S7_mat_i_std = pd.concat(S7_mat_i_list).groupby(level=1).std()
+    S7_mat_o_mean = pd.concat(S7_mat_o_list).groupby(level=1).mean()
+    S7_mat_o_std = pd.concat(S7_mat_o_list).groupby(level=1).std()
+    S7_mat_s_mean = pd.concat(S7_mat_s_list).groupby(level=1).mean()
+    S7_mat_s_std = pd.concat(S7_mat_s_list).groupby(level=1).std()
 
 
 # # ------------------------------------------------------------------------------------
 # Function to plot stock/inflow/outflow for different scenarios
-def plot_sio_materials(s1_inflow=None, s2_inflow=None, s3_inflow=None, s4_inflow=None, s5_inflow=None,
-                       s1_inflow_ci=None, s2_inflow_ci=None, s3_inflow_ci=None, s4_inflow_ci=None, s5_inflow_ci=None,
-                       s1_outflow=None, s2_outflow=None, s3_outflow=None, s4_outflow=None, s5_outflow=None,
-                       s1_outflow_ci=None, s2_outflow_ci=None, s3_outflow_ci=None, s4_outflow_ci=None, s5_outflow_ci=None,
-                       s1_stock=None, s2_stock=None, s3_stock=None, s4_stock=None, s5_stock=None,
-                       s1_stock_ci=None, s2_stock_ci=None, s3_stock_ci=None, s4_stock_ci=None, s5_stock_ci=None,
+def plot_sio_materials(s1_inflow=None, s2_inflow=None, s3_inflow=None, s4_inflow=None, s5_inflow=None, s6_inflow=None, s7_inflow=None,
+                       s1_inflow_ci=None, s2_inflow_ci=None, s3_inflow_ci=None, s4_inflow_ci=None, s5_inflow_ci=None, s6_inflow_ci=None, s7_inflow_ci=None,
+                       s1_outflow=None, s2_outflow=None, s3_outflow=None, s4_outflow=None, s5_outflow=None,s6_outflow=None,s7_outflow=None,
+                       s1_outflow_ci=None, s2_outflow_ci=None, s3_outflow_ci=None, s4_outflow_ci=None, s5_outflow_ci=None,s6_outflow_ci=None, s7_outflow_ci=None,
+                       s1_stock=None, s2_stock=None, s3_stock=None, s4_stock=None, s5_stock=None,s6_stock=None, s7_stock=None,
+                       s1_stock_ci=None, s2_stock_ci=None, s3_stock_ci=None, s4_stock_ci=None, s5_stock_ci=None,s6_stock_ci=None, s7_stock_ci=None,
                        legend=['S1', 'S2', 'S3'], plot_error=True):
     ''' Plot the inflow and outflow of each scenario
         Note that stocks are plotted in Gt and inflows/outflows are plotted in Mt/year
@@ -1111,6 +1167,13 @@ def plot_sio_materials(s1_inflow=None, s2_inflow=None, s3_inflow=None, s4_inflow
         axs[1, 0].plot(s1_inflow.index, s1_inflow['Sum_engwood_inflow'], 'tab:blue')
         axs[1, 1].plot(s1_inflow.index, s1_inflow['Sum_dimlum_inflow'], 'tab:blue')
         axs[2, 0].plot(s1_inflow.index, s1_inflow['Sum_masonry_inflow'], 'tab:blue')
+
+        axs[0, 0].set_title('Steel')
+        axs[0, 1].set_title('Concrete')
+        axs[1, 0].set_title('Eng. Wood')
+        axs[1, 1].set_title('Dim. Lumber')
+        axs[2, 0].set_title('Masonry')
+
         # plot error bars
         if plot_error==True:
             axs[0, 0].fill_between(s1_inflow.index,
@@ -1134,11 +1197,7 @@ def plot_sio_materials(s1_inflow=None, s2_inflow=None, s3_inflow=None, s4_inflow
                                    (s1_inflow['Sum_masonry_inflow'] + s1_inflow_ci['Sum_masonry_inflow']),
                                    color='blue', alpha=.1)
 
-        axs[0, 0].set_title('Steel')
-        axs[0, 1].set_title('Concrete')
-        axs[1, 0].set_title('Eng. Wood')
-        axs[1, 1].set_title('Dim. Lumber')
-        axs[2, 0].set_title('Masonry')
+
         if s2_inflow is not None:
             axs[0, 0].plot(s2_inflow.index, s2_inflow['Sum_steel_inflow'], 'tab:red')
             axs[0, 1].plot(s2_inflow.index, s2_inflow['Sum_conc_inflow'], 'tab:red')
@@ -1250,6 +1309,81 @@ def plot_sio_materials(s1_inflow=None, s2_inflow=None, s3_inflow=None, s4_inflow
                                                    (s5_inflow['Sum_masonry_inflow'] - s5_inflow_ci['Sum_masonry_inflow']),
                                                    (s5_inflow['Sum_masonry_inflow'] + s5_inflow_ci['Sum_masonry_inflow']),
                                                    color='orange', alpha=.1)
+                        if s6_inflow is not None:
+                            axs[0, 0].plot(s6_inflow.index, s6_inflow['Sum_steel_inflow'], 'tab:gray')
+                            axs[0, 1].plot(s6_inflow.index, s6_inflow['Sum_conc_inflow'], 'tab:gray')
+                            axs[1, 0].plot(s6_inflow.index, s6_inflow['Sum_engwood_inflow'], 'tab:gray')
+                            axs[1, 1].plot(s6_inflow.index, s6_inflow['Sum_dimlum_inflow'], 'tab:gray')
+                            axs[2, 0].plot(s6_inflow.index, s6_inflow['Sum_masonry_inflow'], 'tab:gray')
+                            if plot_error == True:
+                                axs[0, 0].fill_between(s6_inflow.index,
+                                                       (s6_inflow['Sum_steel_inflow'] - s6_inflow_ci[
+                                                           'Sum_steel_inflow']),
+                                                       (s6_inflow['Sum_steel_inflow'] + s6_inflow_ci[
+                                                           'Sum_steel_inflow']),
+                                                       color='gray', alpha=.1)
+                                axs[0, 1].fill_between(s6_inflow.index,
+                                                       (s6_inflow['Sum_conc_inflow'] - s6_inflow_ci[
+                                                           'Sum_conc_inflow']),
+                                                       (s6_inflow['Sum_conc_inflow'] + s6_inflow_ci[
+                                                           'Sum_conc_inflow']),
+                                                       color='gray', alpha=.1)
+                                axs[1, 0].fill_between(s6_inflow.index,
+                                                       (s6_inflow['Sum_engwood_inflow'] - s6_inflow_ci[
+                                                           'Sum_engwood_inflow']),
+                                                       (s6_inflow['Sum_engwood_inflow'] + s6_inflow_ci[
+                                                           'Sum_engwood_inflow']),
+                                                       color='gray', alpha=.1)
+                                axs[1, 1].fill_between(s6_inflow.index,
+                                                       (s6_inflow['Sum_dimlum_inflow'] - s6_inflow_ci[
+                                                           'Sum_dimlum_inflow']),
+                                                       (s6_inflow['Sum_dimlum_inflow'] + s6_inflow_ci[
+                                                           'Sum_dimlum_inflow']),
+                                                       color='gray', alpha=.1)
+                                axs[2, 0].fill_between(s6_inflow.index,
+                                                       (s6_inflow['Sum_masonry_inflow'] - s6_inflow_ci[
+                                                           'Sum_masonry_inflow']),
+                                                       (s6_inflow['Sum_masonry_inflow'] + s6_inflow_ci[
+                                                           'Sum_masonry_inflow']),
+                                                       color='gray', alpha=.1)
+                            if s7_inflow is not None:
+                                    axs[0, 0].plot(s7_inflow.index, s7_inflow['Sum_steel_inflow'], 'tab:olive')
+                                    axs[0, 1].plot(s7_inflow.index, s7_inflow['Sum_conc_inflow'], 'tab:olive')
+                                    axs[1, 0].plot(s7_inflow.index, s7_inflow['Sum_engwood_inflow'], 'tab:olive')
+                                    axs[1, 1].plot(s7_inflow.index, s7_inflow['Sum_dimlum_inflow'], 'tab:olive')
+                                    axs[2, 0].plot(s7_inflow.index, s7_inflow['Sum_masonry_inflow'], 'tab:olive')
+                                    if plot_error == True:
+                                        axs[0, 0].fill_between(s7_inflow.index,
+                                                               (s7_inflow['Sum_steel_inflow'] - s7_inflow_ci[
+                                                                   'Sum_steel_inflow']),
+                                                               (s7_inflow['Sum_steel_inflow'] + s7_inflow_ci[
+                                                                   'Sum_steel_inflow']),
+                                                               color='olive', alpha=.1)
+                                        axs[0, 1].fill_between(s7_inflow.index,
+                                                               (s7_inflow['Sum_conc_inflow'] - s7_inflow_ci[
+                                                                   'Sum_conc_inflow']),
+                                                               (s7_inflow['Sum_conc_inflow'] + s7_inflow_ci[
+                                                                   'Sum_conc_inflow']),
+                                                               color='olive', alpha=.1)
+                                        axs[1, 0].fill_between(s7_inflow.index,
+                                                               (s7_inflow['Sum_engwood_inflow'] - s7_inflow_ci[
+                                                                   'Sum_engwood_inflow']),
+                                                               (s7_inflow['Sum_engwood_inflow'] + s7_inflow_ci[
+                                                                   'Sum_engwood_inflow']),
+                                                               color='olive', alpha=.1)
+                                        axs[1, 1].fill_between(s7_inflow.index,
+                                                               (s7_inflow['Sum_dimlum_inflow'] - s7_inflow_ci[
+                                                                   'Sum_dimlum_inflow']),
+                                                               (s7_inflow['Sum_dimlum_inflow'] + s7_inflow_ci[
+                                                                   'Sum_dimlum_inflow']),
+                                                               color='olive', alpha=.1)
+                                        axs[2, 0].fill_between(s7_inflow.index,
+                                                               (s7_inflow['Sum_masonry_inflow'] - s7_inflow_ci[
+                                                                   'Sum_masonry_inflow']),
+                                                               (s7_inflow['Sum_masonry_inflow'] + s7_inflow_ci[
+                                                                   'Sum_masonry_inflow']),
+                                                               color='olive', alpha=.1)
+
 
     # add legend in place of 6th plot
     axs[2, 1].axis('off')
@@ -1406,6 +1540,82 @@ def plot_sio_materials(s1_inflow=None, s2_inflow=None, s3_inflow=None, s4_inflow
                                                    (s5_outflow['Sum_masonry_outflow'] + s5_outflow_ci['Sum_masonry_outflow']),
                                                    color='orange', alpha=.1)
 
+                        if s6_outflow is not None:
+                            axs[0, 0].plot(s6_outflow.index, s6_outflow['Sum_steel_outflow'], 'tab:gray')
+                            axs[0, 1].plot(s6_outflow.index, s6_outflow['Sum_conc_outflow'], 'tab:gray')
+                            axs[1, 0].plot(s6_outflow.index, s6_outflow['Sum_engwood_outflow'], 'tab:gray')
+                            axs[1, 1].plot(s6_outflow.index, s6_outflow['Sum_dimlum_outflow'], 'tab:gray')
+                            axs[2, 0].plot(s6_outflow.index, s6_outflow['Sum_masonry_outflow'], 'tab:gray')
+                            if plot_error == True:
+                                axs[0, 0].fill_between(s6_outflow.index,
+                                                       (s6_outflow['Sum_steel_outflow'] - s6_outflow_ci[
+                                                           'Sum_steel_outflow']),
+                                                       (s6_outflow['Sum_steel_outflow'] + s6_outflow_ci[
+                                                           'Sum_steel_outflow']),
+                                                       color='gray', alpha=.1)
+                                axs[0, 1].fill_between(s6_outflow.index,
+                                                       (s6_outflow['Sum_conc_outflow'] - s6_outflow_ci[
+                                                           'Sum_conc_outflow']),
+                                                       (s6_outflow['Sum_conc_outflow'] + s6_outflow_ci[
+                                                           'Sum_conc_outflow']),
+                                                       color='gray', alpha=.1)
+                                axs[1, 0].fill_between(s6_outflow.index,
+                                                       (s6_outflow['Sum_engwood_outflow'] - s6_outflow_ci[
+                                                           'Sum_engwood_outflow']),
+                                                       (s6_outflow['Sum_engwood_outflow'] + s6_outflow_ci[
+                                                           'Sum_engwood_outflow']),
+                                                       color='gray', alpha=.1)
+                                axs[1, 1].fill_between(s6_outflow.index,
+                                                       (s6_outflow['Sum_dimlum_outflow'] - s6_outflow_ci[
+                                                           'Sum_dimlum_outflow']),
+                                                       (s6_outflow['Sum_dimlum_outflow'] + s6_outflow_ci[
+                                                           'Sum_dimlum_outflow']),
+                                                       color='gray', alpha=.1)
+                                axs[2, 0].fill_between(s6_outflow.index,
+                                                       (s6_outflow['Sum_masonry_outflow'] - s6_outflow_ci[
+                                                           'Sum_masonry_outflow']),
+                                                       (s6_outflow['Sum_masonry_outflow'] + s6_outflow_ci[
+                                                           'Sum_masonry_outflow']),
+                                                       color='gray', alpha=.1)
+
+                            if s7_outflow is not None:
+                                axs[0, 0].plot(s7_outflow.index, s7_outflow['Sum_steel_outflow'], 'tab:olive')
+                                axs[0, 1].plot(s7_outflow.index, s7_outflow['Sum_conc_outflow'], 'tab:olive')
+                                axs[1, 0].plot(s7_outflow.index, s7_outflow['Sum_engwood_outflow'], 'tab:olive')
+                                axs[1, 1].plot(s7_outflow.index, s7_outflow['Sum_dimlum_outflow'], 'tab:olive')
+                                axs[2, 0].plot(s7_outflow.index, s7_outflow['Sum_masonry_outflow'], 'tab:olive')
+                                if plot_error == True:
+                                    axs[0, 0].fill_between(s7_outflow.index,
+                                                           (s7_outflow['Sum_steel_outflow'] - s7_outflow_ci[
+                                                               'Sum_steel_outflow']),
+                                                           (s7_outflow['Sum_steel_outflow'] + s7_outflow_ci[
+                                                               'Sum_steel_outflow']),
+                                                           color='olive', alpha=.1)
+                                    axs[0, 1].fill_between(s7_outflow.index,
+                                                           (s7_outflow['Sum_conc_outflow'] - s7_outflow_ci[
+                                                               'Sum_conc_outflow']),
+                                                           (s7_outflow['Sum_conc_outflow'] + s7_outflow_ci[
+                                                               'Sum_conc_outflow']),
+                                                           color='olive', alpha=.1)
+                                    axs[1, 0].fill_between(s7_outflow.index,
+                                                           (s7_outflow['Sum_engwood_outflow'] - s7_outflow_ci[
+                                                               'Sum_engwood_outflow']),
+                                                           (s7_outflow['Sum_engwood_outflow'] + s7_outflow_ci[
+                                                               'Sum_engwood_outflow']),
+                                                           color='olive', alpha=.1)
+                                    axs[1, 1].fill_between(s7_outflow.index,
+                                                           (s7_outflow['Sum_dimlum_outflow'] - s7_outflow_ci[
+                                                               'Sum_dimlum_outflow']),
+                                                           (s7_outflow['Sum_dimlum_outflow'] + s7_outflow_ci[
+                                                               'Sum_dimlum_outflow']),
+                                                           color='olive', alpha=.1)
+                                    axs[2, 0].fill_between(s7_outflow.index,
+                                                           (s7_outflow['Sum_masonry_outflow'] - s7_outflow_ci[
+                                                               'Sum_masonry_outflow']),
+                                                           (s7_outflow['Sum_masonry_outflow'] + s7_outflow_ci[
+                                                               'Sum_masonry_outflow']),
+                                                           color='olive', alpha=.1)
+
     # add legend in place of 6th plot
     axs[2, 1].axis('off')
     fig.legend(legend, title='Material Outflows by Scenarios', loc='lower right', bbox_to_anchor=(0.98, 0.1), fancybox=True)
@@ -1561,6 +1771,74 @@ def plot_sio_materials(s1_inflow=None, s2_inflow=None, s3_inflow=None, s4_inflow
                                                    (s5_stock['Sum_masonry_stock'] + s5_stock_ci['Sum_masonry_stock']),
                                                    color='orange', alpha=.1)
 
+                        if s6_stock is not None:
+                            axs[0, 0].plot(s6_stock.index, s6_stock['Sum_steel_stock'], 'tab:gray')
+                            axs[0, 1].plot(s6_stock.index, s6_stock['Sum_conc_stock'], 'tab:gray')
+                            axs[1, 0].plot(s6_stock.index, s6_stock['Sum_engwood_stock'], 'tab:gray')
+                            axs[1, 1].plot(s6_stock.index, s6_stock['Sum_dimlum_stock'], 'tab:gray')
+                            axs[2, 0].plot(s6_stock.index, s6_stock['Sum_masonry_stock'], 'tab:gray')
+                            if plot_error == True:
+                                axs[0, 0].fill_between(s6_stock.index,
+                                                       (s6_stock['Sum_steel_stock'] - s6_stock_ci['Sum_steel_stock']),
+                                                       (s6_stock['Sum_steel_stock'] + s6_stock_ci['Sum_steel_stock']),
+                                                       color='gray', alpha=.1)
+                                axs[0, 1].fill_between(s6_stock.index,
+                                                       (s6_stock['Sum_conc_stock'] - s6_stock_ci['Sum_conc_stock']),
+                                                       (s6_stock['Sum_conc_stock'] + s6_stock_ci['Sum_conc_stock']),
+                                                       color='gray', alpha=.1)
+                                axs[1, 0].fill_between(s6_stock.index,
+                                                       (s6_stock['Sum_engwood_stock'] - s6_stock_ci[
+                                                           'Sum_engwood_stock']),
+                                                       (s6_stock['Sum_engwood_stock'] + s6_stock_ci[
+                                                           'Sum_engwood_stock']),
+                                                       color='gray', alpha=.1)
+                                axs[1, 1].fill_between(s6_stock.index,
+                                                       (s6_stock['Sum_dimlum_stock'] - s6_stock_ci['Sum_dimlum_stock']),
+                                                       (s6_stock['Sum_dimlum_stock'] + s6_stock_ci['Sum_dimlum_stock']),
+                                                       color='gray', alpha=.1)
+                                axs[2, 0].fill_between(s6_stock.index,
+                                                       (s6_stock['Sum_masonry_stock'] - s6_stock_ci[
+                                                           'Sum_masonry_stock']),
+                                                       (s6_stock['Sum_masonry_stock'] + s6_stock_ci[
+                                                           'Sum_masonry_stock']),
+                                                       color='gray', alpha=.1)
+
+                            if s7_stock is not None:
+                                axs[0, 0].plot(s7_stock.index, s7_stock['Sum_steel_stock'], 'tab:olive')
+                                axs[0, 1].plot(s7_stock.index, s7_stock['Sum_conc_stock'], 'tab:olive')
+                                axs[1, 0].plot(s7_stock.index, s7_stock['Sum_engwood_stock'], 'tab:olive')
+                                axs[1, 1].plot(s7_stock.index, s7_stock['Sum_dimlum_stock'], 'tab:olive')
+                                axs[2, 0].plot(s7_stock.index, s7_stock['Sum_masonry_stock'], 'tab:olive')
+                                if plot_error == True:
+                                    axs[0, 0].fill_between(s7_stock.index,
+                                                           (s7_stock['Sum_steel_stock'] - s7_stock_ci[
+                                                               'Sum_steel_stock']),
+                                                           (s7_stock['Sum_steel_stock'] + s7_stock_ci[
+                                                               'Sum_steel_stock']),
+                                                           color='olive', alpha=.1)
+                                    axs[0, 1].fill_between(s7_stock.index,
+                                                           (s7_stock['Sum_conc_stock'] - s7_stock_ci['Sum_conc_stock']),
+                                                           (s7_stock['Sum_conc_stock'] + s7_stock_ci['Sum_conc_stock']),
+                                                           color='olive', alpha=.1)
+                                    axs[1, 0].fill_between(s7_stock.index,
+                                                           (s7_stock['Sum_engwood_stock'] - s7_stock_ci[
+                                                               'Sum_engwood_stock']),
+                                                           (s7_stock['Sum_engwood_stock'] + s7_stock_ci[
+                                                               'Sum_engwood_stock']),
+                                                           color='olive', alpha=.1)
+                                    axs[1, 1].fill_between(s7_stock.index,
+                                                           (s7_stock['Sum_dimlum_stock'] - s7_stock_ci[
+                                                               'Sum_dimlum_stock']),
+                                                           (s7_stock['Sum_dimlum_stock'] + s7_stock_ci[
+                                                               'Sum_dimlum_stock']),
+                                                           color='olive', alpha=.1)
+                                    axs[2, 0].fill_between(s7_stock.index,
+                                                           (s7_stock['Sum_masonry_stock'] - s7_stock_ci[
+                                                               'Sum_masonry_stock']),
+                                                           (s7_stock['Sum_masonry_stock'] + s7_stock_ci[
+                                                               'Sum_masonry_stock']),
+                                                           color='olive', alpha=.1)
+
     # add legend in place of 6th plot
     axs[2, 1].axis('off')
     fig.legend(legend, title='Material Stocks by Scenario', loc='lower right', bbox_to_anchor=(0.98, 0.1), fancybox=True)
@@ -1581,8 +1859,69 @@ plot_sio_materials(s1_inflow=S1_mat_i_mean, s1_outflow=S1_mat_o_mean, s1_stock=S
                    s4_inflow_ci=S4_mat_i_std, s4_outflow_ci=S4_mat_o_std, s4_stock_ci=S4_mat_s_std/1000,
                    s5_inflow=S5_mat_i, s5_outflow=S5_mat_o, s5_stock=S5_mat_s/1000,
                    s5_inflow_ci=S5_mat_i_std, s5_outflow_ci=S5_mat_o_std, s5_stock_ci=S5_mat_s_std/1000,
-                   legend=['SSP1 + Low Density', 'SSP1 + Medium Density', 'SSP1 + High Density', 'SSP3 + No Mass Timber', 'SSP3 + Moderate Mass Timber'],
-                   plot_error=False)
+                   s6_inflow=S6_mat_i, s6_outflow=S6_mat_o, s6_stock=S6_mat_s/1000,
+                   s6_inflow_ci=S6_mat_i_std, s6_outflow_ci=S6_mat_o_std, s6_stock_ci=S6_mat_s_std/1000,
+                   s7_inflow=S7_mat_i, s7_outflow=S7_mat_o, s7_stock=S7_mat_s/1000,
+                   s7_inflow_ci=S7_mat_i_std, s7_outflow_ci=S7_mat_o_std, s7_stock_ci=S7_mat_s_std / 1000,
+                   legend=['SSP1 + Low Density', 'SSP1 + Medium Density', 'SSP1 + High Density', 'SSP3 + No Mass Timber', 'SSP3 + Moderate Mass Timber', 'SSP2 + Moderate Mass Timber', 'SSP2 + Low Mass Timber'],
+                   plot_error=True)
+
+# Save scenarios
+export_csv = False
+if export_csv == True:
+    S1_mat_i_mean.to_csv('./Results/S1_mat_i_mean.csv', index=True)
+    S1_mat_i_std.to_csv('./Results/S1_mat_i_std.csv', index=True)
+    S1_mat_o_mean.to_csv('./Results/S1_mat_o_mean.csv', index=True)
+    S1_mat_o_std.to_csv('./Results/S1_mat_o_std.csv', index=True)
+    S1_mat_s_mean.to_csv('./Results/S1_mat_s_mean.csv', index=True)
+    S1_mat_s_std.to_csv('./Results/S1_mat_s_std.csv', index=True)
+
+    S2_mat_i_mean.to_csv('./Results/S2_mat_i_mean.csv', index=True)
+    S2_mat_i_std.to_csv('./Results/S2_mat_i_std.csv', index=True)
+    S2_mat_o_mean.to_csv('./Results/S2_mat_o_mean.csv', index=True)
+    S2_mat_o_std.to_csv('./Results/S2_mat_o_std.csv', index=True)
+    S2_mat_s_mean.to_csv('./Results/S2_mat_s_mean.csv', index=True)
+    S2_mat_s_std.to_csv('./Results/S2_mat_s_std.csv', index=True)
+
+    S3_mat_i_mean.to_csv('./Results/S3_mat_i_mean.csv', index=True)
+    S3_mat_i_std.to_csv('./Results/S3_mat_i_std.csv', index=True)
+    S3_mat_o_mean.to_csv('./Results/S3_mat_o_mean.csv', index=True)
+    S3_mat_o_std.to_csv('./Results/S3_mat_o_std.csv', index=True)
+    S3_mat_s_mean.to_csv('./Results/S3_mat_s_mean.csv', index=True)
+    S3_mat_s_std.to_csv('./Results/S3_mat_s_std.csv', index=True)
+
+    S4_mat_i_mean.to_csv('./Results/S4_mat_i_mean.csv', index=True)
+    S4_mat_i_std.to_csv('./Results/S4_mat_i_std.csv', index=True)
+    S4_mat_o_mean.to_csv('./Results/S4_mat_o_mean.csv', index=True)
+    S4_mat_o_std.to_csv('./Results/S4_mat_o_std.csv', index=True)
+    S4_mat_s_mean.to_csv('./Results/S4_mat_s_mean.csv', index=True)
+    S4_mat_s_std.to_csv('./Results/S4_mat_s_std.csv', index=True)
+
+    S5_mat_i_mean.to_csv('./Results/S5_mat_i_mean.csv', index=True)
+    S5_mat_i_std.to_csv('./Results/S5_mat_i_std.csv', index=True)
+    S5_mat_o_mean.to_csv('./Results/S5_mat_o_mean.csv', index=True)
+    S5_mat_o_std.to_csv('./Results/S5_mat_o_std.csv', index=True)
+    S5_mat_s_mean.to_csv('./Results/S5_mat_s_mean.csv', index=True)
+    S5_mat_s_std.to_csv('./Results/S5_mat_s_std.csv', index=True)
+
+    S6_mat_i_mean.to_csv('./Results/S6_mat_i_mean.csv', index=True)
+    S6_mat_i_std.to_csv('./Results/S6_mat_i_std.csv', index=True)
+    S6_mat_o_mean.to_csv('./Results/S6_mat_o_mean.csv', index=True)
+    S6_mat_o_std.to_csv('./Results/S6_mat_o_std.csv', index=True)
+    S6_mat_s_mean.to_csv('./Results/S6_mat_s_mean.csv', index=True)
+    S6_mat_s_std.to_csv('./Results/S6_mat_s_std.csv', index=True)
+
+    S7_mat_i_mean.to_csv('./Results/S7_mat_i_mean.csv', index=True)
+    S7_mat_i_std.to_csv('./Results/S7_mat_i_std.csv', index=True)
+    S7_mat_o_mean.to_csv('./Results/S7_mat_o_mean.csv', index=True)
+    S7_mat_o_std.to_csv('./Results/S7_mat_o_std.csv', index=True)
+    S7_mat_s_mean.to_csv('./Results/S7_mat_s_mean.csv', index=True)
+    S7_mat_s_std.to_csv('./Results/S7_mat_s_std.csv', index=True)
+
+
+
+
+
 
 # plot_sio_materials(s1_inflow=S1_mat_i_mean, s1_outflow=S1_mat_o_mean, s1_stock=S1_mat_s_mean/1000,
 #                    s1_inflow_ci=S1_mat_i_std, s1_outflow_ci=S1_mat_o_std, s1_stock_ci=S1_mat_s_std/1000,

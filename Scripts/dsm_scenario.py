@@ -213,7 +213,7 @@ def FA_elasticity_linear(year1=1900, year2=2100, base_year=2016,
 
 # function to calculate the floor area elasticity by the methodology of the EDGE model
 def FA_elasticity_EDGE(US_gdp, US_pop, SSP='All',
-                       base_year=2016,FA_base_year=316, Area_country=9.14759e6, gamma=-0.03,
+                       base_year=2016,FA_base_year=246, Area_country=9.14759e6, gamma=-0.03,
                        plot=True):
     """ Area of the USA is 9.834 million km².
         Base year floor are elasticity for all buildings is 347 m2/person as determined by article (in review)"""
@@ -340,7 +340,7 @@ years, US_pop = interpolate_population(data_pop=data_pop_WiC, data_source='WiC',
 US_gdp = interpolate_gdp(data_gdp, year1=year1, year2=year2, SSP='All', kind='cubic', plot=True)
 # calculate total floor area elasticity
 FA_all = FA_elasticity_EDGE(US_gdp, US_pop, SSP='All',
-                       base_year=2016,FA_base_year=316, Area_country=8081867, gamma=-0.03,
+                       base_year=2016,FA_base_year=246, Area_country=8081867, gamma=-0.03,
                        plot=True)      # area of continguous 48 = 8081867, area of all = 9833517
 
 
@@ -374,7 +374,7 @@ def plot_dsm(dsm, plot_name):
     plt.ylim(top=1.2 * max_val)
     plt.xlabel('Year')
     plt.ylabel('Floor Area per year')
-    plt.title(plot_name + ' Floor Area flows')
+    plt.title(plot_name + ' Floor Space - Flow')
     plt.legend([plt1, plt3], ['Inflow', 'Outflow'], loc=2)
     plt.show();
 
@@ -1129,14 +1129,14 @@ if plot_MFA_all_same_graph == True:
     # plt.show();
 
     plt.subplot(212)
-    plt1, = plt.plot(SSP1_dsm_res.t, SSP1_dsm_res.i + SSP1_dsm_com.i + SSP1_dsm_pub.i, LineStyle='dashed')
-    plt2, = plt.plot(SSP1_dsm_res.t, SSP1_dsm_res.o + SSP1_dsm_com.o + SSP1_dsm_pub.o)
-    plt3, = plt.plot(SSP2_dsm_res.t, SSP2_dsm_res.i + SSP2_dsm_com.i + SSP2_dsm_pub.i, LineStyle='dashed')
-    plt4, = plt.plot(SSP2_dsm_res.t, SSP2_dsm_res.o + SSP2_dsm_com.o + SSP2_dsm_pub.o)
-    plt5, = plt.plot(SSP3_dsm_res.t, SSP3_dsm_res.i + SSP3_dsm_com.i + SSP3_dsm_pub.i, LineStyle='dashed')
-    plt6, = plt.plot(SSP3_dsm_res.t, SSP3_dsm_res.o + SSP3_dsm_com.o + SSP3_dsm_pub.o)
-    plt7, = plt.plot(SSP4_dsm_res.t, SSP4_dsm_res.i + SSP4_dsm_com.i + SSP4_dsm_pub.i, LineStyle='dashed')
-    plt8, = plt.plot(SSP4_dsm_res.t, SSP4_dsm_res.o + SSP4_dsm_com.o + SSP4_dsm_pub.o)
+    plt1, = plt.plot(SSP1_dsm_res.t, SSP1_dsm_res.i + SSP1_dsm_com.i + SSP1_dsm_pub.i, LineStyle='dashed', color='#1f77b4')
+    plt2, = plt.plot(SSP1_dsm_res.t, SSP1_dsm_res.o + SSP1_dsm_com.o + SSP1_dsm_pub.o, color = '#1f77b4')
+    plt3, = plt.plot(SSP2_dsm_res.t, SSP2_dsm_res.i + SSP2_dsm_com.i + SSP2_dsm_pub.i, LineStyle='dashed', color='#ff7f0e' )
+    plt4, = plt.plot(SSP2_dsm_res.t, SSP2_dsm_res.o + SSP2_dsm_com.o + SSP2_dsm_pub.o, color='#ff7f0e')
+    plt5, = plt.plot(SSP3_dsm_res.t, SSP3_dsm_res.i + SSP3_dsm_com.i + SSP3_dsm_pub.i, LineStyle='dashed', color='#2ca02c')
+    plt6, = plt.plot(SSP3_dsm_res.t, SSP3_dsm_res.o + SSP3_dsm_com.o + SSP3_dsm_pub.o, color='#2ca02c')
+    plt7, = plt.plot(SSP4_dsm_res.t, SSP4_dsm_res.i + SSP4_dsm_com.i + SSP4_dsm_pub.i, LineStyle='dashed', color='#d62728')
+    plt8, = plt.plot(SSP4_dsm_res.t, SSP4_dsm_res.o + SSP4_dsm_com.o + SSP4_dsm_pub.o, color='#d62728')
 
     plt11, = plt.plot([base_year, base_year], [0, 3000], color='k', LineStyle='--')
 
@@ -1151,7 +1151,7 @@ if plot_MFA_all_same_graph == True:
     plt.xlim(left=1980)
     plt.xlabel('Year')
     plt.ylabel('million m$^2/year$')
-    plt.title('Total Floor Area flows')
+    plt.title('Total Floor Space - Flows')
     plt.show();
 
 
@@ -1183,14 +1183,14 @@ if plot_MFA_all_same_graph == True:
     # plt.show();
 
     plt.subplot(212)
-    plt1, = plt.plot(SSP1_dsm_res.t, SSP1_dsm_res.i, LineStyle='dashed')
-    plt2, = plt.plot(SSP1_dsm_res.t, SSP1_dsm_res.o)
-    plt3, = plt.plot(SSP2_dsm_res.t, SSP2_dsm_res.i, LineStyle='dashed')
-    plt4, = plt.plot(SSP2_dsm_res.t, SSP2_dsm_res.o)
-    plt5, = plt.plot(SSP3_dsm_res.t, SSP3_dsm_res.i, LineStyle='dashed')
-    plt6, = plt.plot(SSP3_dsm_res.t, SSP3_dsm_res.o)
-    plt7, = plt.plot(SSP4_dsm_res.t, SSP4_dsm_res.i, LineStyle='dashed')
-    plt8, = plt.plot(SSP4_dsm_res.t, SSP4_dsm_res.o)
+    plt1, = plt.plot(SSP1_dsm_res.t, SSP1_dsm_res.i, LineStyle='dashed', color='#1f77b4')
+    plt2, = plt.plot(SSP1_dsm_res.t, SSP1_dsm_res.o, color='#1f77b4')
+    plt3, = plt.plot(SSP2_dsm_res.t, SSP2_dsm_res.i, LineStyle='dashed', color='#ff7f0e' )
+    plt4, = plt.plot(SSP2_dsm_res.t, SSP2_dsm_res.o, color='#ff7f0e' )
+    plt5, = plt.plot(SSP3_dsm_res.t, SSP3_dsm_res.i, LineStyle='dashed', color='#2ca02c')
+    plt6, = plt.plot(SSP3_dsm_res.t, SSP3_dsm_res.o, color='#2ca02c')
+    plt7, = plt.plot(SSP4_dsm_res.t, SSP4_dsm_res.i, LineStyle='dashed', color='#d62728')
+    plt8, = plt.plot(SSP4_dsm_res.t, SSP4_dsm_res.o, color='#d62728')
     if no_SSP5 == True:
         temp = 'bleh'
     else:
@@ -1217,7 +1217,7 @@ if plot_MFA_all_same_graph == True:
     plt.xlim(left=1980)
     plt.xlabel('Year')
     plt.ylabel('million m$^2/year$')
-    plt.title('Residential Floor Area flows')
+    plt.title('Residential Floor Space - Flows')
     plt.show();
 
 
@@ -1245,18 +1245,18 @@ if plot_MFA_all_same_graph == True:
     plt.xlim(left=1980)
     plt.xlabel('Year')
     plt.ylabel('million $m^2$')
-    plt.title('Commercial Floor Space Stock')
+    plt.title('Commercial Floor Space - Stock')
     # plt.show();
 
     plt.subplot(212)
-    plt1, = plt.plot(SSP1_dsm_com.t, SSP1_dsm_com.i, LineStyle='dashed')
-    plt2, = plt.plot(SSP1_dsm_com.t, SSP1_dsm_com.o)
-    plt3, = plt.plot(SSP2_dsm_com.t, SSP2_dsm_com.i, LineStyle='dashed')
-    plt4, = plt.plot(SSP2_dsm_com.t, SSP2_dsm_com.o)
-    plt5, = plt.plot(SSP3_dsm_com.t, SSP3_dsm_com.i, LineStyle='dashed')
-    plt6, = plt.plot(SSP3_dsm_com.t, SSP3_dsm_com.o)
-    plt7, = plt.plot(SSP4_dsm_com.t, SSP4_dsm_com.i, LineStyle='dashed')
-    plt8, = plt.plot(SSP4_dsm_com.t, SSP4_dsm_com.o)
+    plt1, = plt.plot(SSP1_dsm_com.t, SSP1_dsm_com.i, LineStyle='dashed', color='#1f77b4')
+    plt2, = plt.plot(SSP1_dsm_com.t, SSP1_dsm_com.o, color='#1f77b4')
+    plt3, = plt.plot(SSP2_dsm_com.t, SSP2_dsm_com.i, LineStyle='dashed', color='#ff7f0e' )
+    plt4, = plt.plot(SSP2_dsm_com.t, SSP2_dsm_com.o, color='#ff7f0e' )
+    plt5, = plt.plot(SSP3_dsm_com.t, SSP3_dsm_com.i, LineStyle='dashed',color='#2ca02c')
+    plt6, = plt.plot(SSP3_dsm_com.t, SSP3_dsm_com.o, color='#2ca02c')
+    plt7, = plt.plot(SSP4_dsm_com.t, SSP4_dsm_com.i, LineStyle='dashed', color='#d62728')
+    plt8, = plt.plot(SSP4_dsm_com.t, SSP4_dsm_com.o, color='#d62728')
     if no_SSP5 == True:
         temp = 'bleh'
     else:
@@ -1283,7 +1283,7 @@ if plot_MFA_all_same_graph == True:
     plt.xlim(left=1980)
     plt.xlabel('Year')
     plt.ylabel('million m$^2/year$')
-    plt.title('Commercial Floor Space Flows')
+    plt.title('Commercial Floor Space - Flows')
     plt.show();
 
 
@@ -1311,17 +1311,18 @@ if plot_MFA_all_same_graph == True:
     plt.xlabel('Year')
     plt.xlim(left=1980)
     plt.ylabel('million $m^2$ ')
-    plt.title('Public Floor Space Stock')
+    plt.title('Public Floor Space - Stock')
     # plt.show();
 
     plt.subplot(212)
-    plt1, = plt.plot(SSP1_dsm_pub.t, SSP1_dsm_pub.i, LineStyle='dashed')
-    plt2, = plt.plot(SSP1_dsm_pub.t, SSP1_dsm_pub.o)
-    plt3, = plt.plot(SSP2_dsm_pub.t, SSP2_dsm_pub.i, LineStyle='dashed')
-    plt4, = plt.plot(SSP2_dsm_pub.t, SSP2_dsm_pub.o)
-    plt6, = plt.plot(SSP3_dsm_pub.t, SSP3_dsm_pub.o)
-    plt7, = plt.plot(SSP4_dsm_pub.t, SSP4_dsm_pub.i, LineStyle='dashed')
-    plt8, = plt.plot(SSP4_dsm_pub.t, SSP4_dsm_pub.o)
+    plt1, = plt.plot(SSP1_dsm_pub.t, SSP1_dsm_pub.i, LineStyle='dashed', color='#1f77b4')
+    plt2, = plt.plot(SSP1_dsm_pub.t, SSP1_dsm_pub.o, color='#1f77b4')
+    plt3, = plt.plot(SSP2_dsm_pub.t, SSP2_dsm_pub.i, LineStyle='dashed', color='#ff7f0e' )
+    plt4, = plt.plot(SSP2_dsm_pub.t, SSP2_dsm_pub.o, color='#ff7f0e' )
+    plt5, = plt.plot(SSP3_dsm_pub.t, SSP3_dsm_pub.i, LineStyle='dashed', color='#2ca02c')
+    plt6, = plt.plot(SSP3_dsm_pub.t, SSP3_dsm_pub.o, color='#2ca02c')
+    plt7, = plt.plot(SSP4_dsm_pub.t, SSP4_dsm_pub.i, LineStyle='dashed', color='#d62728')
+    plt8, = plt.plot(SSP4_dsm_pub.t, SSP4_dsm_pub.o, color='#d62728')
     if no_SSP5 == True:
         temp = 'bleh'
     else:
@@ -1348,5 +1349,5 @@ if plot_MFA_all_same_graph == True:
     plt.xlim(left=1980)
     plt.xlabel('Year')
     plt.ylabel('million m$^2/year$')
-    plt.title('Public Floor Area Flows')
+    plt.title('Public Floor Space - Flows')
     plt.show();

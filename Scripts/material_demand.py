@@ -937,8 +937,8 @@ os_existing_SSP3 = determine_outflow_existing_bldgs(FA_sc_SSP=FA_sc_SSP3,   lt=l
 # # ------------------------------------------------------------------------------------
 # SCENARIO DEFINITIONS
 
-MC_sim = True
-num_iter = 5
+MC_sim = False
+num_iter = 5000
 if MC_sim == True:
     # scenario 1 MC:
     S1_mat_i_list = {}
@@ -971,7 +971,7 @@ if MC_sim == True:
                                                        plot=False, plot_title='SSP1 ')
         # print(S1_sio_new)
         S1_area_i, S1_area_o, S1_area_s = combine_area_existing_and_new(
-            os_existing=os_existing_SSP2,
+            os_existing=os_existing_SSP1,
             sio_new_bldg=S1_sio_new,
             plot=False, plot_title='SSP1 + Low Density')
         S1_mat_i, S1_mat_o, S1_mat_s = calc_inflow_outflow_stock_mats(
@@ -991,7 +991,7 @@ if MC_sim == True:
                                                        plot=False, plot_title='SSP1 ')
         S2_area_i, S2_area_o, S2_area_s = combine_area_existing_and_new(
             os_existing=os_existing_SSP1,
-            sio_new_bldg=S1_sio_new,
+            sio_new_bldg=S2_sio_new,
             plot=False, plot_title='SSP1 + Medium Density')
         S2_mat_i, S2_mat_o, S2_mat_s = calc_inflow_outflow_stock_mats(
             area_inflow_2017_2100=S2_area_i,
@@ -1848,7 +1848,7 @@ def plot_sio_materials(s1_inflow=None, s2_inflow=None, s3_inflow=None, s4_inflow
     fig.show()
 
 # Save scenarios
-export_csv = False
+export_csv = True
 if export_csv == True:
     S1_mat_i_mean.to_csv('./Results/S1_mat_i_mean.csv', index=True)
     S1_mat_i_std.to_csv('./Results/S1_mat_i_std.csv', index=True)
@@ -1901,68 +1901,68 @@ if export_csv == True:
 
 load_results = True
 if load_results == True:
-    S1_mat_i_mean = pd.read_csv('./Results/S1_mat_i_mean.csv')
-    S1_mat_i_std  = pd.read_csv('./Results/S1_mat_i_std.csv')
-    S1_mat_o_mean = pd.read_csv('./Results/S1_mat_o_mean.csv')
-    S1_mat_o_std = pd.read_csv('./Results/S1_mat_o_std.csv')
-    S1_mat_s_mean = pd.read_csv('./Results/S1_mat_s_mean.csv')
-    S1_mat_s_std = pd.read_csv('./Results/S1_mat_s_std.csv')
+    S1_mat_i_mean = pd.read_csv('./Results/MFA_results/S1_mat_i_mean.csv')
+    S1_mat_i_std  = pd.read_csv('./Results/MFA_results/S1_mat_i_std.csv')
+    S1_mat_o_mean = pd.read_csv('./Results/MFA_results/S1_mat_o_mean.csv')
+    S1_mat_o_std = pd.read_csv('./Results/MFA_results/S1_mat_o_std.csv')
+    S1_mat_s_mean = pd.read_csv('./Results/MFA_results/S1_mat_s_mean.csv')
+    S1_mat_s_std = pd.read_csv('./Results/MFA_results/S1_mat_s_std.csv')
 
-    S2_mat_i_mean = pd.read_csv('./Results/S2_mat_i_mean.csv')
-    S2_mat_i_std = pd.read_csv('./Results/S2_mat_i_std.csv')
-    S2_mat_o_mean = pd.read_csv('./Results/S2_mat_o_mean.csv')
-    S2_mat_o_std = pd.read_csv('./Results/S2_mat_o_std.csv')
-    S2_mat_s_mean = pd.read_csv('./Results/S2_mat_s_mean.csv')
-    S2_mat_s_std = pd.read_csv('./Results/S2_mat_s_std.csv')
+    S2_mat_i_mean = pd.read_csv('./Results/MFA_results/S2_mat_i_mean.csv')
+    S2_mat_i_std = pd.read_csv('./Results/MFA_results/S2_mat_i_std.csv')
+    S2_mat_o_mean = pd.read_csv('./Results/MFA_results/S2_mat_o_mean.csv')
+    S2_mat_o_std = pd.read_csv('./Results/MFA_results/S2_mat_o_std.csv')
+    S2_mat_s_mean = pd.read_csv('./Results/MFA_results/S2_mat_s_mean.csv')
+    S2_mat_s_std = pd.read_csv('./Results/MFA_results/S2_mat_s_std.csv')
 
-    S3_mat_i_mean = pd.read_csv('./Results/S3_mat_i_mean.csv')
-    S3_mat_i_std = pd.read_csv('./Results/S3_mat_i_std.csv')
-    S3_mat_o_mean = pd.read_csv('./Results/S3_mat_o_mean.csv')
-    S3_mat_o_std = pd.read_csv('./Results/S3_mat_o_std.csv')
-    S3_mat_s_mean = pd.read_csv('./Results/S3_mat_s_mean.csv')
-    S3_mat_s_std = pd.read_csv('./Results/S3_mat_s_std.csv')
+    S3_mat_i_mean = pd.read_csv('./Results/vS3_mat_i_mean.csv')
+    S3_mat_i_std = pd.read_csv('./Results/MFA_results/S3_mat_i_std.csv')
+    S3_mat_o_mean = pd.read_csv('./Results/MFA_results/S3_mat_o_mean.csv')
+    S3_mat_o_std = pd.read_csv('./Results/MFA_results/S3_mat_o_std.csv')
+    S3_mat_s_mean = pd.read_csv('./Results/MFA_results/S3_mat_s_mean.csv')
+    S3_mat_s_std = pd.read_csv('./Results/MFA_results/S3_mat_s_std.csv')
 
-    S4_mat_i_mean = pd.read_csv('./Results/S4_mat_i_mean.csv')
-    S4_mat_i_std = pd.read_csv('./Results/S4_mat_i_std.csv')
-    S4_mat_o_mean = pd.read_csv('./Results/S4_mat_o_mean.csv')
-    S4_mat_o_std = pd.read_csv('./Results/S4_mat_o_std.csv')
-    S4_mat_s_mean = pd.read_csv('./Results/S4_mat_s_mean.csv')
-    S4_mat_s_std = pd.read_csv('./Results/S4_mat_s_std.csv')
+    S4_mat_i_mean = pd.read_csv('./Results/MFA_results/S4_mat_i_mean.csv')
+    S4_mat_i_std = pd.read_csv('./Results/MFA_results/S4_mat_i_std.csv')
+    S4_mat_o_mean = pd.read_csv('./Results/MFA_results/S4_mat_o_mean.csv')
+    S4_mat_o_std = pd.read_csv('./Results/MFA_results/S4_mat_o_std.csv')
+    S4_mat_s_mean = pd.read_csv('./Results/MFA_results/S4_mat_s_mean.csv')
+    S4_mat_s_std = pd.read_csv('./Results/MFA_results/S4_mat_s_std.csv')
 
-    S5_mat_i_mean = pd.read_csv('./Results/S5_mat_i_mean.csv')
-    S5_mat_i_std = pd.read_csv('./Results/S5_mat_i_std.csv')
-    S5_mat_o_mean = pd.read_csv('./Results/S5_mat_o_mean.csv')
-    S5_mat_o_std = pd.read_csv('./Results/S5_mat_o_std.csv')
-    S5_mat_s_mean = pd.read_csv('./Results/S5_mat_s_mean.csv')
-    S5_mat_s_std = pd.read_csv('./Results/S5_mat_s_std.csv')
+    S5_mat_i_mean = pd.read_csv('./Results/MFA_results/S5_mat_i_mean.csv')
+    S5_mat_i_std = pd.read_csv('./Results/MFA_results/S5_mat_i_std.csv')
+    S5_mat_o_mean = pd.read_csv('./Results/MFA_results/S5_mat_o_mean.csv')
+    S5_mat_o_std = pd.read_csv('./Results/MFA_results/S5_mat_o_std.csv')
+    S5_mat_s_mean = pd.read_csv('./Results/MFA_results/S5_mat_s_mean.csv')
+    S5_mat_s_std = pd.read_csv('./Results/MFA_results/S5_mat_s_std.csv')
 
-    S6_mat_i_mean = pd.read_csv('./Results/S6_mat_i_mean.csv')
-    S6_mat_i_std = pd.read_csv('./Results/S6_mat_i_std.csv')
-    S6_mat_o_mean = pd.read_csv('./Results/S6_mat_o_mean.csv')
-    S6_mat_o_std = pd.read_csv('./Results/S6_mat_o_std.csv')
-    S6_mat_s_mean = pd.read_csv('./Results/S6_mat_s_mean.csv')
-    S6_mat_s_std = pd.read_csv('./Results/S6_mat_s_std.csv')
+    S6_mat_i_mean = pd.read_csv('./Results/MFA_results/S6_mat_i_mean.csv')
+    S6_mat_i_std = pd.read_csv('./Results/MFA_results/S6_mat_i_std.csv')
+    S6_mat_o_mean = pd.read_csv('./Results/MFA_results/S6_mat_o_mean.csv')
+    S6_mat_o_std = pd.read_csv('./Results/MFA_results/S6_mat_o_std.csv')
+    S6_mat_s_mean = pd.read_csv('./Results/MFA_results/S6_mat_s_mean.csv')
+    S6_mat_s_std = pd.read_csv('./Results/MFA_results/S6_mat_s_std.csv')
 
-    S7_mat_i_mean = pd.read_csv('./Results/S7_mat_i_mean.csv')
-    S7_mat_i_std = pd.read_csv('./Results/S7_mat_i_std.csv')
-    S7_mat_o_mean = pd.read_csv('./Results/S7_mat_o_mean.csv')
-    S7_mat_o_std = pd.read_csv('./Results/S7_mat_o_std.csv')
-    S7_mat_s_mean = pd.read_csv('./Results/S7_mat_s_mean.csv')
-    S7_mat_s_std = pd.read_csv('./Results/S7_mat_s_std.csv')
+    S7_mat_i_mean = pd.read_csv('./Results/MFA_results/S7_mat_i_mean.csv')
+    S7_mat_i_std = pd.read_csv('./Results/MFA_results/S7_mat_i_std.csv')
+    S7_mat_o_mean = pd.read_csv('./Results/MFA_results/S7_mat_o_mean.csv')
+    S7_mat_o_std = pd.read_csv('./Results/MFA_results/S7_mat_o_std.csv')
+    S7_mat_s_mean = pd.read_csv('./Results/MFA_results/S7_mat_s_mean.csv')
+    S7_mat_s_std = pd.read_csv('./Results/MFA_results/S7_mat_s_std.csv')
 # Plot scenarios against one another for stock/inflow/outflow (up to 5 scenarios)
 plot_sio_materials(s1_inflow=S1_mat_i_mean, s1_outflow=S1_mat_o_mean, s1_stock=S1_mat_s_mean/1000,
                    s1_inflow_ci=S1_mat_i_std, s1_outflow_ci=S1_mat_o_std, s1_stock_ci=S1_mat_s_std/1000,
-                   s2_inflow= S2_mat_i, s2_outflow= S2_mat_o, s2_stock=S2_mat_s/1000,
+                   s2_inflow= S2_mat_i_mean, s2_outflow= S2_mat_o_mean, s2_stock=S2_mat_s_mean/1000,
                    s2_inflow_ci=S2_mat_i_std, s2_outflow_ci=S2_mat_o_std, s2_stock_ci=S2_mat_s_std/1000,
-                   s3_inflow=S3_mat_i, s3_outflow=S3_mat_o, s3_stock=S3_mat_s/1000,
+                   s3_inflow=S3_mat_i_mean, s3_outflow=S3_mat_o_mean, s3_stock=S3_mat_s_mean/1000,
                    s3_inflow_ci=S3_mat_i_std, s3_outflow_ci=S3_mat_o_std, s3_stock_ci=S3_mat_s_std/1000,
-                   s4_inflow=S4_mat_i, s4_outflow=S4_mat_o, s4_stock=S4_mat_s/1000,
+                   s4_inflow=S4_mat_i_mean, s4_outflow=S4_mat_o_mean, s4_stock=S4_mat_s_mean/1000,
                    s4_inflow_ci=S4_mat_i_std, s4_outflow_ci=S4_mat_o_std, s4_stock_ci=S4_mat_s_std/1000,
-                   s5_inflow=S5_mat_i, s5_outflow=S5_mat_o, s5_stock=S5_mat_s/1000,
+                   s5_inflow=S5_mat_i_mean, s5_outflow=S5_mat_o_mean, s5_stock=S5_mat_s_mean/1000,
                    s5_inflow_ci=S5_mat_i_std, s5_outflow_ci=S5_mat_o_std, s5_stock_ci=S5_mat_s_std/1000,
-                   s6_inflow=S6_mat_i, s6_outflow=S6_mat_o, s6_stock=S6_mat_s/1000,
+                   s6_inflow=S6_mat_i_mean, s6_outflow=S6_mat_o_mean, s6_stock=S6_mat_s_mean/1000,
                    s6_inflow_ci=S6_mat_i_std, s6_outflow_ci=S6_mat_o_std, s6_stock_ci=S6_mat_s_std/1000,
-                   s7_inflow=S7_mat_i, s7_outflow=S7_mat_o, s7_stock=S7_mat_s/1000,
+                   s7_inflow=S7_mat_i_mean, s7_outflow=S7_mat_o_mean, s7_stock=S7_mat_s_mean/1000,
                    s7_inflow_ci=S7_mat_i_std, s7_outflow_ci=S7_mat_o_std, s7_stock_ci=S7_mat_s_std / 1000,
                    legend=['SSP1 + Low Density', 'SSP1 + Medium Density', 'SSP1 + High Density', 'SSP3 + No Mass Timber', 'SSP3 + Moderate Mass Timber', 'SSP2 + Moderate Mass Timber', 'SSP2 + Low Mass Timber'],
                    plot_error=True)

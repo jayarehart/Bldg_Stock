@@ -1,4 +1,4 @@
-# Dynamic stock model (DSM) for residential buildings
+# Dynamic stock model (DSM) for US building stock
 
 # Import libraries
 import pandas as pd

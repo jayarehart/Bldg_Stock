@@ -393,7 +393,7 @@ def determine_inflow_outflow_new_bldg(scenario, FA_dsm_SSP=FA_dsm_SSP1, lt=lt_du
 
             return adoption_df
 
-    construction_ea_year_df = construction_ea_year(year1=2017, year2=2100, scenario_df=scenario_df, type='richards-curve', plot=False)
+    construction_ea_year_df = construction_ea_year(year1=2017, year2=2100, scenario_df=scenario_df, type='richards-curve', plot=True)
     # construction_ea_year_df = construction_ea_year(year1=2017, year2=2100, scenario_df=scenario_df, type='flat')
     # construction_ea_year_df = construction_ea_year(year1=2017, year2=2100, scenario_df=scenario_df, type='linear')
 

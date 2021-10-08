@@ -381,8 +381,9 @@ fig, axes = plt.subplots(2, 2, constrained_layout=True, figsize=(10, 8))
 # fig.tight_layout()
 sns.set_theme(style="ticks")
 # Plot the mass in the atmosphere
-sns.lineplot(ax=axes[0, 0], data=SUMMARY_mass)
+sns.lineplot(ax=axes[0, 0], data=SUMMARY_mass[0:100])
 axes[0, 0].set(xlabel='Year', ylabel='kg', title='Mass in Atmosphere')
+axes[0, 0].legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
 
 # Plot the cumulative GWI (integrated radiative forcing)
 sns.lineplot(ax=axes[1, 0], data=SUMMARY_irf)

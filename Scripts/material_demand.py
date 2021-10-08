@@ -147,13 +147,13 @@ if plot_material_intensity==True:
     axs3.set_xlabel('Material Intensity ($kg / m^2 $)')
     axs3.set_xlim(left=0)
 
-    # plot dimensioned lumber
+    # plot Dimensional lumber
     axs4.plot(kde_LF_wood__Dim_lumber.support, kde_LF_wood__Dim_lumber.density, color='blue')
     # axs4.plot(kde_Mass_Timber__Dim_lumber.support, kde_Mass_Timber__Dim_lumber.density, color='orange')
     # axs4.plot(kde_Steel__Dim_lumber.support, kde_Steel__Dim_lumber.density, color='green')
     # axs4.plot(kde_RC__Dim_lumber.support, kde_RC__Dim_lumber.density, color='red')
     axs4.plot(kde_RM__Dim_lumber.support, kde_RM__Dim_lumber.density, color='purple')
-    axs4.title.set_text('Dimensioned Lumber')
+    axs4.title.set_text('Dimensional Lumber')
     axs4.set_xlabel('Material Intensity ($kg / m^2 $)')
     axs4.set_xlim(left=0)
 
@@ -393,7 +393,7 @@ def determine_inflow_outflow_new_bldg(scenario, FA_dsm_SSP=FA_dsm_SSP1, lt=lt_du
 
             return adoption_df
 
-    construction_ea_year_df = construction_ea_year(year1=2017, year2=2100, scenario_df=scenario_df, type='richards-curve', plot=True)
+    construction_ea_year_df = construction_ea_year(year1=2017, year2=2100, scenario_df=scenario_df, type='richards-curve', plot=False)
     # construction_ea_year_df = construction_ea_year(year1=2017, year2=2100, scenario_df=scenario_df, type='flat')
     # construction_ea_year_df = construction_ea_year(year1=2017, year2=2100, scenario_df=scenario_df, type='linear')
 
@@ -690,7 +690,7 @@ def calc_inflow_outflow_stock_mats(area_inflow_2017_2100, area_outflow_2017_2100
                   ' Mt')
             print('Total engineered wood demand in ', str(print_year), ' =   ',
                   engwood_tot_inflow['Sum_engwood_inflow'][print_year], ' Mt')
-            print('Total dimensioned lumber demand in ', str(print_year), ' =   ',
+            print('Total dimensional lumber demand in ', str(print_year), ' =   ',
                   dimlum_tot_inflow['Sum_dimlum_inflow'][print_year], ' Mt')
             print('Total masonry demand in ', str(print_year), ' =   ',
                   masonry_tot_inflow['Sum_masonry_inflow'][print_year], ' Mt')
@@ -798,7 +798,7 @@ def calc_inflow_outflow_stock_mats(area_inflow_2017_2100, area_outflow_2017_2100
                   ' Mt')
             print('Total engineered wood outflow in ', str(print_year), ' =   ',
                   engwood_tot_outflow['Sum_engwood_outflow'][print_year], ' Mt')
-            print('Total dimensioned lumber outflow in ', str(print_year), ' =   ',
+            print('Total dimensional lumber outflow in ', str(print_year), ' =   ',
                   dimlum_tot_outflow['Sum_dimlum_outflow'][print_year], ' Mt')
             print('Total masonry outflow in ', str(print_year), ' =   ',
                   masonry_tot_outflow['Sum_masonry_outflow'][print_year], ' Mt')
@@ -899,7 +899,7 @@ def calc_inflow_outflow_stock_mats(area_inflow_2017_2100, area_outflow_2017_2100
             print('Total concrete stock in ', str(print_year), ' =   ', conc_tot_stock['Sum_conc_stock'][print_year], ' Mt')
             print('Total engineered wood stock in ', str(print_year), ' =   ',
                   engwood_tot_stock['Sum_engwood_stock'][print_year], ' Mt')
-            print('Total dimensioned lumber stock in ', str(print_year), ' =   ',
+            print('Total dimensional lumber stock in ', str(print_year), ' =   ',
                   dimlum_tot_stock['Sum_dimlum_stock'][print_year], ' Mt')
             print('Total masonry stock in ', str(print_year), ' =   ', masonry_tot_stock['Sum_masonry_stock'][print_year],
                   ' Mt')
@@ -938,7 +938,7 @@ os_existing_SSP3 = determine_outflow_existing_bldgs(FA_sc_SSP=FA_sc_SSP3,   lt=l
 # SCENARIO DEFINITIONS
 
 MC_sim = True
-num_iter = 1
+num_iter = 5000
 if MC_sim == True:
     # scenario 1 MC:
     S1_mat_i_list = {}
@@ -1144,6 +1144,11 @@ if MC_sim == True:
     S7_mat_s_mean = pd.concat(S7_mat_s_list).groupby(level=1).mean()
     S7_mat_s_std = pd.concat(S7_mat_s_list).groupby(level=1).std()
 
+    # print('mean inflow for ea scenario')
+    # print(S1_mat_i_mean.head())
+    print('mean stock for ea scenario')
+    print(S1_mat_s_mean.head())
+    print(S1_mat_s_mean.tail())
 
 # # ------------------------------------------------------------------------------------
 # Function to plot stock/inflow/outflow for different scenarios
@@ -1848,7 +1853,7 @@ def plot_sio_materials(s1_inflow=None, s2_inflow=None, s3_inflow=None, s4_inflow
     fig.show()
 
 # Save scenarios
-export_csv = True
+export_csv = False
 if export_csv == True:
     S1_mat_i_mean.to_csv('./Results/S1_mat_i_mean.csv', index=True)
     S1_mat_i_std.to_csv('./Results/S1_mat_i_std.csv', index=True)
@@ -1899,7 +1904,7 @@ if export_csv == True:
     S7_mat_s_mean.to_csv('./Results/S7_mat_s_mean.csv', index=True)
     S7_mat_s_std.to_csv('./Results/S7_mat_s_std.csv', index=True)
 
-load_results = True
+load_results = False
 if load_results == True:
     S1_mat_i_mean = pd.read_csv('./Results/MFA_results/S1_mat_i_mean.csv')
     S1_mat_i_std  = pd.read_csv('./Results/MFA_results/S1_mat_i_std.csv')
@@ -2012,4 +2017,3 @@ if check_stocks == True:
 
 
 ## Next steps
-# - check that materials are calculated correctly

@@ -17,9 +17,11 @@ ECC_dimlum = 63.12 / 460       # kg CO2e/kg    AWC industry average EPD for soft
 ECC_masonry = 264.16 / 0.76455 / 2400    # kg CO2e/kg  NRMCA 0% FA 3000psi concrete
 
 # ECC_bio_dimlum = 2042.32 / 460  # kg CO2
-ECC_bio_dimlum = 0.39  # kg CO2         BATH v2.0 ICE number
+ECC_bio_dimlum = 0.5*44/12*(1/12)  # kg biogenic CO2         simple conversion
+# ECC_bio_dimlum = -0.42           # guest et al. 2013, rotation = 70 years, storage = 80 years
 # ECC_bio_engwood = 2120.41 / 544     # kg CO2
-ECC_bio_engwood = 0.45     # kg CO2
+ECC_bio_engwood = 0.5*44/12*(1/12)     # biogenic kg CO2     simple conversion
+# ECC_bio_engwood = -0.55          #guest et al.  2013, rotation = 40 years, storage = 80 years
 
 ECC_vec = [ECC_steel, ECC_conc, ECC_engwood, ECC_dimlum, ECC_masonry, ECC_bio_dimlum, ECC_bio_engwood]
 
@@ -32,7 +34,7 @@ S5_i_mean = pd.read_csv('./Results/MFA_results/S5_mat_i_mean.csv')
 S6_i_mean = pd.read_csv('./Results/MFA_results/S6_mat_i_mean.csv')
 S7_i_mean = pd.read_csv('./Results/MFA_results/S7_mat_i_mean.csv')
 
-# duplicate a column for storage in wood
+# duplicate a column for storage in wood (denoted as '2')
 S1_i_mean['Sum_dimlum_inflow_2'] = S1_i_mean['Sum_dimlum_inflow']
 S1_i_mean['Sum_engwood_inflow_2'] = S1_i_mean['Sum_engwood_inflow']
 S1_i_mean = S1_i_mean.set_index('time', drop=True)
@@ -65,6 +67,15 @@ S5_EC = S5_i_mean * ECC_vec
 S6_EC = S6_i_mean * ECC_vec
 S7_EC = S7_i_mean * ECC_vec
 
+# Summary of all EC for each scenario
+list_to_sum = ['Sum_steel_inflow', 'Sum_conc_inflow', 'Sum_engwood_inflow', 'Sum_dimlum_inflow', 'Sum_masonry_inflow']
+EC_df = pd.concat([S1_EC.loc[:,list_to_sum].sum(axis=1), S2_EC.loc[:,list_to_sum].sum(axis=1), S3_EC.loc[:,list_to_sum].sum(axis=1), S4_EC.loc[:,list_to_sum].sum(axis=1), S5_EC.loc[:,list_to_sum].sum(axis=1), S6_EC.loc[:,list_to_sum].sum(axis=1), S7_EC.loc[:,list_to_sum].sum(axis=1)], axis=1).rename(columns={0:'S1',1:'S2',2:'S3',3:'S4',4:'S5',5:'S6',6:'S7'})
+EC_df.to_csv('./Results/EC_out.csv')
+
+# Summary of all EC for each scenario
+list_to_sum = ['Sum_steel_inflow', 'Sum_conc_inflow', 'Sum_engwood_inflow', 'Sum_dimlum_inflow', 'Sum_masonry_inflow']
+EC_df = pd.concat([S1_EC.loc[:,list_to_sum].sum(axis=1), S2_EC.loc[:,list_to_sum].sum(axis=1), S3_EC.loc[:,list_to_sum].sum(axis=1), S4_EC.loc[:,list_to_sum].sum(axis=1), S5_EC.loc[:,list_to_sum].sum(axis=1), S6_EC.loc[:,list_to_sum].sum(axis=1), S7_EC.loc[:,list_to_sum].sum(axis=1)], axis=1).rename(columns={0:'S1',1:'S2',2:'S3',3:'S4',4:'S5',5:'S6',6:'S7'})
+EC_df.to_csv('./Results/EC_storage_out.csv')
 
 # plot the ECC without storage
 fig, axs = plt.subplots(2, 4, figsize=(14, 8), sharey=True)
@@ -85,12 +96,55 @@ axs[1, 0].set_title('SSP1 + Medium Density')
 axs[0, 1].set_title('SSP1 + High Density')
 axs[1, 1].set_title('SSP3 + No Mass Timber')
 axs[0, 2].set_title('SSP3 + Moderate Mass Timber')
-axs[1, 2].set_title('SSP3 + Low Mass Timber')
+axs[1, 2].set_title('SSP2 + Moderate Mass Timber')
 axs[0, 3].set_title('SSP2 + Low Mass Timber')
 
-axs[0, 0].set(ylabel='$ Mt CO_2 / year $')
-axs[1, 0].set(ylabel='$ Mt CO_2 / year $')
+axs[0, 0].set(ylabel='$ Mt CO_2 e/ year $')
+axs[1, 0].set(ylabel='$ Mt CO_2 e/ year $')
 
+# Normalize embodied carbon by unit floor space
+S1_FA = pd.read_excel('./Results/SSP_dsm.xlsx', sheet_name='SSP1')[['time','inflow_total']].rename(columns={"inflow_total": "i_million_m2"})
+S1_FA = S1_FA.set_index('time', drop=True).loc[2017:]
+S2_FA = pd.read_excel('./Results/SSP_dsm.xlsx', sheet_name='SSP1')[['time','inflow_total']].rename(columns={"inflow_total": "i_million_m2"})
+S2_FA = S2_FA.set_index('time', drop=True).loc[2017:]
+S3_FA = pd.read_excel('./Results/SSP_dsm.xlsx', sheet_name='SSP1')[['time','inflow_total']].rename(columns={"inflow_total": "i_million_m2"})
+S3_FA = S3_FA.set_index('time', drop=True).loc[2017:]
+S4_FA = pd.read_excel('./Results/SSP_dsm.xlsx', sheet_name='SSP3')[['time','inflow_total']].rename(columns={"inflow_total": "i_million_m2"})
+S4_FA = S4_FA.set_index('time', drop=True).loc[2017:]
+S5_FA = pd.read_excel('./Results/SSP_dsm.xlsx', sheet_name='SSP3')[['time','inflow_total']].rename(columns={"inflow_total": "i_million_m2"})
+S5_FA = S5_FA.set_index('time', drop=True).loc[2017:]
+S6_FA = pd.read_excel('./Results/SSP_dsm.xlsx', sheet_name='SSP2')[['time','inflow_total']].rename(columns={"inflow_total": "i_million_m2"})
+S6_FA = S6_FA.set_index('time', drop=True).loc[2017:]
+S7_FA = pd.read_excel('./Results/SSP_dsm.xlsx', sheet_name='SSP2')[['time','inflow_total']].rename(columns={"inflow_total": "i_million_m2"})
+S7_FA = S7_FA.set_index('time', drop=True).loc[2017:]
+
+# S1_i_mean = pd.concat([S1_i_mean, S1_FA], axis=1)
+# S2_i_mean = pd.concat([S2_i_mean, S2_FA], axis=1)
+# S3_i_mean = pd.concat([S3_i_mean, S3_FA], axis=1)
+# S4_i_mean = pd.concat([S4_i_mean, S4_FA], axis=1)
+# S5_i_mean = pd.concat([S5_i_mean, S5_FA], axis=1)
+# S6_i_mean = pd.concat([S6_i_mean, S6_FA], axis=1)
+# S7_i_mean = pd.concat([S7_i_mean, S7_FA], axis=1)
+
+# scale results by floor space
+S1_norm = S1_EC[['Sum_steel_inflow', 'Sum_conc_inflow', 'Sum_engwood_inflow',
+                 'Sum_dimlum_inflow', 'Sum_masonry_inflow']].sum(axis=1) / (S1_FA['i_million_m2']) * 1000
+S2_norm = S2_EC[['Sum_steel_inflow', 'Sum_conc_inflow', 'Sum_engwood_inflow',
+                 'Sum_dimlum_inflow', 'Sum_masonry_inflow']].sum(axis=1) / (S2_FA['i_million_m2']) * 1000
+S3_norm = S3_EC[['Sum_steel_inflow', 'Sum_conc_inflow', 'Sum_engwood_inflow',
+                 'Sum_dimlum_inflow', 'Sum_masonry_inflow']].sum(axis=1) / (S3_FA['i_million_m2']) * 1000
+S4_norm = S4_EC[['Sum_steel_inflow', 'Sum_conc_inflow', 'Sum_engwood_inflow',
+                 'Sum_dimlum_inflow', 'Sum_masonry_inflow']].sum(axis=1) / (S4_FA['i_million_m2']) * 1000
+S5_norm = S5_EC[['Sum_steel_inflow', 'Sum_conc_inflow', 'Sum_engwood_inflow',
+                 'Sum_dimlum_inflow', 'Sum_masonry_inflow']].sum(axis=1) / (S5_FA['i_million_m2']) * 1000
+S6_norm = S6_EC[['Sum_steel_inflow', 'Sum_conc_inflow', 'Sum_engwood_inflow',
+                 'Sum_dimlum_inflow', 'Sum_masonry_inflow']].sum(axis=1) / (S6_FA['i_million_m2']) * 1000
+S7_norm = S7_EC[['Sum_steel_inflow', 'Sum_conc_inflow', 'Sum_engwood_inflow',
+                 'Sum_dimlum_inflow', 'Sum_masonry_inflow']].sum(axis=1) / (S7_FA['i_million_m2']) * 1000
+
+S_norm = pd.concat([S1_norm, S2_norm, S3_norm, S4_norm, S5_norm, S6_norm, S7_norm], axis=1).rename(columns={0:'S1',1:'S2',2:'S3',3:'S4',4:'S5',5:'S6',6:'S7'})
+S_norm.to_csv('./Results/EC_intensity_out.csv')
+# S_norm.plot()
 
 # plot the carbon storage
 figure(figsize=(8, 6), dpi=80)
@@ -99,10 +153,10 @@ plt.plot(S2_EC.index, S2_EC['Sum_dimlum_inflow_2'] + S2_EC['Sum_engwood_inflow_2
 plt.plot(S3_EC.index, S3_EC['Sum_dimlum_inflow_2'] + S3_EC['Sum_engwood_inflow_2'], label = 'SSP1 + High Density')
 plt.plot(S4_EC.index, S4_EC['Sum_dimlum_inflow_2'] + S4_EC['Sum_engwood_inflow_2'], label = 'SSP3 + No Mass Timber')
 plt.plot(S5_EC.index, S5_EC['Sum_dimlum_inflow_2'] + S5_EC['Sum_engwood_inflow_2'], label = 'SSP3 + Moderate Mass Timber')
-plt.plot(S6_EC.index, S6_EC['Sum_dimlum_inflow_2'] + S6_EC['Sum_engwood_inflow_2'], label = 'SSP3 + Low Mass Timber')
+plt.plot(S6_EC.index, S6_EC['Sum_dimlum_inflow_2'] + S6_EC['Sum_engwood_inflow_2'], label = 'SSP2 + Moderate Mass Timber')
 plt.plot(S7_EC.index, S7_EC['Sum_dimlum_inflow_2'] + S7_EC['Sum_engwood_inflow_2'], label = 'SSP2 + Low Mass Timber')
 plt.legend(loc = 'lower left');
-plt.ylabel('$ Mt CO_2 / year $')
+plt.ylabel('Mt Biogenic $ CO_2 / year $')
 plt.ylim(0)
 plt.title('Annual Carbon Storage of Gravity Structural Systems')
 

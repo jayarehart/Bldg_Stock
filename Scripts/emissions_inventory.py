@@ -14,27 +14,56 @@ import seaborn as sns
 
 # load in the inflow results of the MFA analysis (Mt of material)
 S1_i_mean = pd.read_csv('./Results/MFA_results/S1_mat_i_mean.csv').set_index('time', drop=True) * 1e9   # convert to kg
+S1_i_p05 = pd.read_csv('./Results/MFA_results/S1_mat_i_p05.csv').set_index('time', drop=True) * 1e9   # convert to kg
+S1_i_p95 = pd.read_csv('./Results/MFA_results/S1_mat_i_p95.csv').set_index('time', drop=True) * 1e9   # convert to kg
 S2_i_mean = pd.read_csv('./Results/MFA_results/S2_mat_i_mean.csv').set_index('time', drop=True) * 1e9   # convert to kg
+S2_i_p05 = pd.read_csv('./Results/MFA_results/S2_mat_i_p05.csv').set_index('time', drop=True) * 1e9   # convert to kg
+S2_i_p95 = pd.read_csv('./Results/MFA_results/S2_mat_i_p95.csv').set_index('time', drop=True) * 1e9   # convert to kg
 S3_i_mean = pd.read_csv('./Results/MFA_results/S3_mat_i_mean.csv').set_index('time', drop=True) * 1e9   # convert to kg
+S3_i_p05 = pd.read_csv('./Results/MFA_results/S3_mat_i_p05.csv').set_index('time', drop=True) * 1e9   # convert to kg
+S3_i_p95 = pd.read_csv('./Results/MFA_results/S3_mat_i_p95.csv').set_index('time', drop=True) * 1e9   # convert to kg
 S4_i_mean = pd.read_csv('./Results/MFA_results/S4_mat_i_mean.csv').set_index('time', drop=True) * 1e9   # convert to kg
+S4_i_p05 = pd.read_csv('./Results/MFA_results/S4_mat_i_p05.csv').set_index('time', drop=True) * 1e9   # convert to kg
+S4_i_p95 = pd.read_csv('./Results/MFA_results/S4_mat_i_p95.csv').set_index('time', drop=True) * 1e9   # convert to kg
 S5_i_mean = pd.read_csv('./Results/MFA_results/S5_mat_i_mean.csv').set_index('time', drop=True) * 1e9   # convert to kg
+S5_i_p05 = pd.read_csv('./Results/MFA_results/S5_mat_i_p05.csv').set_index('time', drop=True) * 1e9   # convert to kg
+S5_i_p95 = pd.read_csv('./Results/MFA_results/S5_mat_i_p95.csv').set_index('time', drop=True) * 1e9   # convert to kg
 S6_i_mean = pd.read_csv('./Results/MFA_results/S6_mat_i_mean.csv').set_index('time', drop=True) * 1e9   # convert to kg
+S6_i_p05 = pd.read_csv('./Results/MFA_results/S6_mat_i_p05.csv').set_index('time', drop=True) * 1e9   # convert to kg
+S6_i_p95 = pd.read_csv('./Results/MFA_results/S6_mat_i_p95.csv').set_index('time', drop=True) * 1e9   # convert to kg
 S7_i_mean = pd.read_csv('./Results/MFA_results/S7_mat_i_mean.csv').set_index('time', drop=True) * 1e9   # convert to kg
+S7_i_p05 = pd.read_csv('./Results/MFA_results/S7_mat_i_p05.csv').set_index('time', drop=True) * 1e9   # convert to kg
+S7_i_p95 = pd.read_csv('./Results/MFA_results/S7_mat_i_p95.csv').set_index('time', drop=True) * 1e9   # convert to kg
+
 S1_o_mean = pd.read_csv('./Results/MFA_results/S1_mat_o_mean.csv').set_index('time', drop=True) * 1e9   # convert to kg
+S1_o_p05 = pd.read_csv('./Results/MFA_results/S1_mat_o_p05.csv').set_index('time', drop=True) * 1e9   # convert to kg
+S1_o_p95 = pd.read_csv('./Results/MFA_results/S1_mat_o_p95.csv').set_index('time', drop=True) * 1e9   # convert to kg
 S2_o_mean = pd.read_csv('./Results/MFA_results/S2_mat_o_mean.csv').set_index('time', drop=True) * 1e9   # convert to kg
+S2_o_p05 = pd.read_csv('./Results/MFA_results/S2_mat_o_p05.csv').set_index('time', drop=True) * 1e9   # convert to kg
+S2_o_p95 = pd.read_csv('./Results/MFA_results/S2_mat_o_p95.csv').set_index('time', drop=True) * 1e9   # convert to kg
 S3_o_mean = pd.read_csv('./Results/MFA_results/S3_mat_o_mean.csv').set_index('time', drop=True) * 1e9   # convert to kg
+S3_o_p05 = pd.read_csv('./Results/MFA_results/S3_mat_o_p05.csv').set_index('time', drop=True) * 1e9   # convert to kg
+S3_o_p95 = pd.read_csv('./Results/MFA_results/S3_mat_o_p95.csv').set_index('time', drop=True) * 1e9   # convert to kg
 S4_o_mean = pd.read_csv('./Results/MFA_results/S4_mat_o_mean.csv').set_index('time', drop=True) * 1e9   # convert to kg
+S4_o_p05 = pd.read_csv('./Results/MFA_results/S4_mat_o_p05.csv').set_index('time', drop=True) * 1e9   # convert to kg
+S4_o_p95 = pd.read_csv('./Results/MFA_results/S4_mat_o_p95.csv').set_index('time', drop=True) * 1e9   # convert to kg
 S5_o_mean = pd.read_csv('./Results/MFA_results/S5_mat_o_mean.csv').set_index('time', drop=True) * 1e9   # convert to kg
+S5_o_p05 = pd.read_csv('./Results/MFA_results/S5_mat_o_p05.csv').set_index('time', drop=True) * 1e9   # convert to kg
+S5_o_p95 = pd.read_csv('./Results/MFA_results/S5_mat_o_p95.csv').set_index('time', drop=True) * 1e9   # convert to kg
 S6_o_mean = pd.read_csv('./Results/MFA_results/S6_mat_o_mean.csv').set_index('time', drop=True) * 1e9   # convert to kg
+S6_o_p05 = pd.read_csv('./Results/MFA_results/S6_mat_o_p05.csv').set_index('time', drop=True) * 1e9   # convert to kg
+S6_o_p95 = pd.read_csv('./Results/MFA_results/S6_mat_o_p95.csv').set_index('time', drop=True) * 1e9   # convert to kg
 S7_o_mean = pd.read_csv('./Results/MFA_results/S7_mat_o_mean.csv').set_index('time', drop=True) * 1e9   # convert to kg
+S7_o_p05 = pd.read_csv('./Results/MFA_results/S7_mat_o_p05.csv').set_index('time', drop=True) * 1e9   # convert to kg
+S7_o_p95 = pd.read_csv('./Results/MFA_results/S7_mat_o_p95.csv').set_index('time', drop=True) * 1e9   # convert to kg
 
 
 # debugging
 # mat_flow_year = S1_i_mean[0:1].set_index('time', drop=True)
-mat_flow_out = S1_o_mean
-mat_flow_in = S1_i_mean
+mat_flow_out = S7_o_mean
+mat_flow_in = S7_i_mean
 year=2017
-scenario_name = 'S1'
+scenario_name = 'S7'
 include_carb = True
 
 def create_dyn_inventory_scenario(mat_flow_in,mat_flow_out,scenario_name,include_carb=True,plot_emission=True):
@@ -265,9 +294,11 @@ def create_dyn_inventory_scenario(mat_flow_in,mat_flow_out,scenario_name,include
     # Add in carbon uptake
     if include_carb == True:
         CO2_flux_total = CO2_flux_total_ext.squeeze() + total_uptake_dimlum + total_uptake_glulam + total_uptake_carb
+
     else:
         CO2_flux_total = CO2_flux_total_ext.squeeze() + total_uptake_dimlum + total_uptake_glulam
 
+    print(CO2_flux_total_ext[0:30].sum()*1e-12)
 
     if plot_emission == True:
         # Plot of emisison vs. uptake for each scenario:
@@ -303,7 +334,7 @@ def create_dyn_inventory_scenario(mat_flow_in,mat_flow_out,scenario_name,include
         # ax2.legend(loc = 'lower right');
         fig.suptitle('Annual $ CO_2$ Emissions for Scenario: ' + scenario_name)
 
-        plt.savefig('./Figures/DLCA/Emissions_inventory_'+scenario_name+'.png', dpi=240)
+        # plt.savefig('./Figures/DLCA/Emissions_inventory_'+scenario_name+'.png', dpi=240)
 
 
 
@@ -321,6 +352,52 @@ S4_inventory = create_dyn_inventory_scenario(mat_flow_in=S4_i_mean,mat_flow_out=
 S5_inventory = create_dyn_inventory_scenario(mat_flow_in=S5_i_mean,mat_flow_out=S5_o_mean,scenario_name='S5',include_carb=True,plot_emission=True)
 S6_inventory = create_dyn_inventory_scenario(mat_flow_in=S6_i_mean,mat_flow_out=S6_o_mean,scenario_name='S6',include_carb=True,plot_emission=True)
 S7_inventory = create_dyn_inventory_scenario(mat_flow_in=S7_i_mean,mat_flow_out=S7_o_mean,scenario_name='S7',include_carb=True,plot_emission=True)
+
+index_timeline = np.linspace(start=2017, stop=2017+500, num=501, dtype=int)
+plot_val = 84
+S1_inventory_an = S1_inventory.set_index(index_timeline)[0:plot_val]
+S2_inventory_an = S2_inventory.set_index(index_timeline)[0:plot_val]
+S3_inventory_an = S3_inventory.set_index(index_timeline)[0:plot_val]
+S4_inventory_an = S4_inventory.set_index(index_timeline)[0:plot_val]
+S5_inventory_an = S5_inventory.set_index(index_timeline)[0:plot_val]
+S6_inventory_an = S6_inventory.set_index(index_timeline)[0:plot_val]
+S7_inventory_an = S7_inventory.set_index(index_timeline)[0:plot_val]
+
+S1_inventory_cum = S1_inventory.cumsum().set_index(index_timeline)[0:plot_val]
+S2_inventory_cum = S2_inventory.cumsum().set_index(index_timeline)[0:plot_val]
+S3_inventory_cum = S3_inventory.cumsum().set_index(index_timeline)[0:plot_val]
+S4_inventory_cum = S4_inventory.cumsum().set_index(index_timeline)[0:plot_val]
+S5_inventory_cum = S5_inventory.cumsum().set_index(index_timeline)[0:plot_val]
+S6_inventory_cum = S6_inventory.cumsum().set_index(index_timeline)[0:plot_val]
+S7_inventory_cum = S7_inventory.cumsum().set_index(index_timeline)[0:plot_val]
+
+# Plot annual and cummulative carbon flux
+fig, axes = plt.subplots(1,2, constrained_layout=True, figsize=(10, 6))
+# plt.rcParams.update({'font.size': 12})
+
+# Plot the annual emisisons
+axes[0].axhline(y=0, color='black', linestyle='-')
+axes[0].plot(S1_inventory_an.index, S1_inventory_an['CO2_flux']*1e-9,color='tab:blue',  linestyle='solid', label = 'S1', )
+axes[0].plot(S2_inventory_an.index, S2_inventory_an['CO2_flux']*1e-9,color='tab:orange', linestyle='solid', label = 'S2')
+axes[0].plot(S3_inventory_an.index, S3_inventory_an['CO2_flux']*1e-9,color='tab:green', linestyle='solid', label = 'S3')
+axes[0].plot(S4_inventory_an.index, S4_inventory_an['CO2_flux']*1e-9,color='tab:red', linestyle='solid', label = 'S4')
+axes[0].plot(S5_inventory_an.index, S5_inventory_an['CO2_flux']*1e-9,color='tab:purple', linestyle='solid', label = 'S5')
+axes[0].plot(S6_inventory_an.index, S6_inventory_an['CO2_flux']*1e-9,color='tab:brown', linestyle='solid', label = 'S6')
+axes[0].plot(S7_inventory_an.index, S7_inventory_an['CO2_flux']*1e-9,color='tab:gray', linestyle='solid', label = 'S7')
+axes[0].legend(loc = 'lower left', fontsize="small", ncol=1);
+axes[0].set_ylabel('Annual Emissions ($Mt CO_2$)')
+# Plot the cummulative emissions
+axes[1].axhline(y=0, color='black', linestyle='-')
+axes[1].plot(S1_inventory_cum.index, S1_inventory_cum['CO2_flux']*1e-12,color='tab:blue',  linestyle='solid', label = 'S1', )
+axes[1].plot(S2_inventory_cum.index, S2_inventory_cum['CO2_flux']*1e-12,color='tab:orange', linestyle='solid', label = 'S2')
+axes[1].plot(S3_inventory_cum.index, S3_inventory_cum['CO2_flux']*1e-12,color='tab:green', linestyle='solid', label = 'S3')
+axes[1].plot(S4_inventory_cum.index, S4_inventory_cum['CO2_flux']*1e-12,color='tab:red', linestyle='solid', label = 'S4')
+axes[1].plot(S5_inventory_cum.index, S5_inventory_cum['CO2_flux']*1e-12,color='tab:purple', linestyle='solid', label = 'S5')
+axes[1].plot(S6_inventory_cum.index, S6_inventory_cum['CO2_flux']*1e-12,color='tab:brown', linestyle='solid', label = 'S6')
+axes[1].plot(S7_inventory_cum.index, S7_inventory_cum['CO2_flux']*1e-12,color='tab:gray', linestyle='solid', label = 'S7')
+# axes[1].legend(loc = 'lower left', fontsize="small", ncol=1);
+axes[1].set_ylabel('Cummulative Emissions ($Gt CO_2$)')
+# plt.savefig('./Figures/DLCA/carbon_flux.png', dpi=240)
 
 
 def DLCA_calc(input_flux, time_horizon=100):
@@ -576,6 +653,7 @@ S7_mass_in_atm, S7_irf_df, S7_temp_change_df, S7_equiv_df = DLCA_calc(S7_invento
 # get the years vector
 index_timeline = np.linspace(start=2017, stop=2017+500, num=501, dtype=int)
 plot_val = 84
+# plot_val = 500
 # in Mt
 SUMMARY_mass = pd.DataFrame({'S1_CO2':S1_mass_in_atm['CO2'] * 1e-9,
                              'S2_CO2':S2_mass_in_atm['CO2'] * 1e-9,
@@ -601,6 +679,15 @@ SUMMARY_irf = pd.DataFrame({'S1_irf':S1_irf_df['IRF_all'],
                             'S5_irf':S5_irf_df['IRF_all'],
                             'S6_irf':S6_irf_df['IRF_all'],
                             'S7_irf':S7_irf_df['IRF_all'],
+                            }).set_index(index_timeline)[0:plot_val]
+
+SUMMARY_rf_inst = pd.DataFrame({'S1_rf_int':S1_irf_df['CO2_radfor'],
+                            'S2_rf_int':S2_irf_df['CO2_radfor'],
+                            'S3_rf_int':S3_irf_df['CO2_radfor'],
+                            'S4_rf_int':S4_irf_df['CO2_radfor'],
+                            'S5_rf_int':S5_irf_df['CO2_radfor'],
+                            'S6_rf_int':S6_irf_df['CO2_radfor'],
+                            'S7_rf_int':S7_irf_df['CO2_radfor'],
                             }).set_index(index_timeline)[0:plot_val]
 
 # in delta-K
@@ -651,17 +738,26 @@ axes[0,0].plot(SUMMARY_mass.index, SUMMARY_mass['S7_CO2'],color='tab:gray', line
 axes[0,0].set_ylabel('Mass in Atmosphere (Mt)')
 axes[0,0].legend(loc = 'lower left', fontsize="small", ncol=1);
 
-# Plot the cumulative GWI (integrated radiative forcing)
+# Plot the instantatnous radiative frocing
 axes[0,1].axhline(y=0, color='black', linestyle='-')
-axes[0,1].plot(SUMMARY_irf.index, SUMMARY_irf['S1_irf'],color='tab:blue',  linestyle='solid', label = 'S1', )
-axes[0,1].plot(SUMMARY_irf.index, SUMMARY_irf['S2_irf'],color='tab:orange', linestyle='solid', label = 'S2')
-axes[0,1].plot(SUMMARY_irf.index, SUMMARY_irf['S3_irf'],color='tab:green', linestyle='solid', label = 'S3')
-axes[0,1].plot(SUMMARY_irf.index, SUMMARY_irf['S4_irf'],color='tab:red', linestyle='solid', label = 'S4')
-axes[0,1].plot(SUMMARY_irf.index, SUMMARY_irf['S5_irf'],color='tab:purple', linestyle='solid', label = 'S5')
-axes[0,1].plot(SUMMARY_irf.index, SUMMARY_irf['S6_irf'],color='tab:brown', linestyle='solid', label = 'S6')
-axes[0,1].plot(SUMMARY_irf.index, SUMMARY_irf['S7_irf'],color='tab:gray', linestyle='solid', label = 'S7')
-axes[0,1].set_ylabel('Cumulative GWI ($W-yr/m^{2}$)')
-axes[0,1].legend(loc = 'upper left', fontsize="small", ncol=1);
+axes[0,1].plot(SUMMARY_rf_inst.index, SUMMARY_rf_inst['S1_rf_int'],color='tab:blue',  linestyle='solid', label = 'S1', )
+axes[0,1].plot(SUMMARY_rf_inst.index, SUMMARY_rf_inst['S2_rf_int'],color='tab:orange', linestyle='solid', label = 'S2')
+axes[0,1].plot(SUMMARY_rf_inst.index, SUMMARY_rf_inst['S3_rf_int'],color='tab:green', linestyle='solid', label = 'S3')
+axes[0,1].plot(SUMMARY_rf_inst.index, SUMMARY_rf_inst['S4_rf_int'],color='tab:red', linestyle='solid', label = 'S4')
+axes[0,1].plot(SUMMARY_rf_inst.index, SUMMARY_rf_inst['S5_rf_int'],color='tab:purple', linestyle='solid', label = 'S5')
+axes[0,1].plot(SUMMARY_rf_inst.index, SUMMARY_rf_inst['S6_rf_int'],color='tab:brown', linestyle='solid', label = 'S6')
+axes[0,1].plot(SUMMARY_rf_inst.index, SUMMARY_rf_inst['S7_rf_int'],color='tab:gray', linestyle='solid', label = 'S7')
+axes[0,1].set_ylabel('Instantaneous Radiative Forcing ($W/m^{2}$)')
+# Plot the cumulative GWI (integrated radiative forcing)
+# axes[0,1].plot(SUMMARY_irf.index, SUMMARY_irf['S1_irf'],color='tab:blue',  linestyle='solid', label = 'S1', )
+# axes[0,1].plot(SUMMARY_irf.index, SUMMARY_irf['S2_irf'],color='tab:orange', linestyle='solid', label = 'S2')
+# axes[0,1].plot(SUMMARY_irf.index, SUMMARY_irf['S3_irf'],color='tab:green', linestyle='solid', label = 'S3')
+# axes[0,1].plot(SUMMARY_irf.index, SUMMARY_irf['S4_irf'],color='tab:red', linestyle='solid', label = 'S4')
+# axes[0,1].plot(SUMMARY_irf.index, SUMMARY_irf['S5_irf'],color='tab:purple', linestyle='solid', label = 'S5')
+# axes[0,1].plot(SUMMARY_irf.index, SUMMARY_irf['S6_irf'],color='tab:brown', linestyle='solid', label = 'S6')
+# axes[0,1].plot(SUMMARY_irf.index, SUMMARY_irf['S7_irf'],color='tab:gray', linestyle='solid', label = 'S7')
+# axes[0,1].set_ylabel('Cumulative Radiative Forcing ($W-yr/m^{2}$)')
+axes[0,1].legend(loc = 'lower left', fontsize="small", ncol=1);
 
 # Plot the temperature change effect
 axes[1,0].axhline(y=0, color='black', linestyle='-')
@@ -694,38 +790,52 @@ axes[1,1].plot(SUMMARY_equiv.index, SUMMARY_equiv['S7_LCA_dyn'],color='tab:gray'
 axes[1,1].set_ylabel('$CO_2$ Equivalencies ($Mt CO_2e$)')
 axes[1,1].legend(loc='lower left', fontsize="small", ncol=1);
 
-plt.savefig('./Figures/DLCA/DLCA_output_all.png', dpi=240)
+# plt.savefig('./Figures/DLCA/DLCA_output_all.png', dpi=240)
 
 
 # Plot some of the figures
 fig, axes = plt.subplots(1,2, constrained_layout=True, figsize=(10, 6))
 plt.rcParams.update({'font.size': 12})
-# Plot the temperature change effect
-axes[0].axhline(y=0, color='black', linestyle='-')
-axes[0].plot(SUMMARY_temp.index, SUMMARY_temp['S1_temp'],color='tab:blue',  linestyle='solid', label = 'S1')
-axes[0].plot(SUMMARY_temp.index, SUMMARY_temp['S2_temp'],color='tab:orange', linestyle='solid', label = 'S2')
-axes[0].plot(SUMMARY_temp.index, SUMMARY_temp['S3_temp'],color='tab:green', linestyle='solid', label = 'S3')
-axes[0].plot(SUMMARY_temp.index, SUMMARY_temp['S4_temp'],color='tab:red', linestyle='solid', label = 'S4')
-axes[0].plot(SUMMARY_temp.index, SUMMARY_temp['S5_temp'],color='tab:purple', linestyle='solid', label = 'S5')
-axes[0].plot(SUMMARY_temp.index, SUMMARY_temp['S6_temp'],color='tab:brown', linestyle='solid', label = 'S6')
-axes[0].plot(SUMMARY_temp.index, SUMMARY_temp['S7_temp'],color='tab:gray', linestyle='solid', label = 'S7')
-axes[0].set_ylabel('Temperature Change Effect ($\Delta K$)')
-axes[0].legend(loc = 'lower left', fontsize="small", ncol=1);
-
 # Plot the CO2 equivalences
+axes[0].axhline(y=0, color='black', linestyle='-')
+axes[0].plot(SUMMARY_equiv.index, SUMMARY_equiv['S1_LCA_dyn'],color='tab:blue',  linestyle='solid', label = 'S1', )
+axes[0].plot(SUMMARY_equiv.index, SUMMARY_equiv['S2_LCA_dyn'],color='tab:orange', linestyle='solid', label = 'S2')
+axes[0].plot(SUMMARY_equiv.index, SUMMARY_equiv['S3_LCA_dyn'],color='tab:green', linestyle='solid', label = 'S3')
+axes[0].plot(SUMMARY_equiv.index, SUMMARY_equiv['S4_LCA_dyn'],color='tab:red', linestyle='solid', label = 'S4')
+axes[0].plot(SUMMARY_equiv.index, SUMMARY_equiv['S5_LCA_dyn'],color='tab:purple', linestyle='solid', label = 'S5')
+axes[0].plot(SUMMARY_equiv.index, SUMMARY_equiv['S6_LCA_dyn'],color='tab:brown', linestyle='solid', label = 'S6')
+axes[0].plot(SUMMARY_equiv.index, SUMMARY_equiv['S7_LCA_dyn'],color='tab:gray', linestyle='solid', label = 'S7')
+axes[0].set_ylabel('$CO_2$ Equivalencies ($Mt CO_2e$)')
+axes[0].legend(loc = 'lower left', fontsize="small", ncol=1);
+# Plot the temperature change effect
 axes[1].axhline(y=0, color='black', linestyle='-')
-axes[1].plot(SUMMARY_equiv.index, SUMMARY_equiv['S1_LCA_dyn'],color='tab:blue',  linestyle='solid', label = 'S1 Dynamic', )
-axes[1].plot(SUMMARY_equiv.index, SUMMARY_equiv['S2_LCA_dyn'],color='tab:orange', linestyle='solid', label = 'S2 Dynamic')
-axes[1].plot(SUMMARY_equiv.index, SUMMARY_equiv['S3_LCA_dyn'],color='tab:green', linestyle='solid', label = 'S3 Dynamic')
-axes[1].plot(SUMMARY_equiv.index, SUMMARY_equiv['S4_LCA_dyn'],color='tab:red', linestyle='solid', label = 'S4 Dynamic')
-axes[1].plot(SUMMARY_equiv.index, SUMMARY_equiv['S5_LCA_dyn'],color='tab:purple', linestyle='solid', label = 'S5 Dynamic')
-axes[1].plot(SUMMARY_equiv.index, SUMMARY_equiv['S6_LCA_dyn'],color='tab:brown', linestyle='solid', label = 'S6 Dynamic')
-axes[1].plot(SUMMARY_equiv.index, SUMMARY_equiv['S7_LCA_dyn'],color='tab:gray', linestyle='solid', label = 'S7 Dynamic')
-axes[1].set_ylabel('$CO_2$ Equivalencies ($Mt CO_2e$)')
-
-plt.savefig('./Figures/DLCA/DLCA_output_temp_dlca.png', dpi=240)
+axes[1].plot(SUMMARY_temp.index, SUMMARY_temp['S1_temp'],color='tab:blue',  linestyle='solid', label = 'S1')
+axes[1].plot(SUMMARY_temp.index, SUMMARY_temp['S2_temp'],color='tab:orange', linestyle='solid', label = 'S2')
+axes[1].plot(SUMMARY_temp.index, SUMMARY_temp['S3_temp'],color='tab:green', linestyle='solid', label = 'S3')
+axes[1].plot(SUMMARY_temp.index, SUMMARY_temp['S4_temp'],color='tab:red', linestyle='solid', label = 'S4')
+axes[1].plot(SUMMARY_temp.index, SUMMARY_temp['S5_temp'],color='tab:purple', linestyle='solid', label = 'S5')
+axes[1].plot(SUMMARY_temp.index, SUMMARY_temp['S6_temp'],color='tab:brown', linestyle='solid', label = 'S6')
+axes[1].plot(SUMMARY_temp.index, SUMMARY_temp['S7_temp'],color='tab:gray', linestyle='solid', label = 'S7')
+axes[1].set_ylabel('Temperature Change Effect ($\Delta K$)')
 
 
+# plt.savefig('./Figures/DLCA/DLCA_output_temp_dlca.png', dpi=240)
+
+# Plot the instantaneous radiative forcing
+# Plot the CO2 equivalences
+figure(constrained_layout=True, figsize=(8, 6))
+plt.axhline(y=0, color='black', linestyle='-')
+plt.plot(SUMMARY_rf_inst.index, SUMMARY_rf_inst['S1_rf_int'],color='tab:blue',  linestyle='solid', label = 'S1', )
+plt.plot(SUMMARY_rf_inst.index, SUMMARY_rf_inst['S2_rf_int'],color='tab:orange', linestyle='solid', label = 'S2')
+plt.plot(SUMMARY_rf_inst.index, SUMMARY_rf_inst['S3_rf_int'],color='tab:green', linestyle='solid', label = 'S3')
+plt.plot(SUMMARY_rf_inst.index, SUMMARY_rf_inst['S4_rf_int'],color='tab:red', linestyle='solid', label = 'S4')
+plt.plot(SUMMARY_rf_inst.index, SUMMARY_rf_inst['S5_rf_int'],color='tab:purple', linestyle='solid', label = 'S5')
+plt.plot(SUMMARY_rf_inst.index, SUMMARY_rf_inst['S6_rf_int'],color='tab:brown', linestyle='solid', label = 'S6')
+plt.plot(SUMMARY_rf_inst.index, SUMMARY_rf_inst['S7_rf_int'],color='tab:gray', linestyle='solid', label = 'S7')
+plt.legend(loc = 'lower left', fontsize="small", ncol=1);
+plt.ylabel('Instantaneous Radiative Forcing ($W/m^2$)')
+
+# plt.savefig('./Figures/DLCA/DLCA_output_inst_rf.png', dpi=240)
 
 
 

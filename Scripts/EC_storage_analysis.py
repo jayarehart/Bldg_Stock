@@ -102,6 +102,69 @@ axs[0, 3].set_title('SSP2 + Low Mass Timber')
 axs[0, 0].set(ylabel='$ Mt CO_2 e/ year $')
 axs[1, 0].set(ylabel='$ Mt CO_2 e/ year $')
 
+# plot with secondary y-axis
+
+# plot the ECC without storage
+fig, axs = plt.subplots(2, 4, figsize=(14, 8), sharey=True)
+
+axs[0, 0].stackplot(S1_EC.index, S1_EC['Sum_steel_inflow'], S1_EC['Sum_conc_inflow'], S1_EC['Sum_engwood_inflow'], S1_EC['Sum_dimlum_inflow'], S1_EC['Sum_masonry_inflow'], alpha=0.8)
+ax2 = axs[0, 0].twinx()
+ax2.set_ylim(0,14)
+ax2.set_yticklabels([])
+ax2.plot(S1_EC.index, np.cumsum(S1_EC['Sum_steel_inflow']+S1_EC['Sum_conc_inflow']+S1_EC['Sum_engwood_inflow']+S1_EC['Sum_dimlum_inflow']+S1_EC['Sum_masonry_inflow'])*1e-3, color='dimgray')
+
+axs[1, 0].stackplot(S2_EC.index, S2_EC['Sum_steel_inflow'], S2_EC['Sum_conc_inflow'], S2_EC['Sum_engwood_inflow'], S2_EC['Sum_dimlum_inflow'], S2_EC['Sum_masonry_inflow'], alpha=0.8)
+ax2 = axs[1, 0].twinx()
+ax2.set_ylim(0,14)
+ax2.set_yticklabels([])
+ax2.plot(S2_EC.index, np.cumsum(S2_EC['Sum_steel_inflow']+S2_EC['Sum_conc_inflow']+S2_EC['Sum_engwood_inflow']+S2_EC['Sum_dimlum_inflow']+S2_EC['Sum_masonry_inflow'])*1e-3, color='dimgray')
+
+axs[0, 1].stackplot(S3_EC.index, S3_EC['Sum_steel_inflow'], S3_EC['Sum_conc_inflow'], S3_EC['Sum_engwood_inflow'], S3_EC['Sum_dimlum_inflow'], S3_EC['Sum_masonry_inflow'], alpha=0.8)
+ax2 = axs[0, 1].twinx()
+ax2.set_ylim(0,14)
+ax2.set_yticklabels([])
+ax2.plot(S3_EC.index, np.cumsum(S3_EC['Sum_steel_inflow']+S3_EC['Sum_conc_inflow']+S3_EC['Sum_engwood_inflow']+S3_EC['Sum_dimlum_inflow']+S3_EC['Sum_masonry_inflow'])*1e-3, color='dimgray')
+
+axs[1, 1].stackplot(S4_EC.index, S4_EC['Sum_steel_inflow'], S4_EC['Sum_conc_inflow'], S4_EC['Sum_engwood_inflow'], S4_EC['Sum_dimlum_inflow'], S4_EC['Sum_masonry_inflow'], alpha=0.8)
+ax2 = axs[1, 1].twinx()
+ax2.set_ylim(0,14)
+ax2.set_yticklabels([])
+ax2.plot(S4_EC.index, np.cumsum(S4_EC['Sum_steel_inflow']+S4_EC['Sum_conc_inflow']+S4_EC['Sum_engwood_inflow']+S4_EC['Sum_dimlum_inflow']+S4_EC['Sum_masonry_inflow'])*1e-3, color='dimgray')
+
+axs[0, 2].stackplot(S5_EC.index, S5_EC['Sum_steel_inflow'], S5_EC['Sum_conc_inflow'], S5_EC['Sum_engwood_inflow'], S5_EC['Sum_dimlum_inflow'], S5_EC['Sum_masonry_inflow'], alpha=0.8)
+ax2 = axs[0, 2].twinx()
+ax2.set_ylim(0,14)
+ax2.set_yticklabels([])
+ax2.plot(S5_EC.index, np.cumsum(S5_EC['Sum_steel_inflow']+S5_EC['Sum_conc_inflow']+S5_EC['Sum_engwood_inflow']+S5_EC['Sum_dimlum_inflow']+S5_EC['Sum_masonry_inflow'])*1e-3, color='dimgray')
+
+axs[1, 2].stackplot(S6_EC.index, S6_EC['Sum_steel_inflow'], S6_EC['Sum_conc_inflow'], S6_EC['Sum_engwood_inflow'], S6_EC['Sum_dimlum_inflow'], S6_EC['Sum_masonry_inflow'], alpha=0.8)
+ax2 = axs[1, 2].twinx()
+ax2.set_ylim(0,14)
+ax2.set(ylabel='Cumulative Emissions (Gt $CO_2e$)')
+ax2.plot(S6_EC.index, np.cumsum(S6_EC['Sum_steel_inflow']+S6_EC['Sum_conc_inflow']+S6_EC['Sum_engwood_inflow']+S6_EC['Sum_dimlum_inflow']+S6_EC['Sum_masonry_inflow'])*1e-3, color='dimgray')
+
+axs[0, 3].stackplot(S7_EC.index, S7_EC['Sum_steel_inflow'], S7_EC['Sum_conc_inflow'], S7_EC['Sum_engwood_inflow'], S7_EC['Sum_dimlum_inflow'], S7_EC['Sum_masonry_inflow'], alpha=0.8)
+ax2 = axs[0, 3].twinx()
+ax2.set_ylim(0,14)
+ax2.set(ylabel='Cumulative Emissions (Gt $CO_2e$)')
+ax2.plot(S7_EC.index, np.cumsum(S7_EC['Sum_steel_inflow']+S7_EC['Sum_conc_inflow']+S7_EC['Sum_engwood_inflow']+S7_EC['Sum_dimlum_inflow']+S7_EC['Sum_masonry_inflow'])*1e-3, color='dimgray')
+axs[1, 3].axis('off')
+
+legend_text=['Steel', 'Concrete', 'Eng. Wood', 'Dim. Lumber', 'Masonry']
+fig.legend(legend_text, title='Materials', loc='lower right', bbox_to_anchor=(0.9, 0.1), fancybox=True)
+
+axs[0, 0].set_title('S1: SSP1 + Low Density')
+axs[1, 0].set_title('S2: SSP1 + Medium Density')
+axs[0, 1].set_title('S3: SSP1 + High Density')
+axs[1, 1].set_title('S4: SSP3 + No Mass Timber')
+axs[0, 2].set_title('S5: SSP3 + Moderate Mass Timber')
+axs[1, 2].set_title('S6: SSP2 + Moderate Mass Timber')
+axs[0, 3].set_title('S7: SSP2 + Low Mass Timber')
+
+axs[0, 0].set(ylabel='$ Mt CO_2 e/ year $')
+axs[1, 0].set(ylabel='$ Mt CO_2 e/ year $')
+# plt.savefig('./Figures/EC_demand.png', dpi=440)
+
 # Normalize embodied carbon by unit floor space
 S1_FA = pd.read_excel('./Results/SSP_dsm.xlsx', sheet_name='SSP1')[['time','inflow_total']].rename(columns={"inflow_total": "i_million_m2"})
 S1_FA = S1_FA.set_index('time', drop=True).loc[2017:]
@@ -147,18 +210,29 @@ S_norm.to_csv('./Results/EC_intensity_out.csv')
 # S_norm.plot()
 
 # plot the carbon storage
-figure(figsize=(8, 6), dpi=80)
-plt.plot(S1_EC.index, S1_EC['Sum_dimlum_inflow_2'] + S1_EC['Sum_engwood_inflow_2'], label = 'SSP1 + Low Density')
-plt.plot(S2_EC.index, S2_EC['Sum_dimlum_inflow_2'] + S2_EC['Sum_engwood_inflow_2'], label = 'SSP1 + Medium Density')
-plt.plot(S3_EC.index, S3_EC['Sum_dimlum_inflow_2'] + S3_EC['Sum_engwood_inflow_2'], label = 'SSP1 + High Density')
-plt.plot(S4_EC.index, S4_EC['Sum_dimlum_inflow_2'] + S4_EC['Sum_engwood_inflow_2'], label = 'SSP3 + No Mass Timber')
-plt.plot(S5_EC.index, S5_EC['Sum_dimlum_inflow_2'] + S5_EC['Sum_engwood_inflow_2'], label = 'SSP3 + Moderate Mass Timber')
-plt.plot(S6_EC.index, S6_EC['Sum_dimlum_inflow_2'] + S6_EC['Sum_engwood_inflow_2'], label = 'SSP2 + Moderate Mass Timber')
-plt.plot(S7_EC.index, S7_EC['Sum_dimlum_inflow_2'] + S7_EC['Sum_engwood_inflow_2'], label = 'SSP2 + Low Mass Timber')
-plt.legend(loc = 'lower left');
-plt.ylabel('Mt Biogenic $ CO_2 / year $')
-plt.ylim(0)
-plt.title('Annual Carbon Storage of Gravity Structural Systems')
+fig, axs = plt.subplots(2, figsize=(8, 8))
+axs[0].plot(S1_EC.index, S1_EC['Sum_dimlum_inflow_2'] + S1_EC['Sum_engwood_inflow_2'], label = 'S1: SSP1 + Low Density')
+axs[0].plot(S2_EC.index, S2_EC['Sum_dimlum_inflow_2'] + S2_EC['Sum_engwood_inflow_2'], label = 'S2: SSP1 + Medium Density')
+axs[0].plot(S3_EC.index, S3_EC['Sum_dimlum_inflow_2'] + S3_EC['Sum_engwood_inflow_2'], label = 'S3: SSP1 + High Density')
+axs[0].plot(S4_EC.index, S4_EC['Sum_dimlum_inflow_2'] + S4_EC['Sum_engwood_inflow_2'], label = 'S4: SSP3 + No Mass Timber')
+axs[0].plot(S5_EC.index, S5_EC['Sum_dimlum_inflow_2'] + S5_EC['Sum_engwood_inflow_2'], label = 'S5: SSP3 + Moderate Mass Timber')
+axs[0].plot(S6_EC.index, S6_EC['Sum_dimlum_inflow_2'] + S6_EC['Sum_engwood_inflow_2'], label = 'S6: SSP2 + Moderate Mass Timber')
+axs[0].plot(S7_EC.index, S7_EC['Sum_dimlum_inflow_2'] + S7_EC['Sum_engwood_inflow_2'], label = 'S7: SSP2 + Low Mass Timber')
+axs[0].set_ylabel('Mt Biogenic $ CO_2 / year $')
+# axs[0].set_ylim(0)
+axs[0].set_title('Annual Carbon Storage')
+
+axs[1].plot(S1_EC.index, np.cumsum(S1_EC['Sum_dimlum_inflow_2'] + S1_EC['Sum_engwood_inflow_2'])*1e-3, label = 'SSP1 + Low Density')
+axs[1].plot(S2_EC.index, np.cumsum(S2_EC['Sum_dimlum_inflow_2'] + S2_EC['Sum_engwood_inflow_2'])*1e-3, label = 'SSP1 + Medium Density')
+axs[1].plot(S3_EC.index, np.cumsum(S3_EC['Sum_dimlum_inflow_2'] + S3_EC['Sum_engwood_inflow_2'])*1e-3, label = 'SSP1 + High Density')
+axs[1].plot(S4_EC.index, np.cumsum(S4_EC['Sum_dimlum_inflow_2'] + S4_EC['Sum_engwood_inflow_2'])*1e-3, label = 'SSP3 + No Mass Timber')
+axs[1].plot(S5_EC.index, np.cumsum(S5_EC['Sum_dimlum_inflow_2'] + S5_EC['Sum_engwood_inflow_2'])*1e-3, label = 'SSP3 + Moderate Mass Timber')
+axs[1].plot(S6_EC.index, np.cumsum(S6_EC['Sum_dimlum_inflow_2'] + S6_EC['Sum_engwood_inflow_2'])*1e-3, label = 'SSP2 + Moderate Mass Timber')
+axs[1].plot(S7_EC.index, np.cumsum(S7_EC['Sum_dimlum_inflow_2'] + S7_EC['Sum_engwood_inflow_2'])*1e-3, label = 'SSP2 + Low Mass Timber')
+axs[1].set_ylabel('Gt Biogenic $ CO_2$')
+axs[1].legend(loc = 'upper left', fontsize='small');
+axs[1].set_title('Cumulative Carbon Storage')
+# plt.savefig('./Figures/Carbon_Storage_simple.png', dpi=440)
 
 
 

@@ -1,0 +1,362 @@
+clc; clear all
+%% Explanation
+% This script calculates the dynamic Global Warming Impact (GWI) of Greenhouse Gases (GHG)
+% The approach was developed by Lavasseur and colleagues (2010)
+% Approach:
+% DCF(t) = integral(a*C(t) dt, t-t,t)
+% DCF   := Dynamic Characterization Factor
+% a     := instantaneous radiative forcing per unit mass increase in the atmosphere for the given GHG (in W/m2/kg)
+% C(t)  := atmospheric load of the given GHG t years after the emission (in kg)
+% GWI_inst(t) = sum( sum( g(i)*DCF(t-i) ,i=0,t), all GHG)
+% g(i)  := inventory result for each GHG
+% GWI_cum(t) = sum( GWI_inst(i), i=0,t)
+
+
+%% General Parameters
+aCH4 = 0.129957;    % methane - instantaneous radiative forcing per unit mass [10^-12 W/m2 /kgCH4]
+TauCH4 = 12;    % methane - lifetime (years)
+aCO2 = 0.0018088;    % CO2 - instantaneous radiative forcing per unit mass [10^-12 W/m2 /kgCO2]
+TauCO2 = [172.9  18.51  1.186];    % CO2 parameters according to Bern carbon cycle-climate model
+aBern = [0.259 0.338 0.186];        % CO2 parameters according to Bern carbon cycle-climate model
+a0Bern = 0.217;                     % CO2 parameters according to Bern carbon cycle-climate model
+
+tf = 200;       % set TimeFrame in years
+Time = (0:(tf-1));  % Time Vector with length = tf
+
+Import_file= 'P1_Matlab1_Input.xlsx';
+Export_file= 'P1_Matlab2_Output.xlsx';
+
+%% Import Excel Information
+Inventory_input = xlsread(Import_file,'Matlab Values','D5:CO117'); % Matrix with values, zeilen = year, spalten = co2, ch4, seq je 3 pro szenario
+products = 5;
+scenario = 6*products;
+Inventory = zeros(tf,scenario*3);
+g_length = Inventory_input(:,2);
+glength = length(g_length);
+for i=1:scenario*3
+    for j=1:glength
+        Inventory(j,i) = Inventory_input(j,i);
+    end
+end
+
+%% CO2 calculation formula
+
+% time dependant atmospheric load for CO2, Bern model
+C_CO2 = @(t) a0Bern + aBern(1)*exp(-t/TauCO2(1)) + aBern(2)*exp(-t/TauCO2(2)) + aBern(3)*exp(-t/TauCO2(3));
+
+% DCF for CO2, for tf years
+DCF_CO2 = zeros(tf,1);
+ for t = 1:tf
+     DCF_CO2(t) = aCO2 * integral(C_CO2,t-1,t);
+ end
+
+% AUX-Matrix: DCF(t-i); Zeile = i (start at 0), Spalte = t (start at 1)
+DCF_CO2_ti = zeros(tf); % Matrix of DCF t-i
+for t =1:tf
+    i = 0;
+    while i<t
+        DCF_CO2_ti(i+1,t) = DCF_CO2(t-i);
+        i=i+1;
+    end
+end
+
+%% CH4 calculation formula
+
+% time dependant atmospheric load for non-CO2 GHGs (Methane)
+C_CH4 = @(t) exp(-t/TauCH4);
+
+% DCF for CH4 for tf years
+DCF_CH4 = zeros(tf,1);
+for i = 1:tf
+    DCF_CH4(i) = aCH4 * integral(C_CH4,i-1,i);
+end
+
+% AUX-Matrix of DCF t-i; Zeile = i (start at 0), Spalte = t (start at 1)
+DCF_CH4_ti = zeros(tf); % Matrix of DCF t-i
+for t =1:tf
+    i = 0;
+    while i<t
+        DCF_CH4_ti(i+1,t) = DCF_CH4(t-i);
+        i=i+1;
+    end
+end
+
+
+%% Output calculation
+% calculation GWI_inst
+GWI_inst = zeros(tf,scenario*3);
+for n=0:scenario-1
+    for t=1:tf
+        GWI_inst(t,(1+n*3)) = sum(Inventory(:,(1+n*3)).* DCF_CO2_ti(:,t));
+        GWI_inst(t,(2+n*3)) = sum(Inventory(:,(2+n*3)).* DCF_CH4_ti(:,t));
+        GWI_inst(t,(3+n*3)) = sum(Inventory(:,(3+n*3)).* DCF_CO2_ti(:,t));
+    end
+end
+%% total
+
+% GWI instantaneous - sum of all gases
+
+% l�se mit matrix, 1spalte = 1 scenario
+GWI_inst_tot = zeros(tf,scenario);
+for i=0:scenario-1
+    GWI_inst_tot(:,i+1) = GWI_inst(:,(1+i*3)) + GWI_inst(:,(2+i*3)) + GWI_inst(:,(3+i*3));
+end
+
+% calculate GWI cummulative
+GWI_cum = zeros(tf,scenario);
+for i=1:scenario
+    for t=1:tf
+        GWI_cum(t,i) = sum(GWI_inst_tot(1:t,i));
+    end
+end
+
+%% Export Excel Information
+xlRange = 'B3';
+xlswrite(Export_file,GWI_inst_tot,1,xlRange);
+xlswrite(Export_file,GWI_cum,2,xlRange);
+
+%% plotting
+origin = zeros(tf,1);
+
+% instantaneous impact
+figure(1);
+for i=1:6
+
+    subplot(3,2,i);
+    plot(Time, GWI_inst_tot(:,i),'r', Time, GWI_inst_tot(:,i+6), 'c', Time, GWI_inst_tot(:,i+12), 'g', Time, GWI_inst_tot(:,i+18), 'y', Time, GWI_inst_tot(:,i+24), 'm', Time, origin, 'black:');
+    title('instantaneous');
+    ylabel('radiative forcing (10�10^-12 W/m^2)')
+    xlabel('time (years)')
+    if i==1
+        title('landfill')
+        legend('1. Straw panel', '2. Hempcrete', '3. Timber frame', '4. Brick', '5. Concrete');
+    end
+    if i==2
+        title('landfill')
+    end
+    if i==3
+        title('energy recovery with impacts beyond')
+    end
+    if i==4
+        title('energy recovery')
+    end
+    if i==5
+        title('material reuse with impacts beyond')
+    end
+    if i==6
+        title('material reuse')
+    end
+end
+
+% cumulative impact
+
+figure(2);
+for i=1:6
+
+    subplot(3,2,i);
+    plot(Time, GWI_cum(:,i), 'r', Time, GWI_cum(:,i+6), 'c', Time, GWI_cum(:,i+12), 'g', Time, GWI_cum(:,i+18), 'y', Time, GWI_inst_tot(:,i+24), 'm', Time, origin, 'black:');
+    title('cumulative');
+    ylabel('radiative forcing (10�10^-12 W/m^2)')
+    xlabel('time (years)')
+    if i==1
+        title('landfill')
+        legend('1. Straw panel', '2. Hempcrete', '3. Timber frame', '4. Brick', '5. Concrete');
+    end
+    if i==2
+        title('landfill')
+    end
+    if i==3
+        title('energy recovery with impacts beyond')
+    end
+    if i==4
+        title('energy recovery')
+    end
+    if i==5
+        title('material reuse with impacts beyond')
+    end
+    if i==6
+        title('material reuse')
+    end
+end
+
+% cumulative for individual products
+figure(3);
+plot(Time, GWI_cum(:,1), 'r', Time, GWI_cum(:,3), 'b-.', Time, GWI_cum(:,4), 'b', Time, GWI_cum(:,5), 'g-.', Time, GWI_cum(:,6), 'g', Time, origin, 'black:', 'LineWidth', 1.3);
+set(gca,'FontSize',14);
+title('zo� plastered - cumulative', 'Fontsize', 16);
+legend('landfill', 'energy recovery with impacts beyond', 'energy recovery', 'material reuse with impacts beyond', 'material reuse', 16, 'Location', 'southwest');
+ylabel('radiative forcing (10�E-12 W/m^2)', 'Fontsize', 16);
+xlabel('time (years)', 'Fontsize', 16);
+
+figure(4);
+plot(Time, GWI_cum(:,7), 'r', Time, GWI_cum(:,9), 'b-.', Time, GWI_cum(:,10), 'b', Time, GWI_cum(:,11), 'g-.', Time, GWI_cum(:,12), 'g', Time, origin, 'black:', 'LineWidth', 1.3);
+set(gca,'FontSize',14);
+title('zo� ventilated - cumulative', 'Fontsize', 16);
+legend('landfill', 'energy recovery with impacts beyond', 'energy recovery', 'material reuse with impacts beyond', 'material reuse', 16, 'Location', 'southwest');
+ylabel('radiative forcing (10�E-12 W/m^2)', 'Fontsize', 16);
+xlabel('time (years)', 'Fontsize', 16);
+
+figure(5);
+plot(Time, GWI_cum(:,13), 'r', Time, GWI_cum(:,15), 'b-.', Time, GWI_cum(:,16), 'b', Time, GWI_cum(:,17), 'g-.', Time, GWI_cum(:,18), 'g', Time, origin, 'black:', 'LineWidth', 1.3);
+set(gca,'FontSize',14);
+title('timber frame plastered - cumulative', 'Fontsize', 16);
+legend('landfill', 'energy recovery with impacts beyond', 'energy recovery', 'material reuse with impacts beyond', 'material reuse', 16, 'Location', 'northwest');
+ylabel('radiative forcing (10�E-12 W/m^2)', 'Fontsize', 16);
+xlabel('time (years)', 'Fontsize', 16);
+
+figure(6);
+plot(Time, GWI_cum(:,19), 'r', Time, GWI_cum(:,21), 'b-.', Time, GWI_cum(:,22), 'b', Time, GWI_cum(:,23), 'g-.', Time, GWI_cum(:,24), 'g', Time, origin, 'black:', 'LineWidth', 1.3);
+set(gca,'FontSize',14);
+title('timber frame ventilated - cumulative', 'Fontsize', 16);
+legend('landfill', 'energy recovery with impacts beyond', 'energy recovery', 'material reuse with impacts beyond', 'material reuse', 16, 'Location', 'northwest');
+ylabel('radiative forcing (10�E-12 W/m^2)', 'Fontsize', 16);
+xlabel('time (years)', 'Fontsize', 16);
+
+figure(7);
+plot(Time, GWI_cum(:,25), 'r', Time, GWI_cum(:,27), 'b-.', Time, GWI_cum(:,28), 'b', Time, GWI_cum(:,29), 'g-.', Time, GWI_cum(:,30), 'g', Time, origin, 'black:', 'LineWidth', 1.3);
+set(gca,'FontSize',14);
+title('concrete - cumulative', 'Fontsize', 16);
+legend('landfill', 'energy recovery with impacts beyond', 'energy recovery', 'material reuse with impacts beyond', 'material reuse', 16, 'Location', 'northwest');
+ylabel('radiative forcing (10�E-12 W/m^2)', 'Fontsize', 16);
+xlabel('time (years)', 'Fontsize', 16);
+
+figure(8);
+plot(Time, GWI_cum(:,31), 'r', Time, GWI_cum(:,33), 'b-.', Time, GWI_cum(:,34), 'b', Time, GWI_cum(:,35), 'g-.', Time, GWI_cum(:,36), 'g', Time, origin, 'black:', 'LineWidth', 1.3);
+set(gca,'FontSize',14);
+title('brick - cumulative', 'Fontsize', 16);
+legend('landfill', 'energy recovery with impacts beyond', 'energy recovery', 'material reuse with impacts beyond', 'material reuse', 16, 'Location', 'northwest');
+ylabel('radiative forcing (10�E-12 W/m^2)', 'Fontsize', 16);
+xlabel('time (years)', 'Fontsize', 16);
+
+% instant for individual products
+figure(9);
+plot(Time, GWI_inst_tot(:,1), 'r', Time, GWI_inst_tot(:,3), 'b-.', Time, GWI_inst_tot(:,4), 'b', Time, GWI_inst_tot(:,5), 'g-.', Time, GWI_inst_tot(:,6), 'g', Time, origin, 'black:', 'LineWidth', 1.3);
+set(gca,'FontSize',14);
+title('zo� plastered - instantaneous', 'Fontsize', 16);
+legend('landfill', 'energy recovery with impacts beyond', 'energy recovery', 'material reuse with impacts beyond', 'material reuse', 16, 'Location', 'northeast');
+ylabel('radiative forcing (10�E-12 W/m^2)', 'Fontsize', 16);
+xlabel('time (years)', 'Fontsize', 16);
+
+figure(10);
+plot(Time, GWI_inst_tot(:,7), 'r', Time, GWI_inst_tot(:,9), 'b-.', Time, GWI_inst_tot(:,10), 'b', Time, GWI_inst_tot(:,11), 'g-.', Time, GWI_inst_tot(:,12), 'g', Time, origin, 'black:', 'LineWidth', 1.3);
+set(gca,'FontSize',14);
+title('zo� ventilated - instantaneous', 'Fontsize', 16);
+legend('landfill', 'energy recovery with impacts beyond', 'energy recovery', 'material reuse with impacts beyond', 'material reuse', 16, 'Location', 'northeast');
+ylabel('radiative forcing (10�E-12 W/m^2)', 'Fontsize', 16);
+xlabel('time (years)', 'Fontsize', 16);
+
+figure(11);
+plot(Time, GWI_inst_tot(:,13), 'r', Time, GWI_inst_tot(:,15), 'b-.', Time, GWI_inst_tot(:,16), 'b', Time, GWI_inst_tot(:,17), 'g-.', Time, GWI_inst_tot(:,18), 'g', Time, origin, 'black:', 'LineWidth', 1.3);
+set(gca,'FontSize',14);
+title('timber frame plastered - instantaneous', 'Fontsize', 16);
+legend('landfill', 'energy recovery with impacts beyond', 'energy recovery', 'material reuse with impacts beyond', 'material reuse', 16, 'Location', 'northeast');
+ylabel('radiative forcing (10�E-12 W/m^2)', 'Fontsize', 16);
+xlabel('time (years)', 'Fontsize', 16);
+
+figure(12);
+plot(Time, GWI_inst_tot(:,19), 'r', Time, GWI_inst_tot(:,21), 'b-.', Time, GWI_inst_tot(:,22), 'b', Time, GWI_inst_tot(:,23), 'g-.', Time, GWI_inst_tot(:,24), 'g', Time, origin, 'black:', 'LineWidth', 1.3);
+set(gca,'FontSize',14);
+title('timber frame ventilated - instantaneous', 'Fontsize', 16);
+legend('landfill', 'energy recovery with impacts beyond', 'energy recovery', 'material reuse with impacts beyond', 'material reuse', 16, 'Location', 'northeast');
+ylabel('radiative forcing (10�E-12 W/m^2)', 'Fontsize', 16);
+xlabel('time (years)', 'Fontsize', 16);
+
+figure(13);
+plot(Time, GWI_inst_tot(:,25), 'r', Time, GWI_inst_tot(:,27), 'b-.', Time, GWI_inst_tot(:,28), 'b', Time, GWI_inst_tot(:,29), 'g-.', Time, GWI_inst_tot(:,30), 'g', Time, origin, 'black:', 'LineWidth', 1.3);
+set(gca,'FontSize',14);
+title('concrete - instantaneous', 'Fontsize', 16);
+legend('landfill', 'energy recovery with impacts beyond', 'energy recovery', 'material reuse with impacts beyond', 'material reuse', 16, 'Location', 'northeast');
+ylabel('radiative forcing (10�E-12 W/m^2)', 'Fontsize', 16);
+xlabel('time (years)', 'Fontsize', 16);
+
+figure(14);
+plot(Time, GWI_inst_tot(:,31), 'r', Time, GWI_inst_tot(:,33), 'b-.', Time, GWI_inst_tot(:,34), 'b', Time, GWI_inst_tot(:,35), 'g-.', Time, GWI_inst_tot(:,36), 'g', Time, origin, 'black:', 'LineWidth', 1.3);
+set(gca,'FontSize',14);
+title('brick - instantaneous', 'Fontsize', 16);
+legend('landfill', 'energy recovery with impacts beyond', 'energy recovery', 'material reuse with impacts beyond', 'material reuse', 16, 'Location', 'northeast');
+ylabel('radiative forcing (10�E-12 W/m^2)', 'Fontsize', 16);
+xlabel('time (years)', 'Fontsize', 16);
+
+% landfill instant for all products
+figure(15);
+plot(Time, GWI_inst_tot(:,1), 'r', Time, GWI_inst_tot(:,7), 'c', Time, GWI_inst_tot(:,13), 'g', Time, GWI_inst_tot(:,19), 'y', Time, GWI_inst_tot(:,25), 'b', Time, GWI_inst_tot(:,31), 'black', Time, origin, 'black:', 'LineWidth', 1.3);
+set(gca,'FontSize',14);
+ylabel('radiative forcing (10�E-12 W/m^2)', 'Fontsize', 16);
+xlabel('time (years)', 'Fontsize', 16);
+legend('zoe plastered', 'zoe ventilated', 'timber frame plastered', 'timber frame ventilated', 'concrete', 'brick');
+title('landfill - instantaneous', 'Fontsize', 16);
+
+figure(16);
+plot(Time, GWI_inst_tot(:,3), 'r', Time, GWI_inst_tot(:,9), 'c', Time, GWI_inst_tot(:,15), 'g', Time, GWI_inst_tot(:,21), 'y', Time, GWI_inst_tot(:,27), 'b', Time, GWI_inst_tot(:,33), 'black', Time, origin, 'black:', 'LineWidth', 1.3);
+set(gca,'FontSize',14);
+ylabel('radiative forcing (10�E-12 W/m^2)', 'Fontsize', 16);
+xlabel('time (years)', 'Fontsize', 16);
+legend('zoe plastered', 'zoe ventilated', 'timber frame plastered', 'timber frame ventilated', 'concrete', 'brick');
+title('energy recovery with impacts beyond - instantaneous', 'Fontsize', 16);
+
+figure(17);
+plot(Time, GWI_inst_tot(:,4), 'r', Time, GWI_inst_tot(:,10), 'c', Time, GWI_inst_tot(:,16), 'g', Time, GWI_inst_tot(:,22), 'y', Time, GWI_inst_tot(:,28), 'b', Time, GWI_inst_tot(:,34), 'black', Time, origin, 'black:', 'LineWidth', 1.3);
+set(gca,'FontSize',14);
+ylabel('radiative forcing (10�E-12 W/m^2)', 'Fontsize', 16);
+xlabel('time (years)', 'Fontsize', 16);
+legend('zoe plastered', 'zoe ventilated', 'timber frame plastered', 'timber frame ventilated', 'concrete', 'brick');
+title('energy recovery - instantaneous', 'Fontsize', 16);
+
+figure(18);
+plot(Time, GWI_inst_tot(:,5), 'r', Time, GWI_inst_tot(:,11), 'c', Time, GWI_inst_tot(:,17), 'g', Time, GWI_inst_tot(:,23), 'y', Time, GWI_inst_tot(:,29), 'b', Time, GWI_inst_tot(:,35), 'black', Time, origin, 'black:', 'LineWidth', 1.3);
+set(gca,'FontSize',14);
+ylabel('radiative forcing (10�E-12 W/m^2)', 'Fontsize', 16);
+xlabel('time (years)', 'Fontsize', 16);
+legend('zoe plastered', 'zoe ventilated', 'timber frame plastered', 'timber frame ventilated', 'concrete', 'brick');
+title('material reuse with impacts beyond - instantaneous', 'Fontsize', 16);
+
+figure(19);
+plot(Time, GWI_inst_tot(:,6), 'r', Time, GWI_inst_tot(:,12), 'c', Time, GWI_inst_tot(:,18), 'g', Time, GWI_inst_tot(:,24), 'y', Time, GWI_inst_tot(:,30), 'b', Time, GWI_inst_tot(:,36), 'black', Time, origin, 'black:', 'LineWidth', 1.3);
+set(gca,'FontSize',14);
+ylabel('radiative forcing (10�E-12 W/m^2)', 'Fontsize', 16);
+xlabel('time (years)', 'Fontsize', 16);
+legend('zoe plastered', 'zoe ventilated', 'timber frame plastered', 'timber frame ventilated', 'concrete', 'brick');
+title('material reuse - instantaneous', 'Fontsize', 16);
+
+% landfill cumulative for all products
+figure(20);
+plot(Time, GWI_cum(:,1), 'r', Time, GWI_cum(:,7), 'c', Time, GWI_cum(:,13), 'g', Time, GWI_cum(:,19), 'y', Time, GWI_cum(:,25), 'b', Time, GWI_cum(:,31), 'black', Time, origin, 'black:', 'LineWidth', 1.3);
+set(gca,'FontSize',14);
+ylabel('radiative forcing (10�E-12 W/m^2)', 'Fontsize', 16);
+xlabel('time (years)', 'Fontsize', 16);
+legend('zoe plastered', 'zoe ventilated', 'timber frame plastered', 'timber frame ventilated', 'concrete', 'brick', 'Location', 'northwest');
+title('landfill - cumulative', 'Fontsize', 16);
+
+figure(21);
+plot(Time, GWI_cum(:,3), 'r', Time, GWI_cum(:,9), 'c', Time, GWI_cum(:,15), 'g', Time, GWI_cum(:,21), 'y', Time, GWI_cum(:,27), 'b', Time, GWI_cum(:,33), 'black', Time, origin, 'black:', 'LineWidth', 1.3);
+set(gca,'FontSize',14);
+ylabel('radiative forcing (10�E-12 W/m^2)', 'Fontsize', 16);
+xlabel('time (years)', 'Fontsize', 16);
+legend('zoe plastered', 'zoe ventilated', 'timber frame plastered', 'timber frame ventilated', 'concrete', 'brick', 'Location', 'northwest');
+title('energy recovery with impacts beyond - cumulative', 'Fontsize', 16);
+
+figure(22);
+plot(Time, GWI_cum(:,4), 'r', Time, GWI_cum(:,10), 'c', Time, GWI_cum(:,16), 'g', Time, GWI_cum(:,22), 'y', Time, GWI_cum(:,28), 'b', Time, GWI_cum(:,34), 'black', Time, origin, 'black:', 'LineWidth', 1.3);
+set(gca,'FontSize',14);
+ylabel('radiative forcing (10�E-12 W/m^2)', 'Fontsize', 16);
+xlabel('time (years)', 'Fontsize', 16);
+legend('zoe plastered', 'zoe ventilated', 'timber frame plastered', 'timber frame ventilated', 'concrete', 'brick', 'Location', 'northwest');
+title('energy recovery - cumulative', 'Fontsize', 16);
+
+figure(23);
+plot(Time, GWI_cum(:,5), 'r', Time, GWI_cum(:,11), 'c', Time, GWI_cum(:,17), 'g', Time, GWI_cum(:,23), 'y', Time, GWI_cum(:,29), 'b', Time, GWI_cum(:,35), 'black', Time, origin, 'black:', 'LineWidth', 1.3);
+set(gca,'FontSize',14);
+ylabel('radiative forcing (10�E-12 W/m^2)', 'Fontsize', 16);
+xlabel('time (years)', 'Fontsize', 16);
+legend('zoe plastered', 'zoe ventilated', 'timber frame plastered', 'timber frame ventilated', 'concrete', 'brick', 'Location', 'northwest');
+title('material reuse with impacts beyond - cumulative', 'Fontsize', 16);
+
+figure(24);
+plot(Time, GWI_cum(:,6), 'r', Time, GWI_cum(:,12), 'c', Time, GWI_cum(:,18), 'g', Time, GWI_cum(:,24), 'y', Time, GWI_cum(:,30), 'b', Time, GWI_cum(:,36), 'black', Time, origin, 'black:', 'LineWidth', 1.3);
+set(gca,'FontSize',14);
+ylabel('radiative forcing (10�E-12 W/m^2)', 'Fontsize', 16);
+xlabel('time (years)', 'Fontsize', 16);
+legend('zoe plastered', 'zoe ventilated', 'timber frame plastered', 'timber frame ventilated', 'concrete', 'brick', 'Location', 'northwest');
+title('material reuse - cumulative', 'Fontsize', 16);
+
+

@@ -1946,8 +1946,8 @@ if export_csv == True:
     S4_mat_o_p95.to_csv('./Results/S4_mat_o_p95.csv', index=True)
     S4_mat_s_mean.to_csv('./Results/S4_mat_s_mean.csv', index=True)
     S4_mat_s_std.to_csv('./Results/S4_mat_s_std.csv', index=True)
-    S4_mat_i_p05.to_csv('./Results/S4_mat_s_p05.csv', index=True)
-    S4_mat_i_p95.to_csv('./Results/S4_mat_s_p95.csv', index=True)
+    S4_mat_s_p05.to_csv('./Results/S4_mat_s_p05.csv', index=True)
+    S4_mat_s_p95.to_csv('./Results/S4_mat_s_p95.csv', index=True)
 
     S5_mat_i_mean.to_csv('./Results/S5_mat_i_mean.csv', index=True)
     S5_mat_i_std.to_csv('./Results/S5_mat_i_std.csv', index=True)

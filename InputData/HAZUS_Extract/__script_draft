@@ -1,0 +1,16 @@
+# HAZUS Data processing
+
+import pandas as pd
+import os
+import glob
+
+directoryPath='./InputData/HAZUS'
+summary_df = pd.DataFrame()
+for file_name in glob.glob(directoryPath+'*_type.csv'):
+    x = pd.read_csv(file_name, low_memory=False)
+    x_sum = x.sum(axis=1) * 1000 / 0.092903     # sum and convert to sqm
+    x_tot_sm = x_sum.TotalSqft                  # sum of total area
+    y_line = x_sum / x_tot_sm                   # percent weights of each
+    check = y_line.sum(axis=0) - 1              # check sum to be 100%
+    print(file_name, '  ', check)
+    summary_df = pd.concat([summary_df,y_line],axis=0)

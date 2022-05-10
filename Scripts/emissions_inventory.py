@@ -345,59 +345,129 @@ def create_dyn_inventory_scenario(mat_flow_in,mat_flow_out,scenario_name,include
 
     return total_flux_df
 
-S1_inventory = create_dyn_inventory_scenario(mat_flow_in=S1_i_mean,mat_flow_out=S1_o_mean,scenario_name='S1',include_carb=True,plot_emission=True)
-S2_inventory = create_dyn_inventory_scenario(mat_flow_in=S2_i_mean,mat_flow_out=S2_o_mean,scenario_name='S2',include_carb=True,plot_emission=True)
-S3_inventory = create_dyn_inventory_scenario(mat_flow_in=S3_i_mean,mat_flow_out=S3_o_mean,scenario_name='S3',include_carb=True,plot_emission=True)
-S4_inventory = create_dyn_inventory_scenario(mat_flow_in=S4_i_mean,mat_flow_out=S4_o_mean,scenario_name='S4',include_carb=True,plot_emission=True)
-S5_inventory = create_dyn_inventory_scenario(mat_flow_in=S5_i_mean,mat_flow_out=S5_o_mean,scenario_name='S5',include_carb=True,plot_emission=True)
-S6_inventory = create_dyn_inventory_scenario(mat_flow_in=S6_i_mean,mat_flow_out=S6_o_mean,scenario_name='S6',include_carb=True,plot_emission=True)
-S7_inventory = create_dyn_inventory_scenario(mat_flow_in=S7_i_mean,mat_flow_out=S7_o_mean,scenario_name='S7',include_carb=True,plot_emission=True)
+S1_inventory_mean = create_dyn_inventory_scenario(mat_flow_in=S1_i_mean,mat_flow_out=S1_o_mean,scenario_name='S1',include_carb=True,plot_emission=True)
+S2_inventory_mean = create_dyn_inventory_scenario(mat_flow_in=S2_i_mean,mat_flow_out=S2_o_mean,scenario_name='S2',include_carb=True,plot_emission=True)
+S3_inventory_mean = create_dyn_inventory_scenario(mat_flow_in=S3_i_mean,mat_flow_out=S3_o_mean,scenario_name='S3',include_carb=True,plot_emission=True)
+S4_inventory_mean = create_dyn_inventory_scenario(mat_flow_in=S4_i_mean,mat_flow_out=S4_o_mean,scenario_name='S4',include_carb=True,plot_emission=True)
+S5_inventory_mean = create_dyn_inventory_scenario(mat_flow_in=S5_i_mean,mat_flow_out=S5_o_mean,scenario_name='S5',include_carb=True,plot_emission=True)
+S6_inventory_mean = create_dyn_inventory_scenario(mat_flow_in=S6_i_mean,mat_flow_out=S6_o_mean,scenario_name='S6',include_carb=True,plot_emission=True)
+S7_inventory_mean = create_dyn_inventory_scenario(mat_flow_in=S7_i_mean,mat_flow_out=S7_o_mean,scenario_name='S7',include_carb=True,plot_emission=True)
+
+S1_inventory_p05 = create_dyn_inventory_scenario(mat_flow_in=S1_i_p05,mat_flow_out=S1_o_p05,scenario_name='S1',include_carb=True,plot_emission=True)
+S2_inventory_p05 = create_dyn_inventory_scenario(mat_flow_in=S2_i_p05,mat_flow_out=S2_o_p05,scenario_name='S2',include_carb=True,plot_emission=False)
+S3_inventory_p05 = create_dyn_inventory_scenario(mat_flow_in=S3_i_p05,mat_flow_out=S3_o_p05,scenario_name='S3',include_carb=True,plot_emission=False)
+S4_inventory_p05 = create_dyn_inventory_scenario(mat_flow_in=S4_i_p05,mat_flow_out=S4_o_p05,scenario_name='S4',include_carb=True,plot_emission=False)
+S5_inventory_p05 = create_dyn_inventory_scenario(mat_flow_in=S5_i_p05,mat_flow_out=S5_o_p05,scenario_name='S5',include_carb=True,plot_emission=False)
+S6_inventory_p05 = create_dyn_inventory_scenario(mat_flow_in=S6_i_p05,mat_flow_out=S6_o_p05,scenario_name='S6',include_carb=True,plot_emission=False)
+S7_inventory_p05 = create_dyn_inventory_scenario(mat_flow_in=S7_i_p05,mat_flow_out=S7_o_p05,scenario_name='S7',include_carb=True,plot_emission=False)
+
+S1_inventory_p95 = create_dyn_inventory_scenario(mat_flow_in=S1_i_p95,mat_flow_out=S1_o_p95,scenario_name='S1',include_carb=True,plot_emission=True)
+S2_inventory_p95 = create_dyn_inventory_scenario(mat_flow_in=S2_i_p95,mat_flow_out=S2_o_p95,scenario_name='S2',include_carb=True,plot_emission=False)
+S3_inventory_p95 = create_dyn_inventory_scenario(mat_flow_in=S3_i_p95,mat_flow_out=S3_o_p95,scenario_name='S3',include_carb=True,plot_emission=False)
+S4_inventory_p95 = create_dyn_inventory_scenario(mat_flow_in=S4_i_p95,mat_flow_out=S4_o_p95,scenario_name='S4',include_carb=True,plot_emission=False)
+S5_inventory_p95 = create_dyn_inventory_scenario(mat_flow_in=S5_i_p95,mat_flow_out=S5_o_p95,scenario_name='S5',include_carb=True,plot_emission=False)
+S6_inventory_p95 = create_dyn_inventory_scenario(mat_flow_in=S6_i_p95,mat_flow_out=S6_o_p95,scenario_name='S6',include_carb=True,plot_emission=False)
+S7_inventory_p95 = create_dyn_inventory_scenario(mat_flow_in=S7_i_p95,mat_flow_out=S7_o_p95,scenario_name='S7',include_carb=True,plot_emission=False)
+
 
 index_timeline = np.linspace(start=2017, stop=2017+500, num=501, dtype=int)
 plot_val = 84
-S1_inventory_an = S1_inventory.set_index(index_timeline)[0:plot_val]
-S2_inventory_an = S2_inventory.set_index(index_timeline)[0:plot_val]
-S3_inventory_an = S3_inventory.set_index(index_timeline)[0:plot_val]
-S4_inventory_an = S4_inventory.set_index(index_timeline)[0:plot_val]
-S5_inventory_an = S5_inventory.set_index(index_timeline)[0:plot_val]
-S6_inventory_an = S6_inventory.set_index(index_timeline)[0:plot_val]
-S7_inventory_an = S7_inventory.set_index(index_timeline)[0:plot_val]
+S1_inventory_mean_an = S1_inventory_mean.set_index(index_timeline)[0:plot_val]
+S2_inventory_mean_an = S2_inventory_mean.set_index(index_timeline)[0:plot_val]
+S3_inventory_mean_an = S3_inventory_mean.set_index(index_timeline)[0:plot_val]
+S4_inventory_mean_an = S4_inventory_mean.set_index(index_timeline)[0:plot_val]
+S5_inventory_mean_an = S5_inventory_mean.set_index(index_timeline)[0:plot_val]
+S6_inventory_mean_an = S6_inventory_mean.set_index(index_timeline)[0:plot_val]
+S7_inventory_mean_an = S7_inventory_mean.set_index(index_timeline)[0:plot_val]
 
-S1_inventory_cum = S1_inventory.cumsum().set_index(index_timeline)[0:plot_val]
-S2_inventory_cum = S2_inventory.cumsum().set_index(index_timeline)[0:plot_val]
-S3_inventory_cum = S3_inventory.cumsum().set_index(index_timeline)[0:plot_val]
-S4_inventory_cum = S4_inventory.cumsum().set_index(index_timeline)[0:plot_val]
-S5_inventory_cum = S5_inventory.cumsum().set_index(index_timeline)[0:plot_val]
-S6_inventory_cum = S6_inventory.cumsum().set_index(index_timeline)[0:plot_val]
-S7_inventory_cum = S7_inventory.cumsum().set_index(index_timeline)[0:plot_val]
+S1_inventory_p05_an = S1_inventory_p05.set_index(index_timeline)[0:plot_val]
+S2_inventory_p05_an = S2_inventory_p05.set_index(index_timeline)[0:plot_val]
+S3_inventory_p05_an = S3_inventory_p05.set_index(index_timeline)[0:plot_val]
+S4_inventory_p05_an = S4_inventory_p05.set_index(index_timeline)[0:plot_val]
+S5_inventory_p05_an = S5_inventory_p05.set_index(index_timeline)[0:plot_val]
+S6_inventory_p05_an = S6_inventory_p05.set_index(index_timeline)[0:plot_val]
+S7_inventory_p05_an = S7_inventory_p05.set_index(index_timeline)[0:plot_val]
+
+S1_inventory_p95_an = S1_inventory_p95.set_index(index_timeline)[0:plot_val]
+S2_inventory_p95_an = S2_inventory_p95.set_index(index_timeline)[0:plot_val]
+S3_inventory_p95_an = S3_inventory_p95.set_index(index_timeline)[0:plot_val]
+S4_inventory_p95_an = S4_inventory_p95.set_index(index_timeline)[0:plot_val]
+S5_inventory_p95_an = S5_inventory_p95.set_index(index_timeline)[0:plot_val]
+S6_inventory_p95_an = S6_inventory_p95.set_index(index_timeline)[0:plot_val]
+S7_inventory_p95_an = S7_inventory_p95.set_index(index_timeline)[0:plot_val]
+
+S1_inventory_mean_cum = S1_inventory_mean.cumsum().set_index(index_timeline)[0:plot_val]
+S2_inventory_mean_cum = S2_inventory_mean.cumsum().set_index(index_timeline)[0:plot_val]
+S3_inventory_mean_cum = S3_inventory_mean.cumsum().set_index(index_timeline)[0:plot_val]
+S4_inventory_mean_cum = S4_inventory_mean.cumsum().set_index(index_timeline)[0:plot_val]
+S5_inventory_mean_cum = S5_inventory_mean.cumsum().set_index(index_timeline)[0:plot_val]
+S6_inventory_mean_cum = S6_inventory_mean.cumsum().set_index(index_timeline)[0:plot_val]
+S7_inventory_mean_cum = S7_inventory_mean.cumsum().set_index(index_timeline)[0:plot_val]
+
+S1_inventory_p05_cum = S1_inventory_p05.cumsum().set_index(index_timeline)[0:plot_val]
+S2_inventory_p05_cum = S2_inventory_p05.cumsum().set_index(index_timeline)[0:plot_val]
+S3_inventory_p05_cum = S3_inventory_p05.cumsum().set_index(index_timeline)[0:plot_val]
+S4_inventory_p05_cum = S4_inventory_p05.cumsum().set_index(index_timeline)[0:plot_val]
+S5_inventory_p05_cum = S5_inventory_p05.cumsum().set_index(index_timeline)[0:plot_val]
+S6_inventory_p05_cum = S6_inventory_p05.cumsum().set_index(index_timeline)[0:plot_val]
+S7_inventory_p05_cum = S7_inventory_p05.cumsum().set_index(index_timeline)[0:plot_val]
+
+S1_inventory_p95_cum = S1_inventory_p95.cumsum().set_index(index_timeline)[0:plot_val]
+S2_inventory_p95_cum = S2_inventory_p95.cumsum().set_index(index_timeline)[0:plot_val]
+S3_inventory_p95_cum = S3_inventory_p95.cumsum().set_index(index_timeline)[0:plot_val]
+S4_inventory_p95_cum = S4_inventory_p95.cumsum().set_index(index_timeline)[0:plot_val]
+S5_inventory_p95_cum = S5_inventory_p95.cumsum().set_index(index_timeline)[0:plot_val]
+S6_inventory_p95_cum = S6_inventory_p95.cumsum().set_index(index_timeline)[0:plot_val]
+S7_inventory_p95_cum = S7_inventory_p95.cumsum().set_index(index_timeline)[0:plot_val]
 
 # Plot annual and cummulative carbon flux
+plot_error = True
 fig, axes = plt.subplots(1,2, constrained_layout=True, figsize=(10, 6))
 # plt.rcParams.update({'font.size': 12})
 
 # Plot the annual emisisons
 axes[0].axhline(y=0, color='black', linestyle='-')
-axes[0].plot(S1_inventory_an.index, S1_inventory_an['CO2_flux']*1e-9,color='tab:blue',  linestyle='solid', label = 'S1', )
-axes[0].plot(S2_inventory_an.index, S2_inventory_an['CO2_flux']*1e-9,color='tab:orange', linestyle='solid', label = 'S2')
-axes[0].plot(S3_inventory_an.index, S3_inventory_an['CO2_flux']*1e-9,color='tab:green', linestyle='solid', label = 'S3')
-axes[0].plot(S4_inventory_an.index, S4_inventory_an['CO2_flux']*1e-9,color='tab:red', linestyle='solid', label = 'S4')
-axes[0].plot(S5_inventory_an.index, S5_inventory_an['CO2_flux']*1e-9,color='tab:purple', linestyle='solid', label = 'S5')
-axes[0].plot(S6_inventory_an.index, S6_inventory_an['CO2_flux']*1e-9,color='tab:brown', linestyle='solid', label = 'S6')
-axes[0].plot(S7_inventory_an.index, S7_inventory_an['CO2_flux']*1e-9,color='tab:gray', linestyle='solid', label = 'S7')
+axes[0].plot(S1_inventory_mean_an.index, S1_inventory_mean_an['CO2_flux']*1e-9,color='tab:blue',  linestyle='solid', label = 'S1', )
+axes[0].plot(S2_inventory_mean_an.index, S2_inventory_mean_an['CO2_flux']*1e-9,color='tab:orange', linestyle='solid', label = 'S2')
+axes[0].plot(S3_inventory_mean_an.index, S3_inventory_mean_an['CO2_flux']*1e-9,color='tab:green', linestyle='solid', label = 'S3')
+axes[0].plot(S4_inventory_mean_an.index, S4_inventory_mean_an['CO2_flux']*1e-9,color='tab:red', linestyle='solid', label = 'S4')
+axes[0].plot(S5_inventory_mean_an.index, S5_inventory_mean_an['CO2_flux']*1e-9,color='tab:purple', linestyle='solid', label = 'S5')
+axes[0].plot(S6_inventory_mean_an.index, S6_inventory_mean_an['CO2_flux']*1e-9,color='tab:brown', linestyle='solid', label = 'S6')
+axes[0].plot(S7_inventory_mean_an.index, S7_inventory_mean_an['CO2_flux']*1e-9,color='tab:gray', linestyle='solid', label = 'S7')
+if plot_error == True:
+    # S1_an_upper = np.maximum(S1_inventory_p05_an['CO2_flux'], S1_inventory_p95_an['CO2_flux'])*1e-9
+    # S1_an_lower = np.minimum(S1_inventory_p05_an['CO2_flux'], S1_inventory_p95_an['CO2_flux'])*1e-9
+    # axes[0].fill_between(S1_inventory_mean_an.index, S1_an_lower, S1_an_upper, color='tab:blue', alpha=0.1)
+    #
+    # axes[0].fill_between(S1_inventory_mean_an.index, S1_inventory_p05_an['CO2_flux']*1e-9, S1_inventory_p95_an['CO2_flux']*1e-9, color='tab:blue', alpha=0.1)
+    axes[0].fill_between(S2_inventory_mean_an.index, S2_inventory_p05_an['CO2_flux']*1e-9, S2_inventory_p95_an['CO2_flux']*1e-9, color='tab:orange', alpha=0.1)
+    axes[0].fill_between(S3_inventory_mean_an.index, S3_inventory_p05_an['CO2_flux']*1e-9, S3_inventory_p95_an['CO2_flux']*1e-9, color='tab:green', alpha=0.1)
+    axes[0].fill_between(S4_inventory_mean_an.index, S4_inventory_p05_an['CO2_flux']*1e-9, S4_inventory_p95_an['CO2_flux']*1e-9, color='tab:red', alpha=0.1)
+    axes[0].fill_between(S5_inventory_mean_an.index, S5_inventory_p05_an['CO2_flux']*1e-9, S5_inventory_p95_an['CO2_flux']*1e-9, color='tab:purple', alpha=0.1)
+    axes[0].fill_between(S6_inventory_mean_an.index, S6_inventory_p05_an['CO2_flux']*1e-9, S6_inventory_p95_an['CO2_flux']*1e-9, color='tab:brown', alpha=0.1)
+    axes[0].fill_between(S7_inventory_mean_an.index, S7_inventory_p05_an['CO2_flux']*1e-9, S7_inventory_p95_an['CO2_flux']*1e-9, color='tab:gray', alpha=0.1)
 axes[0].legend(loc = 'lower left', fontsize="small", ncol=1);
 axes[0].set_ylabel('Annual Emissions ($Mt CO_2$)')
 # Plot the cummulative emissions
 axes[1].axhline(y=0, color='black', linestyle='-')
-axes[1].plot(S1_inventory_cum.index, S1_inventory_cum['CO2_flux']*1e-12,color='tab:blue',  linestyle='solid', label = 'S1', )
-axes[1].plot(S2_inventory_cum.index, S2_inventory_cum['CO2_flux']*1e-12,color='tab:orange', linestyle='solid', label = 'S2')
-axes[1].plot(S3_inventory_cum.index, S3_inventory_cum['CO2_flux']*1e-12,color='tab:green', linestyle='solid', label = 'S3')
-axes[1].plot(S4_inventory_cum.index, S4_inventory_cum['CO2_flux']*1e-12,color='tab:red', linestyle='solid', label = 'S4')
-axes[1].plot(S5_inventory_cum.index, S5_inventory_cum['CO2_flux']*1e-12,color='tab:purple', linestyle='solid', label = 'S5')
-axes[1].plot(S6_inventory_cum.index, S6_inventory_cum['CO2_flux']*1e-12,color='tab:brown', linestyle='solid', label = 'S6')
-axes[1].plot(S7_inventory_cum.index, S7_inventory_cum['CO2_flux']*1e-12,color='tab:gray', linestyle='solid', label = 'S7')
+axes[1].plot(S1_inventory_mean_cum.index, S1_inventory_mean_cum['CO2_flux']*1e-12,color='tab:blue',  linestyle='solid', label = 'S1', )
+axes[1].plot(S2_inventory_mean_cum.index, S2_inventory_mean_cum['CO2_flux']*1e-12,color='tab:orange', linestyle='solid', label = 'S2')
+axes[1].plot(S3_inventory_mean_cum.index, S3_inventory_mean_cum['CO2_flux']*1e-12,color='tab:green', linestyle='solid', label = 'S3')
+axes[1].plot(S4_inventory_mean_cum.index, S4_inventory_mean_cum['CO2_flux']*1e-12,color='tab:red', linestyle='solid', label = 'S4')
+axes[1].plot(S5_inventory_mean_cum.index, S5_inventory_mean_cum['CO2_flux']*1e-12,color='tab:purple', linestyle='solid', label = 'S5')
+axes[1].plot(S6_inventory_mean_cum.index, S6_inventory_mean_cum['CO2_flux']*1e-12,color='tab:brown', linestyle='solid', label = 'S6')
+axes[1].plot(S7_inventory_mean_cum.index, S7_inventory_mean_cum['CO2_flux']*1e-12,color='tab:gray', linestyle='solid', label = 'S7')
+if plot_error == True:
+    axes[1].fill_between(S1_inventory_mean_cum.index, S1_inventory_p05_cum['CO2_flux']*1e-12, S1_inventory_p95_cum['CO2_flux']*1e-12, color='tab:blue', alpha=0.1)
+    axes[1].fill_between(S2_inventory_mean_cum.index, S2_inventory_p05_cum['CO2_flux']*1e-12, S2_inventory_p95_cum['CO2_flux']*1e-12, color='tab:orange', alpha=0.1)
+    axes[1].fill_between(S3_inventory_mean_cum.index, S3_inventory_p05_cum['CO2_flux']*1e-12, S3_inventory_p95_cum['CO2_flux']*1e-12, color='tab:green', alpha=0.1)
+    axes[1].fill_between(S4_inventory_mean_cum.index, S4_inventory_p05_cum['CO2_flux']*1e-12, S4_inventory_p95_cum['CO2_flux']*1e-12, color='tab:red', alpha=0.1)
+    axes[1].fill_between(S5_inventory_mean_cum.index, S5_inventory_p05_cum['CO2_flux']*1e-12, S5_inventory_p95_cum['CO2_flux']*1e-12, color='tab:purple', alpha=0.1)
+    axes[1].fill_between(S6_inventory_mean_cum.index, S6_inventory_p05_cum['CO2_flux']*1e-12, S6_inventory_p95_cum['CO2_flux']*1e-12, color='tab:brown', alpha=0.1)
+    axes[1].fill_between(S7_inventory_mean_cum.index, S7_inventory_p05_cum['CO2_flux']*1e-12, S7_inventory_p95_cum['CO2_flux']*1e-12, color='tab:gray', alpha=0.1)
 # axes[1].legend(loc = 'lower left', fontsize="small", ncol=1);
 axes[1].set_ylabel('Cummulative Emissions ($Gt CO_2$)')
-# plt.savefig('./Figures/DLCA/carbon_flux.png', dpi=240)
+# plt.savefig('./Figures/DLCA/carbon_flux_error.png', dpi=240)
 
 
 def DLCA_calc(input_flux, time_horizon=100):
@@ -639,13 +709,29 @@ def DLCA_calc(input_flux, time_horizon=100):
 
     return mass_in_atm_df, irf_df, temp_change_df, equiv_df
 
-S1_mass_in_atm, S1_irf_df, S1_temp_change_df, S1_equiv_df = DLCA_calc(S1_inventory)
-S2_mass_in_atm, S2_irf_df, S2_temp_change_df, S2_equiv_df = DLCA_calc(S2_inventory)
-S3_mass_in_atm, S3_irf_df, S3_temp_change_df, S3_equiv_df = DLCA_calc(S3_inventory)
-S4_mass_in_atm, S4_irf_df, S4_temp_change_df, S4_equiv_df = DLCA_calc(S4_inventory)
-S5_mass_in_atm, S5_irf_df, S5_temp_change_df, S5_equiv_df = DLCA_calc(S5_inventory)
-S6_mass_in_atm, S6_irf_df, S6_temp_change_df, S6_equiv_df = DLCA_calc(S6_inventory)
-S7_mass_in_atm, S7_irf_df, S7_temp_change_df, S7_equiv_df = DLCA_calc(S7_inventory)
+S1_mean_mass_in_atm, S1_mean_irf_df, S1_mean_temp_change_df, S1_mean_equiv_df = DLCA_calc(S1_inventory_mean)
+S2_mean_mass_in_atm, S2_mean_irf_df, S2_mean_temp_change_df, S2_mean_equiv_df = DLCA_calc(S2_inventory_mean)
+S3_mean_mass_in_atm, S3_mean_irf_df, S3_mean_temp_change_df, S3_mean_equiv_df = DLCA_calc(S3_inventory_mean)
+S4_mean_mass_in_atm, S4_mean_irf_df, S4_mean_temp_change_df, S4_mean_equiv_df = DLCA_calc(S4_inventory_mean)
+S5_mean_mass_in_atm, S5_mean_irf_df, S5_mean_temp_change_df, S5_mean_equiv_df = DLCA_calc(S5_inventory_mean)
+S6_mean_mass_in_atm, S6_mean_irf_df, S6_mean_temp_change_df, S6_mean_equiv_df = DLCA_calc(S6_inventory_mean)
+S7_mean_mass_in_atm, S7_mean_irf_df, S7_mean_temp_change_df, S7_mean_equiv_df = DLCA_calc(S7_inventory_mean)
+
+S1_p05_mass_in_atm, S1_p05_irf_df, S1_p05_temp_change_df, S1_p05_equiv_df = DLCA_calc(S1_inventory_p05)
+S2_p05_mass_in_atm, S2_p05_irf_df, S2_p05_temp_change_df, S2_p05_equiv_df = DLCA_calc(S2_inventory_p05)
+S3_p05_mass_in_atm, S3_p05_irf_df, S3_p05_temp_change_df, S3_p05_equiv_df = DLCA_calc(S3_inventory_p05)
+S4_p05_mass_in_atm, S4_p05_irf_df, S4_p05_temp_change_df, S4_p05_equiv_df = DLCA_calc(S4_inventory_p05)
+S5_p05_mass_in_atm, S5_p05_irf_df, S5_p05_temp_change_df, S5_p05_equiv_df = DLCA_calc(S5_inventory_p05)
+S6_p05_mass_in_atm, S6_p05_irf_df, S6_p05_temp_change_df, S6_p05_equiv_df = DLCA_calc(S6_inventory_p05)
+S7_p05_mass_in_atm, S7_p05_irf_df, S7_p05_temp_change_df, S7_p05_equiv_df = DLCA_calc(S7_inventory_p05)
+
+S1_p95_mass_in_atm, S1_p95_irf_df, S1_p95_temp_change_df, S1_p95_equiv_df = DLCA_calc(S1_inventory_p95)
+S2_p95_mass_in_atm, S2_p95_irf_df, S2_p95_temp_change_df, S2_p95_equiv_df = DLCA_calc(S2_inventory_p95)
+S3_p95_mass_in_atm, S3_p95_irf_df, S3_p95_temp_change_df, S3_p95_equiv_df = DLCA_calc(S3_inventory_p95)
+S4_p95_mass_in_atm, S4_p95_irf_df, S4_p95_temp_change_df, S4_p95_equiv_df = DLCA_calc(S4_inventory_p95)
+S5_p95_mass_in_atm, S5_p95_irf_df, S5_p95_temp_change_df, S5_p95_equiv_df = DLCA_calc(S5_inventory_p95)
+S6_p95_mass_in_atm, S6_p95_irf_df, S6_p95_temp_change_df, S6_p95_equiv_df = DLCA_calc(S6_inventory_p95)
+S7_p95_mass_in_atm, S7_p95_irf_df, S7_p95_temp_change_df, S7_p95_equiv_df = DLCA_calc(S7_inventory_p95)
 
 
 ### Plot all of the scenarios together
@@ -655,77 +741,186 @@ index_timeline = np.linspace(start=2017, stop=2017+500, num=501, dtype=int)
 plot_val = 84
 # plot_val = 500
 # in Mt
-SUMMARY_mass = pd.DataFrame({'S1_CO2':S1_mass_in_atm['CO2'] * 1e-9,
-                             'S2_CO2':S2_mass_in_atm['CO2'] * 1e-9,
-                             'S3_CO2':S3_mass_in_atm['CO2'] * 1e-9,
-                             'S4_CO2':S4_mass_in_atm['CO2'] * 1e-9,
-                             'S5_CO2':S5_mass_in_atm['CO2'] * 1e-9,
-                             'S6_CO2':S6_mass_in_atm['CO2'] * 1e-9,
-                             'S7_CO2':S7_mass_in_atm['CO2'] * 1e-9,
-                             'S1_CH4':S1_mass_in_atm['CH4'] * 1e-9,
-                             'S2_CH4':S2_mass_in_atm['CH4'] * 1e-9,
-                             'S3_CH4':S3_mass_in_atm['CH4'] * 1e-9,
-                             'S4_CH4':S4_mass_in_atm['CH4'] * 1e-9,
-                             'S5_CH4':S5_mass_in_atm['CH4'] * 1e-9,
-                             'S6_CH4':S6_mass_in_atm['CH4'] * 1e-9,
-                             'S7_CH4':S7_mass_in_atm['CH4'] * 1e-9,
+SUMMARY_mean_mass = pd.DataFrame({'S1_CO2':S1_mean_mass_in_atm['CO2'] * 1e-9,
+                             'S2_CO2':S2_mean_mass_in_atm['CO2'] * 1e-9,
+                             'S3_CO2':S3_mean_mass_in_atm['CO2'] * 1e-9,
+                             'S4_CO2':S4_mean_mass_in_atm['CO2'] * 1e-9,
+                             'S5_CO2':S5_mean_mass_in_atm['CO2'] * 1e-9,
+                             'S6_CO2':S6_mean_mass_in_atm['CO2'] * 1e-9,
+                             'S7_CO2':S7_mean_mass_in_atm['CO2'] * 1e-9,
+                             'S1_CH4':S1_mean_mass_in_atm['CH4'] * 1e-9,
+                             'S2_CH4':S2_mean_mass_in_atm['CH4'] * 1e-9,
+                             'S3_CH4':S3_mean_mass_in_atm['CH4'] * 1e-9,
+                             'S4_CH4':S4_mean_mass_in_atm['CH4'] * 1e-9,
+                             'S5_CH4':S5_mean_mass_in_atm['CH4'] * 1e-9,
+                             'S6_CH4':S6_mean_mass_in_atm['CH4'] * 1e-9,
+                             'S7_CH4':S7_mean_mass_in_atm['CH4'] * 1e-9,
                              }).set_index(index_timeline)[0:plot_val]
+SUMMARY_p05_mass = pd.DataFrame({'S1_CO2':S1_p05_mass_in_atm['CO2'] * 1e-9,
+                                  'S2_CO2':S2_p05_mass_in_atm['CO2'] * 1e-9,
+                                  'S3_CO2':S3_p05_mass_in_atm['CO2'] * 1e-9,
+                                  'S4_CO2':S4_p05_mass_in_atm['CO2'] * 1e-9,
+                                  'S5_CO2':S5_p05_mass_in_atm['CO2'] * 1e-9,
+                                  'S6_CO2':S6_p05_mass_in_atm['CO2'] * 1e-9,
+                                  'S7_CO2':S7_p05_mass_in_atm['CO2'] * 1e-9,
+                                  'S1_CH4':S1_p05_mass_in_atm['CH4'] * 1e-9,
+                                  'S2_CH4':S2_p05_mass_in_atm['CH4'] * 1e-9,
+                                  'S3_CH4':S3_p05_mass_in_atm['CH4'] * 1e-9,
+                                  'S4_CH4':S4_p05_mass_in_atm['CH4'] * 1e-9,
+                                  'S5_CH4':S5_p05_mass_in_atm['CH4'] * 1e-9,
+                                  'S6_CH4':S6_p05_mass_in_atm['CH4'] * 1e-9,
+                                  'S7_CH4':S7_p05_mass_in_atm['CH4'] * 1e-9,
+                                  }).set_index(index_timeline)[0:plot_val]
+SUMMARY_p95_mass = pd.DataFrame({'S1_CO2':S1_p95_mass_in_atm['CO2'] * 1e-9,
+                                  'S2_CO2':S2_p95_mass_in_atm['CO2'] * 1e-9,
+                                  'S3_CO2':S3_p95_mass_in_atm['CO2'] * 1e-9,
+                                  'S4_CO2':S4_p95_mass_in_atm['CO2'] * 1e-9,
+                                  'S5_CO2':S5_p95_mass_in_atm['CO2'] * 1e-9,
+                                  'S6_CO2':S6_p95_mass_in_atm['CO2'] * 1e-9,
+                                  'S7_CO2':S7_p95_mass_in_atm['CO2'] * 1e-9,
+                                  'S1_CH4':S1_p95_mass_in_atm['CH4'] * 1e-9,
+                                  'S2_CH4':S2_p95_mass_in_atm['CH4'] * 1e-9,
+                                  'S3_CH4':S3_p95_mass_in_atm['CH4'] * 1e-9,
+                                  'S4_CH4':S4_p95_mass_in_atm['CH4'] * 1e-9,
+                                  'S5_CH4':S5_p95_mass_in_atm['CH4'] * 1e-9,
+                                  'S6_CH4':S6_p95_mass_in_atm['CH4'] * 1e-9,
+                                  'S7_CH4':S7_p95_mass_in_atm['CH4'] * 1e-9,
+                                  }).set_index(index_timeline)[0:plot_val]
+
 
 # in W-yr/m2
-SUMMARY_irf = pd.DataFrame({'S1_irf':S1_irf_df['IRF_all'],
-                            'S2_irf':S2_irf_df['IRF_all'],
-                            'S3_irf':S3_irf_df['IRF_all'],
-                            'S4_irf':S4_irf_df['IRF_all'],
-                            'S5_irf':S5_irf_df['IRF_all'],
-                            'S6_irf':S6_irf_df['IRF_all'],
-                            'S7_irf':S7_irf_df['IRF_all'],
+SUMMARY_mean_irf = pd.DataFrame({'S1_irf':S1_mean_irf_df['IRF_all'],
+                            'S2_irf':S2_mean_irf_df['IRF_all'],
+                            'S3_irf':S3_mean_irf_df['IRF_all'],
+                            'S4_irf':S4_mean_irf_df['IRF_all'],
+                            'S5_irf':S5_mean_irf_df['IRF_all'],
+                            'S6_irf':S6_mean_irf_df['IRF_all'],
+                            'S7_irf':S7_mean_irf_df['IRF_all'],
                             }).set_index(index_timeline)[0:plot_val]
+SUMMARY_p05_irf = pd.DataFrame({'S1_irf':S1_p05_irf_df['IRF_all'],
+                                 'S2_irf':S2_p05_irf_df['IRF_all'],
+                                 'S3_irf':S3_p05_irf_df['IRF_all'],
+                                 'S4_irf':S4_p05_irf_df['IRF_all'],
+                                 'S5_irf':S5_p05_irf_df['IRF_all'],
+                                 'S6_irf':S6_p05_irf_df['IRF_all'],
+                                 'S7_irf':S7_p05_irf_df['IRF_all'],
+                                 }).set_index(index_timeline)[0:plot_val]
+SUMMARY_p95_irf = pd.DataFrame({'S1_irf':S1_p95_irf_df['IRF_all'],
+                                 'S2_irf':S2_p95_irf_df['IRF_all'],
+                                 'S3_irf':S3_p95_irf_df['IRF_all'],
+                                 'S4_irf':S4_p95_irf_df['IRF_all'],
+                                 'S5_irf':S5_p95_irf_df['IRF_all'],
+                                 'S6_irf':S6_p95_irf_df['IRF_all'],
+                                 'S7_irf':S7_p95_irf_df['IRF_all'],
+                                 }).set_index(index_timeline)[0:plot_val]
 
-SUMMARY_rf_inst = pd.DataFrame({'S1_rf_int':S1_irf_df['CO2_radfor'],
-                            'S2_rf_int':S2_irf_df['CO2_radfor'],
-                            'S3_rf_int':S3_irf_df['CO2_radfor'],
-                            'S4_rf_int':S4_irf_df['CO2_radfor'],
-                            'S5_rf_int':S5_irf_df['CO2_radfor'],
-                            'S6_rf_int':S6_irf_df['CO2_radfor'],
-                            'S7_rf_int':S7_irf_df['CO2_radfor'],
+SUMMARY_mean_rf_inst = pd.DataFrame({'S1_rf_int':S1_mean_irf_df['CO2_radfor'],
+                            'S2_rf_int':S2_mean_irf_df['CO2_radfor'],
+                            'S3_rf_int':S3_mean_irf_df['CO2_radfor'],
+                            'S4_rf_int':S4_mean_irf_df['CO2_radfor'],
+                            'S5_rf_int':S5_mean_irf_df['CO2_radfor'],
+                            'S6_rf_int':S6_mean_irf_df['CO2_radfor'],
+                            'S7_rf_int':S7_mean_irf_df['CO2_radfor'],
                             }).set_index(index_timeline)[0:plot_val]
+SUMMARY_p05_rf_inst = pd.DataFrame({'S1_rf_int':S1_p05_irf_df['CO2_radfor'],
+                                     'S2_rf_int':S2_p05_irf_df['CO2_radfor'],
+                                     'S3_rf_int':S3_p05_irf_df['CO2_radfor'],
+                                     'S4_rf_int':S4_p05_irf_df['CO2_radfor'],
+                                     'S5_rf_int':S5_p05_irf_df['CO2_radfor'],
+                                     'S6_rf_int':S6_p05_irf_df['CO2_radfor'],
+                                     'S7_rf_int':S7_p05_irf_df['CO2_radfor'],
+                                     }).set_index(index_timeline)[0:plot_val]
+SUMMARY_p95_rf_inst = pd.DataFrame({'S1_rf_int':S1_p95_irf_df['CO2_radfor'],
+                                     'S2_rf_int':S2_p95_irf_df['CO2_radfor'],
+                                     'S3_rf_int':S3_p95_irf_df['CO2_radfor'],
+                                     'S4_rf_int':S4_p95_irf_df['CO2_radfor'],
+                                     'S5_rf_int':S5_p95_irf_df['CO2_radfor'],
+                                     'S6_rf_int':S6_p95_irf_df['CO2_radfor'],
+                                     'S7_rf_int':S7_p95_irf_df['CO2_radfor'],
+                                     }).set_index(index_timeline)[0:plot_val]
 
 # in delta-K
-SUMMARY_temp = pd.DataFrame({'S1_temp':S1_temp_change_df['temp_change'],
-                             'S2_temp':S2_temp_change_df['temp_change'],
-                             'S3_temp':S3_temp_change_df['temp_change'],
-                             'S4_temp':S4_temp_change_df['temp_change'],
-                             'S5_temp':S5_temp_change_df['temp_change'],
-                             'S6_temp':S6_temp_change_df['temp_change'],
-                             'S7_temp':S7_temp_change_df['temp_change'],
+SUMMARY_mean_temp = pd.DataFrame({'S1_temp':S1_mean_temp_change_df['temp_change'],
+                             'S2_temp':S2_mean_temp_change_df['temp_change'],
+                             'S3_temp':S3_mean_temp_change_df['temp_change'],
+                             'S4_temp':S4_mean_temp_change_df['temp_change'],
+                             'S5_temp':S5_mean_temp_change_df['temp_change'],
+                             'S6_temp':S6_mean_temp_change_df['temp_change'],
+                             'S7_temp':S7_mean_temp_change_df['temp_change'],
                              }).set_index(index_timeline)[0:plot_val]
+SUMMARY_p05_temp = pd.DataFrame({'S1_temp':S1_p05_temp_change_df['temp_change'],
+                                  'S2_temp':S2_p05_temp_change_df['temp_change'],
+                                  'S3_temp':S3_p05_temp_change_df['temp_change'],
+                                  'S4_temp':S4_p05_temp_change_df['temp_change'],
+                                  'S5_temp':S5_p05_temp_change_df['temp_change'],
+                                  'S6_temp':S6_p05_temp_change_df['temp_change'],
+                                  'S7_temp':S7_p05_temp_change_df['temp_change'],
+                                  }).set_index(index_timeline)[0:plot_val]
+SUMMARY_p95_temp = pd.DataFrame({'S1_temp':S1_p95_temp_change_df['temp_change'],
+                                  'S2_temp':S2_p95_temp_change_df['temp_change'],
+                                  'S3_temp':S3_p95_temp_change_df['temp_change'],
+                                  'S4_temp':S4_p95_temp_change_df['temp_change'],
+                                  'S5_temp':S5_p95_temp_change_df['temp_change'],
+                                  'S6_temp':S6_p95_temp_change_df['temp_change'],
+                                  'S7_temp':S7_p95_temp_change_df['temp_change'],
+                                  }).set_index(index_timeline)[0:plot_val]
 # in Mt
-SUMMARY_equiv = pd.DataFrame({'S1_LCA_dyn':S1_equiv_df['LCA_dyn'] * 1e-9,
-                              'S2_LCA_dyn':S2_equiv_df['LCA_dyn'] * 1e-9,
-                              'S3_LCA_dyn':S3_equiv_df['LCA_dyn'] * 1e-9,
-                              'S4_LCA_dyn':S4_equiv_df['LCA_dyn'] * 1e-9,
-                              'S5_LCA_dyn':S5_equiv_df['LCA_dyn'] * 1e-9,
-                              'S6_LCA_dyn':S6_equiv_df['LCA_dyn'] * 1e-9,
-                              'S7_LCA_dyn':S7_equiv_df['LCA_dyn'] * 1e-9,
-                              'S1_LCA_static':S1_equiv_df['LCA_static'] * 1e-9,
-                              'S2_LCA_static':S2_equiv_df['LCA_static'] * 1e-9,
-                              'S3_LCA_static':S3_equiv_df['LCA_static'] * 1e-9,
-                              'S4_LCA_static':S4_equiv_df['LCA_static'] * 1e-9,
-                              'S5_LCA_static':S5_equiv_df['LCA_static'] * 1e-9,
-                              'S6_LCA_static':S6_equiv_df['LCA_static'] * 1e-9,
-                              'S7_LCA_static':S7_equiv_df['LCA_static'] * 1e-9
+SUMMARY_mean_equiv = pd.DataFrame({'S1_LCA_dyn':S1_mean_equiv_df['LCA_dyn'] * 1e-9,
+                              'S2_LCA_dyn':S2_mean_equiv_df['LCA_dyn'] * 1e-9,
+                              'S3_LCA_dyn':S3_mean_equiv_df['LCA_dyn'] * 1e-9,
+                              'S4_LCA_dyn':S4_mean_equiv_df['LCA_dyn'] * 1e-9,
+                              'S5_LCA_dyn':S5_mean_equiv_df['LCA_dyn'] * 1e-9,
+                              'S6_LCA_dyn':S6_mean_equiv_df['LCA_dyn'] * 1e-9,
+                              'S7_LCA_dyn':S7_mean_equiv_df['LCA_dyn'] * 1e-9,
+                              'S1_LCA_static':S1_mean_equiv_df['LCA_static'] * 1e-9,
+                              'S2_LCA_static':S2_mean_equiv_df['LCA_static'] * 1e-9,
+                              'S3_LCA_static':S3_mean_equiv_df['LCA_static'] * 1e-9,
+                              'S4_LCA_static':S4_mean_equiv_df['LCA_static'] * 1e-9,
+                              'S5_LCA_static':S5_mean_equiv_df['LCA_static'] * 1e-9,
+                              'S6_LCA_static':S6_mean_equiv_df['LCA_static'] * 1e-9,
+                              'S7_LCA_static':S7_mean_equiv_df['LCA_static'] * 1e-9
                               }).set_index(index_timeline)[0:plot_val]
+SUMMARY_p05_equiv = pd.DataFrame({'S1_LCA_dyn':S1_p05_equiv_df['LCA_dyn'] * 1e-9,
+                                   'S2_LCA_dyn':S2_p05_equiv_df['LCA_dyn'] * 1e-9,
+                                   'S3_LCA_dyn':S3_p05_equiv_df['LCA_dyn'] * 1e-9,
+                                   'S4_LCA_dyn':S4_p05_equiv_df['LCA_dyn'] * 1e-9,
+                                   'S5_LCA_dyn':S5_p05_equiv_df['LCA_dyn'] * 1e-9,
+                                   'S6_LCA_dyn':S6_p05_equiv_df['LCA_dyn'] * 1e-9,
+                                   'S7_LCA_dyn':S7_p05_equiv_df['LCA_dyn'] * 1e-9,
+                                   'S1_LCA_static':S1_p05_equiv_df['LCA_static'] * 1e-9,
+                                   'S2_LCA_static':S2_p05_equiv_df['LCA_static'] * 1e-9,
+                                   'S3_LCA_static':S3_p05_equiv_df['LCA_static'] * 1e-9,
+                                   'S4_LCA_static':S4_p05_equiv_df['LCA_static'] * 1e-9,
+                                   'S5_LCA_static':S5_p05_equiv_df['LCA_static'] * 1e-9,
+                                   'S6_LCA_static':S6_p05_equiv_df['LCA_static'] * 1e-9,
+                                   'S7_LCA_static':S7_p05_equiv_df['LCA_static'] * 1e-9
+                                   }).set_index(index_timeline)[0:plot_val]
+SUMMARY_p95_equiv = pd.DataFrame({'S1_LCA_dyn':S1_p95_equiv_df['LCA_dyn'] * 1e-9,
+                                   'S2_LCA_dyn':S2_p95_equiv_df['LCA_dyn'] * 1e-9,
+                                   'S3_LCA_dyn':S3_p95_equiv_df['LCA_dyn'] * 1e-9,
+                                   'S4_LCA_dyn':S4_p95_equiv_df['LCA_dyn'] * 1e-9,
+                                   'S5_LCA_dyn':S5_p95_equiv_df['LCA_dyn'] * 1e-9,
+                                   'S6_LCA_dyn':S6_p95_equiv_df['LCA_dyn'] * 1e-9,
+                                   'S7_LCA_dyn':S7_p95_equiv_df['LCA_dyn'] * 1e-9,
+                                   'S1_LCA_static':S1_p95_equiv_df['LCA_static'] * 1e-9,
+                                   'S2_LCA_static':S2_p95_equiv_df['LCA_static'] * 1e-9,
+                                   'S3_LCA_static':S3_p95_equiv_df['LCA_static'] * 1e-9,
+                                   'S4_LCA_static':S4_p95_equiv_df['LCA_static'] * 1e-9,
+                                   'S5_LCA_static':S5_p95_equiv_df['LCA_static'] * 1e-9,
+                                   'S6_LCA_static':S6_p95_equiv_df['LCA_static'] * 1e-9,
+                                   'S7_LCA_static':S7_p95_equiv_df['LCA_static'] * 1e-9
+                                   }).set_index(index_timeline)[0:plot_val]
 
 fig, axes = plt.subplots(2, 2, constrained_layout=True, figsize=(10, 8))
 # plot the CO2 emisisons
 axes[0,0].axhline(y=0, color='black', linestyle='-')
-axes[0,0].plot(SUMMARY_mass.index, SUMMARY_mass['S1_CO2'],color='tab:blue',  linestyle='solid', label = 'S1 (CO2)', )
-axes[0,0].plot(SUMMARY_mass.index, SUMMARY_mass['S2_CO2'],color='tab:orange', linestyle='solid', label = 'S2 (CO2)')
-axes[0,0].plot(SUMMARY_mass.index, SUMMARY_mass['S3_CO2'],color='tab:green', linestyle='solid', label = 'S3 (CO2)')
-axes[0,0].plot(SUMMARY_mass.index, SUMMARY_mass['S4_CO2'],color='tab:red', linestyle='solid', label = 'S4 (CO2)')
-axes[0,0].plot(SUMMARY_mass.index, SUMMARY_mass['S5_CO2'],color='tab:purple', linestyle='solid', label = 'S5 (CO2)')
-axes[0,0].plot(SUMMARY_mass.index, SUMMARY_mass['S6_CO2'],color='tab:brown', linestyle='solid', label = 'S6 (CO2)')
-axes[0,0].plot(SUMMARY_mass.index, SUMMARY_mass['S7_CO2'],color='tab:gray', linestyle='solid', label = 'S7 (CO2)')
+axes[0,0].plot(SUMMARY_mean_mass.index, SUMMARY_mean_mass['S1_CO2'],color='tab:blue',  linestyle='solid', label = 'S1 (CO2)', )
+axes[0,0].plot(SUMMARY_mean_mass.index, SUMMARY_mean_mass['S2_CO2'],color='tab:orange', linestyle='solid', label = 'S2 (CO2)')
+axes[0,0].plot(SUMMARY_mean_mass.index, SUMMARY_mean_mass['S3_CO2'],color='tab:green', linestyle='solid', label = 'S3 (CO2)')
+axes[0,0].plot(SUMMARY_mean_mass.index, SUMMARY_mean_mass['S4_CO2'],color='tab:red', linestyle='solid', label = 'S4 (CO2)')
+axes[0,0].plot(SUMMARY_mean_mass.index, SUMMARY_mean_mass['S5_CO2'],color='tab:purple', linestyle='solid', label = 'S5 (CO2)')
+axes[0,0].plot(SUMMARY_mean_mass.index, SUMMARY_mean_mass['S6_CO2'],color='tab:brown', linestyle='solid', label = 'S6 (CO2)')
+axes[0,0].plot(SUMMARY_mean_mass.index, SUMMARY_mean_mass['S7_CO2'],color='tab:gray', linestyle='solid', label = 'S7 (CO2)')
 # plot the CH4 emisisons
 # axes[0,0].plot(SUMMARY_mass.index, SUMMARY_mass['S1_CH4'],color='tab:blue', linestyle='dashed', label = 'S1 (CH4)')
 # axes[0,0].plot(SUMMARY_mass.index, SUMMARY_mass['S2_CH4'],color='tab:orange', linestyle='dashed', label = 'S2 (CH4)')
@@ -740,13 +935,13 @@ axes[0,0].legend(loc = 'lower left', fontsize="small", ncol=1);
 
 # Plot the instantatnous radiative frocing
 axes[0,1].axhline(y=0, color='black', linestyle='-')
-axes[0,1].plot(SUMMARY_rf_inst.index, SUMMARY_rf_inst['S1_rf_int'],color='tab:blue',  linestyle='solid', label = 'S1', )
-axes[0,1].plot(SUMMARY_rf_inst.index, SUMMARY_rf_inst['S2_rf_int'],color='tab:orange', linestyle='solid', label = 'S2')
-axes[0,1].plot(SUMMARY_rf_inst.index, SUMMARY_rf_inst['S3_rf_int'],color='tab:green', linestyle='solid', label = 'S3')
-axes[0,1].plot(SUMMARY_rf_inst.index, SUMMARY_rf_inst['S4_rf_int'],color='tab:red', linestyle='solid', label = 'S4')
-axes[0,1].plot(SUMMARY_rf_inst.index, SUMMARY_rf_inst['S5_rf_int'],color='tab:purple', linestyle='solid', label = 'S5')
-axes[0,1].plot(SUMMARY_rf_inst.index, SUMMARY_rf_inst['S6_rf_int'],color='tab:brown', linestyle='solid', label = 'S6')
-axes[0,1].plot(SUMMARY_rf_inst.index, SUMMARY_rf_inst['S7_rf_int'],color='tab:gray', linestyle='solid', label = 'S7')
+axes[0,1].plot(SUMMARY_mean_rf_inst.index, SUMMARY_mean_rf_inst['S1_rf_int'],color='tab:blue',  linestyle='solid', label = 'S1', )
+axes[0,1].plot(SUMMARY_mean_rf_inst.index, SUMMARY_mean_rf_inst['S2_rf_int'],color='tab:orange', linestyle='solid', label = 'S2')
+axes[0,1].plot(SUMMARY_mean_rf_inst.index, SUMMARY_mean_rf_inst['S3_rf_int'],color='tab:green', linestyle='solid', label = 'S3')
+axes[0,1].plot(SUMMARY_mean_rf_inst.index, SUMMARY_mean_rf_inst['S4_rf_int'],color='tab:red', linestyle='solid', label = 'S4')
+axes[0,1].plot(SUMMARY_mean_rf_inst.index, SUMMARY_mean_rf_inst['S5_rf_int'],color='tab:purple', linestyle='solid', label = 'S5')
+axes[0,1].plot(SUMMARY_mean_rf_inst.index, SUMMARY_mean_rf_inst['S6_rf_int'],color='tab:brown', linestyle='solid', label = 'S6')
+axes[0,1].plot(SUMMARY_mean_rf_inst.index, SUMMARY_mean_rf_inst['S7_rf_int'],color='tab:gray', linestyle='solid', label = 'S7')
 axes[0,1].set_ylabel('Instantaneous Radiative Forcing ($W/m^{2}$)')
 # Plot the cumulative GWI (integrated radiative forcing)
 # axes[0,1].plot(SUMMARY_irf.index, SUMMARY_irf['S1_irf'],color='tab:blue',  linestyle='solid', label = 'S1', )
@@ -761,25 +956,25 @@ axes[0,1].legend(loc = 'lower left', fontsize="small", ncol=1);
 
 # Plot the temperature change effect
 axes[1,0].axhline(y=0, color='black', linestyle='-')
-axes[1,0].plot(SUMMARY_temp.index, SUMMARY_temp['S1_temp'],color='tab:blue',  linestyle='solid', label = 'S1', )
-axes[1,0].plot(SUMMARY_temp.index, SUMMARY_temp['S2_temp'],color='tab:orange', linestyle='solid', label = 'S2')
-axes[1,0].plot(SUMMARY_temp.index, SUMMARY_temp['S3_temp'],color='tab:green', linestyle='solid', label = 'S3')
-axes[1,0].plot(SUMMARY_temp.index, SUMMARY_temp['S4_temp'],color='tab:red', linestyle='solid', label = 'S4')
-axes[1,0].plot(SUMMARY_temp.index, SUMMARY_temp['S5_temp'],color='tab:purple', linestyle='solid', label = 'S5')
-axes[1,0].plot(SUMMARY_temp.index, SUMMARY_temp['S6_temp'],color='tab:brown', linestyle='solid', label = 'S6')
-axes[1,0].plot(SUMMARY_temp.index, SUMMARY_temp['S7_temp'],color='tab:gray', linestyle='solid', label = 'S7')
+axes[1,0].plot(SUMMARY_mean_temp.index, SUMMARY_mean_temp['S1_temp'],color='tab:blue',  linestyle='solid', label = 'S1', )
+axes[1,0].plot(SUMMARY_mean_temp.index, SUMMARY_mean_temp['S2_temp'],color='tab:orange', linestyle='solid', label = 'S2')
+axes[1,0].plot(SUMMARY_mean_temp.index, SUMMARY_mean_temp['S3_temp'],color='tab:green', linestyle='solid', label = 'S3')
+axes[1,0].plot(SUMMARY_mean_temp.index, SUMMARY_mean_temp['S4_temp'],color='tab:red', linestyle='solid', label = 'S4')
+axes[1,0].plot(SUMMARY_mean_temp.index, SUMMARY_mean_temp['S5_temp'],color='tab:purple', linestyle='solid', label = 'S5')
+axes[1,0].plot(SUMMARY_mean_temp.index, SUMMARY_mean_temp['S6_temp'],color='tab:brown', linestyle='solid', label = 'S6')
+axes[1,0].plot(SUMMARY_mean_temp.index, SUMMARY_mean_temp['S7_temp'],color='tab:gray', linestyle='solid', label = 'S7')
 axes[1,0].set_ylabel('Temperature Change Effect ($\Delta K$)')
 axes[1,0].legend(loc = 'lower left', fontsize="small", ncol=1);
 
 # Plot the CO2 equivalences
 axes[1,1].axhline(y=0, color='black', linestyle='-')
-axes[1,1].plot(SUMMARY_equiv.index, SUMMARY_equiv['S1_LCA_dyn'],color='tab:blue',  linestyle='solid', label = 'S1 Dynamic', )
-axes[1,1].plot(SUMMARY_equiv.index, SUMMARY_equiv['S2_LCA_dyn'],color='tab:orange', linestyle='solid', label = 'S2 Dynamic')
-axes[1,1].plot(SUMMARY_equiv.index, SUMMARY_equiv['S3_LCA_dyn'],color='tab:green', linestyle='solid', label = 'S3 Dynamic')
-axes[1,1].plot(SUMMARY_equiv.index, SUMMARY_equiv['S4_LCA_dyn'],color='tab:red', linestyle='solid', label = 'S4 Dynamic')
-axes[1,1].plot(SUMMARY_equiv.index, SUMMARY_equiv['S5_LCA_dyn'],color='tab:purple', linestyle='solid', label = 'S5 Dynamic')
-axes[1,1].plot(SUMMARY_equiv.index, SUMMARY_equiv['S6_LCA_dyn'],color='tab:brown', linestyle='solid', label = 'S6 Dynamic')
-axes[1,1].plot(SUMMARY_equiv.index, SUMMARY_equiv['S7_LCA_dyn'],color='tab:gray', linestyle='solid', label = 'S7 Dynamic')
+axes[1,1].plot(SUMMARY_mean_equiv.index, SUMMARY_mean_equiv['S1_LCA_dyn'],color='tab:blue',  linestyle='solid', label = 'S1 Dynamic', )
+axes[1,1].plot(SUMMARY_mean_equiv.index, SUMMARY_mean_equiv['S2_LCA_dyn'],color='tab:orange', linestyle='solid', label = 'S2 Dynamic')
+axes[1,1].plot(SUMMARY_mean_equiv.index, SUMMARY_mean_equiv['S3_LCA_dyn'],color='tab:green', linestyle='solid', label = 'S3 Dynamic')
+axes[1,1].plot(SUMMARY_mean_equiv.index, SUMMARY_mean_equiv['S4_LCA_dyn'],color='tab:red', linestyle='solid', label = 'S4 Dynamic')
+axes[1,1].plot(SUMMARY_mean_equiv.index, SUMMARY_mean_equiv['S5_LCA_dyn'],color='tab:purple', linestyle='solid', label = 'S5 Dynamic')
+axes[1,1].plot(SUMMARY_mean_equiv.index, SUMMARY_mean_equiv['S6_LCA_dyn'],color='tab:brown', linestyle='solid', label = 'S6 Dynamic')
+axes[1,1].plot(SUMMARY_mean_equiv.index, SUMMARY_mean_equiv['S7_LCA_dyn'],color='tab:gray', linestyle='solid', label = 'S7 Dynamic')
 # axes[1,1].plot(SUMMARY_equiv.index, SUMMARY_equiv['S1_LCA_static'],color='tab:blue',  linestyle='dashed', label = 'S1 Static', )
 # axes[1,1].plot(SUMMARY_equiv.index, SUMMARY_equiv['S2_LCA_static'],color='tab:orange', linestyle='dashed', label = 'S2 Static')
 # axes[1,1].plot(SUMMARY_equiv.index, SUMMARY_equiv['S3_LCA_static'],color='tab:green', linestyle='dashed', label = 'S3 Static')
@@ -792,30 +987,52 @@ axes[1,1].legend(loc='lower left', fontsize="small", ncol=1);
 
 # plt.savefig('./Figures/DLCA/DLCA_output_all.png', dpi=240)
 
+figure()
+plt.plot(SUMMARY_mean_equiv.index, SUMMARY_mean_equiv['S5_LCA_dyn'], linestyle='solid', label = 'mean')
+plt.plot(SUMMARY_p05_equiv.index, SUMMARY_p05_equiv['S5_LCA_dyn'], linestyle='solid', label = 'p05')
+plt.plot(SUMMARY_p95_equiv.index, SUMMARY_p95_equiv['S5_LCA_dyn'], linestyle='solid', label = 'p95')
+plt.legend()
+
 
 # Plot some of the figures
 fig, axes = plt.subplots(1,2, constrained_layout=True, figsize=(10, 6))
 plt.rcParams.update({'font.size': 12})
 # Plot the CO2 equivalences
 axes[0].axhline(y=0, color='black', linestyle='-')
-axes[0].plot(SUMMARY_equiv.index, SUMMARY_equiv['S1_LCA_dyn'],color='tab:blue',  linestyle='solid', label = 'S1', )
-axes[0].plot(SUMMARY_equiv.index, SUMMARY_equiv['S2_LCA_dyn'],color='tab:orange', linestyle='solid', label = 'S2')
-axes[0].plot(SUMMARY_equiv.index, SUMMARY_equiv['S3_LCA_dyn'],color='tab:green', linestyle='solid', label = 'S3')
-axes[0].plot(SUMMARY_equiv.index, SUMMARY_equiv['S4_LCA_dyn'],color='tab:red', linestyle='solid', label = 'S4')
-axes[0].plot(SUMMARY_equiv.index, SUMMARY_equiv['S5_LCA_dyn'],color='tab:purple', linestyle='solid', label = 'S5')
-axes[0].plot(SUMMARY_equiv.index, SUMMARY_equiv['S6_LCA_dyn'],color='tab:brown', linestyle='solid', label = 'S6')
-axes[0].plot(SUMMARY_equiv.index, SUMMARY_equiv['S7_LCA_dyn'],color='tab:gray', linestyle='solid', label = 'S7')
+axes[0].plot(SUMMARY_mean_equiv.index, SUMMARY_mean_equiv['S1_LCA_dyn'],color='tab:blue',  linestyle='solid', label = 'S1', )
+axes[0].plot(SUMMARY_mean_equiv.index, SUMMARY_mean_equiv['S2_LCA_dyn'],color='tab:orange', linestyle='solid', label = 'S2')
+axes[0].plot(SUMMARY_mean_equiv.index, SUMMARY_mean_equiv['S3_LCA_dyn'],color='tab:green', linestyle='solid', label = 'S3')
+axes[0].plot(SUMMARY_mean_equiv.index, SUMMARY_mean_equiv['S4_LCA_dyn'],color='tab:red', linestyle='solid', label = 'S4')
+axes[0].plot(SUMMARY_mean_equiv.index, SUMMARY_mean_equiv['S5_LCA_dyn'],color='tab:purple', linestyle='solid', label = 'S5')
+axes[0].plot(SUMMARY_mean_equiv.index, SUMMARY_mean_equiv['S6_LCA_dyn'],color='tab:brown', linestyle='solid', label = 'S6')
+axes[0].plot(SUMMARY_mean_equiv.index, SUMMARY_mean_equiv['S7_LCA_dyn'],color='tab:gray', linestyle='solid', label = 'S7')
+if plot_error == True:
+    axes[0].fill_between(SUMMARY_mean_equiv.index, SUMMARY_p05_equiv['S1_LCA_dyn'], SUMMARY_p95_equiv['S1_LCA_dyn'], color='tab:blue', alpha=0.1)
+    axes[0].fill_between(SUMMARY_mean_equiv.index, SUMMARY_p05_equiv['S2_LCA_dyn'], SUMMARY_p95_equiv['S2_LCA_dyn'], color='tab:orange', alpha=0.1)
+    axes[0].fill_between(SUMMARY_mean_equiv.index, SUMMARY_p05_equiv['S3_LCA_dyn'], SUMMARY_p95_equiv['S3_LCA_dyn'], color='tab:green', alpha=0.1)
+    axes[0].fill_between(SUMMARY_mean_equiv.index, SUMMARY_p05_equiv['S4_LCA_dyn'], SUMMARY_p95_equiv['S4_LCA_dyn'], color='tab:red', alpha=0.1)
+    axes[0].fill_between(SUMMARY_mean_equiv.index, SUMMARY_p05_equiv['S5_LCA_dyn'], SUMMARY_p95_equiv['S5_LCA_dyn'], color='tab:purple', alpha=0.1)
+    axes[0].fill_between(SUMMARY_mean_equiv.index, SUMMARY_p05_equiv['S6_LCA_dyn'], SUMMARY_p95_equiv['S6_LCA_dyn'], color='tab:brown', alpha=0.1)
+    axes[0].fill_between(SUMMARY_mean_equiv.index, SUMMARY_p05_equiv['S7_LCA_dyn'], SUMMARY_p95_equiv['S7_LCA_dyn'], color='tab:gray', alpha=0.1)
 axes[0].set_ylabel('$CO_2$ Equivalencies ($Mt CO_2e$)')
 axes[0].legend(loc = 'lower left', fontsize="small", ncol=1);
 # Plot the temperature change effect
 axes[1].axhline(y=0, color='black', linestyle='-')
-axes[1].plot(SUMMARY_temp.index, SUMMARY_temp['S1_temp'],color='tab:blue',  linestyle='solid', label = 'S1')
-axes[1].plot(SUMMARY_temp.index, SUMMARY_temp['S2_temp'],color='tab:orange', linestyle='solid', label = 'S2')
-axes[1].plot(SUMMARY_temp.index, SUMMARY_temp['S3_temp'],color='tab:green', linestyle='solid', label = 'S3')
-axes[1].plot(SUMMARY_temp.index, SUMMARY_temp['S4_temp'],color='tab:red', linestyle='solid', label = 'S4')
-axes[1].plot(SUMMARY_temp.index, SUMMARY_temp['S5_temp'],color='tab:purple', linestyle='solid', label = 'S5')
-axes[1].plot(SUMMARY_temp.index, SUMMARY_temp['S6_temp'],color='tab:brown', linestyle='solid', label = 'S6')
-axes[1].plot(SUMMARY_temp.index, SUMMARY_temp['S7_temp'],color='tab:gray', linestyle='solid', label = 'S7')
+axes[1].plot(SUMMARY_mean_temp.index, SUMMARY_mean_temp['S1_temp'],color='tab:blue',  linestyle='solid', label = 'S1')
+axes[1].plot(SUMMARY_mean_temp.index, SUMMARY_mean_temp['S2_temp'],color='tab:orange', linestyle='solid', label = 'S2')
+axes[1].plot(SUMMARY_mean_temp.index, SUMMARY_mean_temp['S3_temp'],color='tab:green', linestyle='solid', label = 'S3')
+axes[1].plot(SUMMARY_mean_temp.index, SUMMARY_mean_temp['S4_temp'],color='tab:red', linestyle='solid', label = 'S4')
+axes[1].plot(SUMMARY_mean_temp.index, SUMMARY_mean_temp['S5_temp'],color='tab:purple', linestyle='solid', label = 'S5')
+axes[1].plot(SUMMARY_mean_temp.index, SUMMARY_mean_temp['S6_temp'],color='tab:brown', linestyle='solid', label = 'S6')
+axes[1].plot(SUMMARY_mean_temp.index, SUMMARY_mean_temp['S7_temp'],color='tab:gray', linestyle='solid', label = 'S7')
+if plot_error == True:
+    axes[1].fill_between(SUMMARY_mean_temp.index, SUMMARY_p05_temp['S1_temp'], SUMMARY_p95_temp['S1_temp'], color='tab:blue', alpha=0.1)
+    axes[1].fill_between(SUMMARY_mean_temp.index, SUMMARY_p05_temp['S2_temp'], SUMMARY_p95_temp['S2_temp'], color='tab:orange', alpha=0.1)
+    axes[1].fill_between(SUMMARY_mean_temp.index, SUMMARY_p05_temp['S3_temp'], SUMMARY_p95_temp['S3_temp'], color='tab:green', alpha=0.1)
+    axes[1].fill_between(SUMMARY_mean_temp.index, SUMMARY_p05_temp['S4_temp'], SUMMARY_p95_temp['S4_temp'], color='tab:red', alpha=0.1)
+    axes[1].fill_between(SUMMARY_mean_temp.index, SUMMARY_p05_temp['S5_temp'], SUMMARY_p95_temp['S5_temp'], color='tab:purple', alpha=0.1)
+    axes[1].fill_between(SUMMARY_mean_temp.index, SUMMARY_p05_temp['S6_temp'], SUMMARY_p95_temp['S6_temp'], color='tab:brown', alpha=0.1)
+    axes[1].fill_between(SUMMARY_mean_temp.index, SUMMARY_p05_temp['S7_temp'], SUMMARY_p95_temp['S7_temp'], color='tab:gray', alpha=0.1)
 axes[1].set_ylabel('Temperature Change Effect ($\Delta K$)')
 
 
@@ -825,13 +1042,13 @@ axes[1].set_ylabel('Temperature Change Effect ($\Delta K$)')
 # Plot the CO2 equivalences
 figure(constrained_layout=True, figsize=(8, 6))
 plt.axhline(y=0, color='black', linestyle='-')
-plt.plot(SUMMARY_rf_inst.index, SUMMARY_rf_inst['S1_rf_int'],color='tab:blue',  linestyle='solid', label = 'S1', )
-plt.plot(SUMMARY_rf_inst.index, SUMMARY_rf_inst['S2_rf_int'],color='tab:orange', linestyle='solid', label = 'S2')
-plt.plot(SUMMARY_rf_inst.index, SUMMARY_rf_inst['S3_rf_int'],color='tab:green', linestyle='solid', label = 'S3')
-plt.plot(SUMMARY_rf_inst.index, SUMMARY_rf_inst['S4_rf_int'],color='tab:red', linestyle='solid', label = 'S4')
-plt.plot(SUMMARY_rf_inst.index, SUMMARY_rf_inst['S5_rf_int'],color='tab:purple', linestyle='solid', label = 'S5')
-plt.plot(SUMMARY_rf_inst.index, SUMMARY_rf_inst['S6_rf_int'],color='tab:brown', linestyle='solid', label = 'S6')
-plt.plot(SUMMARY_rf_inst.index, SUMMARY_rf_inst['S7_rf_int'],color='tab:gray', linestyle='solid', label = 'S7')
+plt.plot(SUMMARY_mean_rf_inst.index, SUMMARY_mean_rf_inst['S1_rf_int'],color='tab:blue',  linestyle='solid', label = 'S1', )
+plt.plot(SUMMARY_mean_rf_inst.index, SUMMARY_mean_rf_inst['S2_rf_int'],color='tab:orange', linestyle='solid', label = 'S2')
+plt.plot(SUMMARY_mean_rf_inst.index, SUMMARY_mean_rf_inst['S3_rf_int'],color='tab:green', linestyle='solid', label = 'S3')
+plt.plot(SUMMARY_mean_rf_inst.index, SUMMARY_mean_rf_inst['S4_rf_int'],color='tab:red', linestyle='solid', label = 'S4')
+plt.plot(SUMMARY_mean_rf_inst.index, SUMMARY_mean_rf_inst['S5_rf_int'],color='tab:purple', linestyle='solid', label = 'S5')
+plt.plot(SUMMARY_mean_rf_inst.index, SUMMARY_mean_rf_inst['S6_rf_int'],color='tab:brown', linestyle='solid', label = 'S6')
+plt.plot(SUMMARY_mean_rf_inst.index, SUMMARY_mean_rf_inst['S7_rf_int'],color='tab:gray', linestyle='solid', label = 'S7')
 plt.legend(loc = 'lower left', fontsize="small", ncol=1);
 plt.ylabel('Instantaneous Radiative Forcing ($W/m^2$)')
 
